@@ -4,7 +4,7 @@ import { history } from 'umi';
 
 class List extends Component {
   handleChange = () => {
-    alert('点击跳转到新建项目页面');
+    // alert('点击跳转到新建项目页面');
     history.push('/page');
   };
 
