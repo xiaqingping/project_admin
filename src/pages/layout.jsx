@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import router from 'umi/router';
+import { history } from 'umi';
 // import ProjectEdit from '@/pages/project/projectAdd';
 
 class List extends Component {
   handleChange = () => {
     alert('点击跳转到新建项目页面');
-    router.push('/page');
+    history.push('/page');
   };
 
   render() {
