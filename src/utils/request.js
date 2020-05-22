@@ -1,13 +1,13 @@
-import axios from "axios";
-import { notification } from "antd";
-import { router } from "umi";
-import { formatMessage } from "umi/locale";
+import axios from 'axios';
+import { notification } from 'antd';
+import { router } from 'umi';
+import { formatMessage } from 'umi/locale';
 
 const baseURLMap = {
-  dev: "https://devapi.sangon.com:30443/api",
-  test: "https://testapi.sangon.com/api",
-  pre: "https://preapi.sangon.com/api",
-  prod: "https://api.sangon.com/api",
+  dev: 'https://devapi.sangon.com:30443/api',
+  test: 'https://testapi.sangon.com/api',
+  pre: 'https://preapi.sangon.com/api',
+  prod: 'https://api.sangon.com/api',
 };
 
 // BASE_API 是 .env 文件中定义的环境变量，如果没有设置过此环境变量，则默认值为pre（具体查看config.js）。
@@ -34,8 +34,8 @@ const service = axios.create({
 //
 // }
 
-const requestErr = (data) => {
-  let errMsg = ["系统异常,请与系统管理员联系!"];
+const requestErr = data => {
+  let errMsg = ['系统异常,请与系统管理员联系!'];
 
   if (data) {
     if (data.message) {
@@ -46,20 +46,18 @@ const requestErr = (data) => {
     }
 
     if (data.type === 41 && data.code === 40000) {
-      localStorage.removeItem("token");
+      localStorage.removeItem('token');
       const URL = window.location.href;
-      if (URL.indexOf("/user/login") === -1) {
-        router.push(
-          `/user/login?redirect=${encodeURIComponent(window.location.href)}`
-        );
+      if (URL.indexOf('/user/login') === -1) {
+        router.push(`/user/login?redirect=${encodeURIComponent(window.location.href)}`);
       }
     }
   } else {
     errMsg = [errMsg];
   }
 
-  let message = (data && data.desc) || "错误提示";
-  let description = errMsg.join("，") || "请求错误！";
+  let message = (data && data.desc) || '错误提示';
+  let description = errMsg.join('，') || '请求错误！';
   try {
     message = formatMessage({
       id: message,
@@ -68,9 +66,7 @@ const requestErr = (data) => {
       id: description,
     });
   } catch (error) {
-    console.log(
-      `缺少错误消息国际化\nmessage:${message}\ndescription${description}`
-    );
+    console.log(`缺少错误消息国际化\nmessage:${message}\ndescription${description}`);
   }
 
   notification.error({
@@ -79,7 +75,7 @@ const requestErr = (data) => {
   });
 };
 
-const err = (error) => {
+const err = error => {
   const { response = {} } = error;
   const { data } = response;
   requestErr(data);
@@ -88,19 +84,19 @@ const err = (error) => {
 
 /* eslint-disable no-param-reassign */
 // 请求拦截
-service.interceptors.request.use((config) => {
+service.interceptors.request.use(config => {
   // window.location.href = 'http://www.baidu.com';
   // window.open('http://www.baidu.com');
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
   // GET请求处理请求参数
   // 去掉首尾空格
-  if (config.method === "get") {
+  if (config.method === 'get') {
     const { params } = config;
     // eslint-disable-next-line no-restricted-syntax
     for (const key in params) {
       if (params.hasOwnProperty(key)) {
         const element = params[key];
-        if (typeof element === "string") {
+        if (typeof element === 'string') {
           config.params[key] = element.trim();
         }
       }
@@ -110,18 +106,40 @@ service.interceptors.request.use((config) => {
     config.headers.Authorization = token;
 
     // FIXME: 开发时代理临时接口（配合webpack proxy 使用）
-    if (process.env.NODE_ENV === "development") {
-      config.headers.usercode = "123";
-      config.headers.username = "123";
+    if (process.env.NODE_ENV === 'development') {
+      config.headers.usercode = '123';
+      config.headers.username = '123';
+      // 项目管理开发
+      if (config.url.indexOf('http://192.168.20.12:8360/') > -1) {
+        config.url = config.url.replace('http://192.168.20.12:8360/', '/192.168.20.12:8360/');
+        config.baseURL = '/';
+      }
+      if (config.url.indexOf('http://192.168.20.12:8460/') > -1) {
+        config.url = config.url.replace('http://192.168.20.12:8460/', '/192.168.20.12:8460/');
+        config.baseURL = '/';
+      }
+      if (config.url.indexOf('http://192.168.20.6:8166/') > -1) {
+        config.url = config.url.replace('http://192.168.20.6:8166/', '/192.168.20.6:8166/');
+        config.baseURL = '/';
+      }
+      if (config.url.indexOf('http://192.168.20.6:8167/') > -1) {
+        config.url = config.url.replace('http://192.168.20.6:8167/', '/192.168.20.6:8167/');
+        config.baseURL = '/';
+      }
+
+      if (config.url.indexOf('http://192.168.20.27:8166/') > -1) {
+        config.url = config.url.replace('http://192.168.20.27:8166/', '/192.168.20.27:8166/');
+        config.baseURL = '/';
+      }
       // TODO: 针对mock接口做处理
-      if (config.url.indexOf("/mock") === 0) {
-        config.url = config.url.replace("/mock", "");
-        config.baseURL = "/";
+      if (config.url.indexOf('/mock') === 0) {
+        config.url = config.url.replace('/mock', '');
+        config.baseURL = '/';
       }
     }
   }
 
-  if (config.url.indexOf("/zuul/api/disk/") > -1) {
+  if (config.url.indexOf('/zuul/api/disk/') > -1) {
     // disk 服务接口在定义时已经有了 /api/ 所以拼接baseURL时，去掉baseURL的 /api/
     config.url = new URL(baseURLMap[env]).origin + config.url;
   }
@@ -137,7 +155,7 @@ service.interceptors.request.use((config) => {
 /* eslint-enable no-param-reassign */
 
 // 响应拦截
-service.interceptors.response.use((response) => response.data, err);
+service.interceptors.response.use(response => response.data, err);
 
 export default service;
 export { baseURL, requestErr };
