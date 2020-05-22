@@ -1,7 +1,6 @@
 import React from 'react';
-import { Layout } from 'antd';
+
 import style from './index.less';
-const { Header, Footer } = Layout;
 
 class GlobalHeader extends React.Component {
   state = {};
