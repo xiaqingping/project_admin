@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { notification } from 'antd';
-import { history } from 'umi';
+import { router } from 'umi';
 // import { formatMessage } from 'umi/locale';
 
 const baseURLMap = {
@@ -49,7 +49,7 @@ const requestErr = data => {
       localStorage.removeItem('token');
       const URL = window.location.href;
       if (URL.indexOf('/user/login') === -1) {
-        history.push(
+        router.push(
           `/user/login?redirect=${encodeURIComponent(window.location.href)}`,
         );
       }
@@ -89,9 +89,7 @@ const err = error => {
 service.interceptors.request.use(config => {
   // window.location.href = 'http://www.baidu.com';
   // window.open('http://www.baidu.com');
-  const token =
-    '2oKfjHGD8_Ks-GZ2j7IeFJSAdTARWPRHmUuO5eM34S0hXfahsxNFLPNEM1Si0RQr';
-  // const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token');
   // GET请求处理请求参数
   // 去掉首尾空格
   if (config.method === 'get') {

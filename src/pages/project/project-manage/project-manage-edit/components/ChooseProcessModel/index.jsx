@@ -232,6 +232,7 @@ class ChooseProcessModel extends React.Component {
    */
   handleOk = () => {
     const { selecteditem } = this.state;
+    console.log(selecteditem);
     this.props.getData(selecteditem);
     this.props.onClose();
   };
@@ -419,7 +420,6 @@ class ChooseProcessModel extends React.Component {
   }
 }
 
-export default connect(({ global, projectManage }) => ({
-  languageCode: global.languageCode,
+export default connect(({ projectManage }) => ({
   projectManage,
 }))(ChooseProcessModel);
