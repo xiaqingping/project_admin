@@ -1,6 +1,7 @@
 import React from 'react';
 import { Layout, Avatar } from 'antd';
 import style from './index.less';
+
 const { Header } = Layout;
 
 class GlobalHeader extends React.Component {
@@ -22,7 +23,7 @@ class GlobalHeader extends React.Component {
       <Layout>
         <Header className={style.globalHeader}>
           <div className={style.headerContent}>
-            <div className={style.logoImg}></div>
+            <div className={style.logoImg} />
             <div>
               <Avatar size={40} src={user.avatar} />
               <span className={style.headerUser} style={{ marginLeft: 10 }}>
