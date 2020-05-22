@@ -24,5 +24,10 @@ export default defineConfig({
       component: '@/pages/project/project-manage/projectDetail',
       title: '项目详情',
     },
+    {
+      path: '/addflowpath',
+      component: '@/pages/project/project-manage/project-manage-edit/addflowpath',
+      title: '项目详情',
+    },
   ],
 });
