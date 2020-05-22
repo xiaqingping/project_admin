@@ -1,0 +1,56 @@
+ul {
+  list-style: none;
+}
+
+.isSelect {
+  position: relative;
+  box-sizing: border-box;
+  border: 1px solid #1890ff;
+
+  .isOk {
+    display: inline-block !important;
+  }
+}
+
+:global {
+  .classChooseProcessModel {
+    .ant-modal-content {
+      width: 1030px;
+    }
+
+    .ant-modal-body {
+      padding: 25px;
+      padding-bottom: 0;
+    }
+
+    .tableList {
+      .ant-card-body {
+        padding-left: 5px !important;
+        form > div > div > .ant-form-item {
+          margin-bottom: 0 !important;
+        }
+      }
+    }
+
+    #contentCenter {
+      .isView {
+        button {
+          color: #108ee9 !important;
+        }
+      }
+      .ant-col {
+        margin-right: 0 !important;
+        .ant-card-body {
+          height: 150px;
+          padding-top: 10px;
+          > div:nth-child(2) {
+            width: 250px;
+            height: 50px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
+      }
+    }
+  }
+}
