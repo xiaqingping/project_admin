@@ -11,5 +11,10 @@ export default defineConfig({
       component: '@/pages/project/project-manage/projectAdd',
       title: '新建项目',
     },
+    {
+      path: '/detail',
+      component: '@/pages/project/project-manage/projectDetail',
+      title: '项目详情',
+    },
   ],
 });
