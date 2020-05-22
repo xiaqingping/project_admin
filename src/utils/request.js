@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { notification } from 'antd';
 import { router } from 'umi';
-import { formatMessage } from 'umi/locale';
+// import { formatMessage } from 'umi/locale';
 
 const baseURLMap = {
   dev: 'https://devapi.sangon.com:30443/api',
@@ -49,25 +49,27 @@ const requestErr = data => {
       localStorage.removeItem('token');
       const URL = window.location.href;
       if (URL.indexOf('/user/login') === -1) {
-        router.push(`/user/login?redirect=${encodeURIComponent(window.location.href)}`);
+        router.push(
+          `/user/login?redirect=${encodeURIComponent(window.location.href)}`,
+        );
       }
     }
   } else {
     errMsg = [errMsg];
   }
 
-  let message = (data && data.desc) || '错误提示';
-  let description = errMsg.join('，') || '请求错误！';
-  try {
-    message = formatMessage({
-      id: message,
-    });
-    description = formatMessage({
-      id: description,
-    });
-  } catch (error) {
-    console.log(`缺少错误消息国际化\nmessage:${message}\ndescription${description}`);
-  }
+  const message = (data && data.desc) || '错误提示';
+  const description = errMsg.join('，') || '请求错误！';
+  // try {
+  //   message = formatMessage({
+  //     id: message,
+  //   });
+  //   description = formatMessage({
+  //     id: description,
+  //   });
+  // } catch (error) {
+  //   console.log(`缺少错误消息国际化\nmessage:${message}\ndescription${description}`);
+  // }
 
   notification.error({
     message,
@@ -111,24 +113,39 @@ service.interceptors.request.use(config => {
       config.headers.username = '123';
       // 项目管理开发
       if (config.url.indexOf('http://192.168.20.12:8360/') > -1) {
-        config.url = config.url.replace('http://192.168.20.12:8360/', '/192.168.20.12:8360/');
+        config.url = config.url.replace(
+          'http://192.168.20.12:8360/',
+          '/192.168.20.12:8360/',
+        );
         config.baseURL = '/';
       }
       if (config.url.indexOf('http://192.168.20.12:8460/') > -1) {
-        config.url = config.url.replace('http://192.168.20.12:8460/', '/192.168.20.12:8460/');
+        config.url = config.url.replace(
+          'http://192.168.20.12:8460/',
+          '/192.168.20.12:8460/',
+        );
         config.baseURL = '/';
       }
       if (config.url.indexOf('http://192.168.20.6:8166/') > -1) {
-        config.url = config.url.replace('http://192.168.20.6:8166/', '/192.168.20.6:8166/');
+        config.url = config.url.replace(
+          'http://192.168.20.6:8166/',
+          '/192.168.20.6:8166/',
+        );
         config.baseURL = '/';
       }
       if (config.url.indexOf('http://192.168.20.6:8167/') > -1) {
-        config.url = config.url.replace('http://192.168.20.6:8167/', '/192.168.20.6:8167/');
+        config.url = config.url.replace(
+          'http://192.168.20.6:8167/',
+          '/192.168.20.6:8167/',
+        );
         config.baseURL = '/';
       }
 
       if (config.url.indexOf('http://192.168.20.27:8166/') > -1) {
-        config.url = config.url.replace('http://192.168.20.27:8166/', '/192.168.20.27:8166/');
+        config.url = config.url.replace(
+          'http://192.168.20.27:8166/',
+          '/192.168.20.27:8166/',
+        );
         config.baseURL = '/';
       }
       // TODO: 针对mock接口做处理

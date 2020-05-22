@@ -1,11 +1,9 @@
 import _ from 'lodash';
-import {
-  parse
-} from 'querystring';
+import { parse } from 'querystring';
 import pathRegexp from 'path-to-regexp';
-import {
-  formatMessage
-} from 'umi/locale';
+// import {
+//   formatMessage
+// } from 'umi/locale';
 
 /* eslint no-useless-escape:0 import/prefer-default-export:0 */
 // eslint-disable-next-line max-len
@@ -21,12 +19,9 @@ export const getPageQuery = () => parse(window.location.href.split('?')[1]);
  */
 export const getAuthorityFromRouter = (router = [], pathname) => {
   const authority = router.find(
-    ({
-      routes,
-      path = '/'
-    }) =>
-    (path && pathRegexp(path).exec(pathname)) ||
-    (routes && getAuthorityFromRouter(routes, pathname)),
+    ({ routes, path = '/' }) =>
+      (path && pathRegexp(path).exec(pathname)) ||
+      (routes && getAuthorityFromRouter(routes, pathname)),
   );
   if (authority) return authority;
   return undefined;
@@ -102,9 +97,9 @@ export const formatter = (arr, value, key1, key2) => {
  */
 export const validateForm = form =>
   form
-  .validateFields()
-  .then(data => [true, data])
-  .catch(error => [false, error]);
+    .validateFields()
+    .then(data => [true, data])
+    .catch(error => [false, error]);
 
 /**
  * 获取表单的值（不验证）
@@ -143,7 +138,8 @@ export const diff = (prev, next, key = 'id') => {
 
   // prev 有，next没有，则是删除数据
   const del = prev.filter(
-    prevItem => !nextOther.some(nextOtherItem => nextOtherItem[key] === prevItem[key]),
+    prevItem =>
+      !nextOther.some(nextOtherItem => nextOtherItem[key] === prevItem[key]),
   );
 
   return {
@@ -170,10 +166,10 @@ export const validateEmpty = (val, fieldName) => {
  * 简化 formatMessage 使用
  * @param {String} id
  */
-export const format = id =>
-  formatMessage({
-    id,
-  });
+// export const format = id =>
+//   formatMessage({
+//     id,
+//   });
 
 /**
  * 获取缓存数据
@@ -184,18 +180,9 @@ export const format = id =>
  * @param {Object} customApi 自定义请求接口列表
  */
 export function* getCache(namespace, action, effects, defaultApi, customApi) {
-  const {
-    payload
-  } = action;
-  const {
-    call,
-    put,
-    select
-  } = effects;
-  const {
-    type,
-    options
-  } = payload;
+  const { payload } = action;
+  const { call, put, select } = effects;
+  const { type, options } = payload;
 
   let targetState;
 
@@ -249,10 +236,7 @@ export function* getCache(namespace, action, effects, defaultApi, customApi) {
  * @param {Function} fun 数据处理方法
  */
 export const setCache = (namespace, payload, fun) => {
-  const {
-    type,
-    targetState
-  } = payload;
+  const { type, targetState } = payload;
 
   const data = (fun[type] && fun[type](targetState)) || targetState;
 
@@ -323,7 +307,10 @@ export const getOperates = str => {
  */
 export const versionFun = str => {
   const version = str.substr(1);
-  return [`V${((version * 10 + 1) / 10).toFixed(1)}`, `V${((version * 10 + 10) / 10).toFixed(1)}`];
+  return [
+    `V${((version * 10 + 1) / 10).toFixed(1)}`,
+    `V${((version * 10 + 10) / 10).toFixed(1)}`,
+  ];
 };
 
 /**
@@ -340,14 +327,17 @@ export const compare = arr => (a, b) => {
  * 判断字符是否为空
  * @param {String} str 字符串判断的值
  */
-export const isEmpty = str => typeof str === 'undefined' || str === null || str === '';
+export const isEmpty = str =>
+  typeof str === 'undefined' || str === null || str === '';
 
 /**
  * 随机生成颜色
  */
 export const getrandomColor = () => {
-  const colorStr = Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase();
-  let color = `#${  "000000".substring(0, 6 - colorStr)  }${colorStr}`;
+  const colorStr = Math.floor(Math.random() * 0xffffff)
+    .toString(16)
+    .toUpperCase();
+  let color = `#${'000000'.substring(0, 6 - colorStr)}${colorStr}`;
   color = color.length === 7 ? color : getrandomColor();
   return color;
 };
@@ -387,11 +377,11 @@ export const arrChangeObject = value => {
     let temp = {};
     value[i].forEach((item, index) => {
       const tempJson = {
-        [index]: item
+        [index]: item,
       };
       temp = {
         ...temp,
-        ...tempJson
+        ...tempJson,
       };
     });
     arr = [...arr, temp];
