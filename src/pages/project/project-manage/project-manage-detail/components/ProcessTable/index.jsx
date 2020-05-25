@@ -1,3 +1,4 @@
+/** 流程列表 渲染Table页面 */
 import React, { Component } from 'react';
 import { Table, Tag, Divider, message, Avatar, Tooltip, Modal } from 'antd';
 // import { connect } from 'dva';
@@ -36,7 +37,6 @@ class ProcessTable extends Component {
    * 组件挂载时
    */
   componentDidMount() {
-    console.log(this.props.projectId);
     this.setState({
       tableData: this.props.processData,
       // projectId: this.props.projectId,

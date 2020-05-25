@@ -1339,6 +1339,7 @@ class SampleGroup extends React.Component {
             display: 'flex',
             justifyContent: 'space-between',
             marginTop: 10,
+            marginLeft: 16,
             marginBottom: 10,
           }}
         >

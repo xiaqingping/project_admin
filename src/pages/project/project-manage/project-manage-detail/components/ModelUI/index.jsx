@@ -60,15 +60,11 @@ const EditInforModel = props => {
               describe: props.rowData.describe,
             }}
           >
-            <FormItem
-              label="名称"
-              name="name"
-              rules={[{ message: '请输入名称!' }]}
-            >
+            <FormItem label="" name="name" rules={[{ message: '请输入名称!' }]}>
               <Input style={{ width: 260, height: 32 }} />
             </FormItem>
             <FormItem
-              label="描述"
+              label=""
               name="describe"
               rules={[{ message: '请输入相关描述!' }]}
             >

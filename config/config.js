@@ -20,7 +20,7 @@ export default defineConfig({
       title: '新建项目',
     },
     {
-      path: '/detail',
+      path: '/detail/:id',
       component: '@/pages/project/project-manage/project-manage-detail',
       title: '项目详情',
     },

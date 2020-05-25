@@ -140,7 +140,7 @@ class ProjectManagement extends Component {
    * */
   searchDetails = row => {
     const projectId = row.id;
-    history.push(`/project/project-manage/detail/${projectId}`);
+    history.push(`/detail/${projectId}`);
   };
 
   /**

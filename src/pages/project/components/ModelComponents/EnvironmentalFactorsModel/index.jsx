@@ -756,6 +756,7 @@ class EnvironmentalFactorsModel extends React.Component {
           style={{
             float: 'left',
             marginTop: 10,
+            marginLeft: 16,
             fontSize: 15,
             fontWeight: 'bold',
           }}

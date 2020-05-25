@@ -564,6 +564,7 @@ class SampleSelect extends React.Component {
             color: 'rgba(0,0,0,.65)',
             fontWeight: 'bold',
             marginBottom: 18,
+            marginLeft: 16,
           }}
         >
           {paramName}
