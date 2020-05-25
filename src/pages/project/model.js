@@ -25,8 +25,17 @@ const projectModel = {
         status: 'Error',
       },
     ],
+    // 颜色
+    colorStore: [],
   },
   effects: {},
-  reducers: {},
+  reducers: {
+    setColorStore(state, action) {
+      return {
+        ...state,
+        colorStore: action.payload,
+      };
+    },
+  },
 };
 export default projectModel;

@@ -20,14 +20,21 @@ export default defineConfig({
       title: '新建项目',
     },
     {
-      path: '/detail',
-      component: '@/pages/project/project-manage/projectDetail',
+      path: '/detail/:id',
+      component: '@/pages/project/project-manage/project-manage-detail',
       title: '项目详情',
     },
     {
       path: '/addflowpath',
-      component: '@/pages/project/project-manage/project-manage-edit/addflowpath',
+      component:
+        '@/pages/project/project-manage/project-manage-edit/addflowpath',
       title: '项目详情',
+    },
+    {
+      path: '/detail/parameter/:id',
+      component:
+        '@/pages/project/project-manage/project-manage-detail/process-parameter',
+      title: '流程参数',
     },
   ],
 });
