@@ -141,6 +141,51 @@ const projectModel = {
     projectInfor: [],
     // 流程参数列表
     paramList: [],
+    filedStatus: {
+
+    },
+    filedList: [
+      {
+        id: 1,
+        code: 111111,
+        name: 'XXXX文件1', // 文件名称
+        describe: 'XXXX流程名称1', // 描述
+        sourceType: '描述描述描述描述描述描述描述描述描述111',
+        changeDate: '2019/10/20 12:00:36',
+        type: 1,
+        size: 6,
+      },
+      {
+        id: 2,
+        code: 222222,
+        name: 'XXXX文件2',
+        describe: 'XXXX流程名称2', // 描述
+        sourceType: '描述描述描述描述描述描述描述描述描述222',
+        changeDate: '2019/10/20 12:00:36',
+        type: 'pdf',
+        size: '360',
+      },
+      {
+        id: 3,
+        code: 333333,
+        name: 'XXXX文件3',
+        describe: 'XXXX流程名称3', // 描述
+        sourceType: '描述描述描述描述描述描述描述描述描述333',
+        changeDate: '2019/10/20 12:00:36',
+        type: 'file',
+        size: '128',
+      },
+      {
+        id: 4,
+        code: 444444,
+        name: 'XXXX文件4',
+        describe: 'XXXX流程名称4',
+        sourceType: '描述描述描述描述描述描述描述描述描述444',
+        changeDate: '2019/10/20 12:00:36',
+        type: 'word',
+        size: '128',
+      },
+    ],
   },
   effects: {},
   reducers: {

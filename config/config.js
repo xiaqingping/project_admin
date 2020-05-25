@@ -29,5 +29,10 @@ export default defineConfig({
       component: '@/pages/project/project-manage/project-manage-edit/addflowpath',
       title: '项目详情',
     },
+    {
+      path: '/filed-list',
+      component: '@/pages/project/project-manage/project-manage-edit/components/FiledList',
+      title: '文件列表',
+    },
   ],
 });
