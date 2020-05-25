@@ -25,7 +25,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { connect } from 'dva';
 import debounce from 'lodash/debounce';
 // import _ from 'lodash';
-import history from 'umi';
+import { history } from 'umi';
 import ProTable from '@ant-design/pro-table';
 // import StandardTable from '@/pages/project/components/StandardTable';
 import { formatter } from '@/utils/utils';

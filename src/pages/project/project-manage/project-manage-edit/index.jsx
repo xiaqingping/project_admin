@@ -1,6 +1,8 @@
 // 项目管理：新建项目
 import React, { Component } from 'react';
-import { PageHeaderWrapper } from '@ant-design/pro-layout';
+import GlobalHeader from '@/components/GlobalHeader';
+import GlobalFooter from '@/components/GlobalFooter';
+// import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { Input, Card, Form, Tag, Button, DatePicker, message } from 'antd';
 // import router from 'umi/router';
 import { history } from 'umi';
@@ -22,11 +24,14 @@ class ProjectEdit extends Component {
 
   constructor(props) {
     super(props);
+    // const { id } = this.props.match.params;
+    // console.log(id)
+    // console.log(this.props)
     const projectId = this.props.match.params;
+    console.log(this.props);
     const { labels } = props.projectManage;
 
     this.state = {
-      // requestType: 'addProject', // 请求类型
       selectedlabels: [], // 选中标签
       bpCode: '', // bp编号
       bpName: '', // bp名称
@@ -35,8 +40,46 @@ class ProjectEdit extends Component {
       projectData: [],
       labels,
       projectId,
+      requestType: '',
     };
   }
+
+  // 组件加载时
+  componentDidMount = () => {
+    // 加载table数据
+    const { projectId, requestType } = this.state;
+    console.log(this.state);
+    if (JSON.stringify(projectId) === '{}') {
+      this.setState({
+        requestType,
+      });
+    }
+    if (JSON.stringify(projectId) !== '{}' && projectId.id !== 'addGoback') {
+      this.setState({
+        requestType: 'editProject',
+      });
+      this.getTableData(projectId.id);
+    }
+
+    if (projectId.id === 'addGoback') {
+      console.log('从选择流程页面返回');
+      const addProjectInfor = JSON.parse(
+        sessionStorage.getItem('addProjectInfor'),
+      );
+      console.log(addProjectInfor);
+      this.formRef.current.setFieldsValue({
+        name: addProjectInfor.name,
+        describe: addProjectInfor.describe,
+        bpName: addProjectInfor.bpName,
+      });
+      this.setState({
+        selectedlabels: addProjectInfor.labels || [],
+        beginDate: addProjectInfor.beginDate,
+        endDate: addProjectInfor.endDate,
+      });
+    }
+    return false;
+  };
 
   /**
    * 获取表格数据
@@ -63,24 +106,6 @@ class ProjectEdit extends Component {
     });
   };
 
-  // 组件加载时
-  componentDidMount = () => {
-    // 加载table数据
-    // const { projectId, requestType } = this.state;
-    // if (JSON.stringify(projectId) === '{}') {
-    //   this.setState({
-    //     requestType,
-    //   });
-    // }
-    // if (JSON.stringify(projectId) !== '{}') {
-    //   this.setState({
-    //     requestType: 'editProject'
-    //   });
-    //   this.getTableData(projectId.id);
-    // }
-    // return false;
-  };
-
   // 保存
   handleSave = () => {
     const data = this.saveData();
@@ -88,16 +113,15 @@ class ProjectEdit extends Component {
     // 新建
     if (JSON.stringify(projectId) === '{}') {
       api.addProjects(data).then(() => {
-        history.push('/project/project-manage');
+        history.push('/');
       });
     }
     // 修改
     if (JSON.stringify(projectId) !== '{}') {
       api.updateProjects(data).then(() => {
-        history.push('/project/project-manage');
+        history.push('/');
       });
     }
-    // sessionStorage.removeItem('ModifyProject');
   };
 
   // 保存时所需数据
@@ -110,8 +134,10 @@ class ProjectEdit extends Component {
       beginDate,
       projectId,
     } = this.state;
+    console.log(this.state);
 
     const formData = this.formRef.current.getFieldsValue();
+    console.log(formData);
 
     if (formData.name === undefined) {
       message.error('项目名称不能为空！');
@@ -153,11 +179,41 @@ class ProjectEdit extends Component {
     }
 
     // 修改项目
-    if (JSON.stringify(projectId) !== '{}') {
+    if (JSON.stringify(projectId) !== '{}' && projectId.id !== 'addGoback') {
+      console.log('修改项目');
       data = {
         id: projectId.id,
         name: formData.name,
         describe: formData.describe,
+        labels: selectedlabels,
+      };
+    }
+
+    // 选择流程时返回新建项目页面的保存
+    if (projectId.id === 'addGoback') {
+      console.log('返回新建项目页面的保存');
+      const addProjectInfor = JSON.parse(
+        sessionStorage.getItem('addProjectInfor'),
+      );
+      console.log(addProjectInfor);
+      this.formRef.current.setFieldsValue({
+        name: addProjectInfor.name,
+        describe: addProjectInfor.describe,
+        bpName: addProjectInfor.bpName,
+      });
+      this.setState({
+        selectedlabels: addProjectInfor.labels || [],
+        beginDate: addProjectInfor.beginDate,
+        endDate: addProjectInfor.endDate,
+      });
+
+      data = {
+        name: addProjectInfor.name,
+        describe: addProjectInfor.describe,
+        bpCode,
+        bpName: addProjectInfor.bpName,
+        endDate,
+        beginDate,
         labels: selectedlabels,
       };
     }
@@ -167,6 +223,7 @@ class ProjectEdit extends Component {
   // 返回
   goBack = () => {
     message.success('返回上一页');
+    history.push('/');
   };
 
   // 时间选中事件
@@ -201,6 +258,7 @@ class ProjectEdit extends Component {
   // 跳转到添加流程页面
   handleAdd = () => {
     const data = this.saveData();
+    console.log(data);
     if (data === false) {
       this.props.dispatch({
         type: 'projectManage/setProjectInfor',
@@ -208,10 +266,15 @@ class ProjectEdit extends Component {
       });
     } else {
       data.requestType = 'add';
-      this.props.dispatch({
-        type: 'projectManage/setProjectInfor',
-        payload: data,
-      });
+      this.props.dispatch(
+        {
+          type: 'projectManage/setProjectInfor',
+          payload: data,
+        },
+        () => {
+          console.log(this.props.projectInfor);
+        },
+      );
 
       history.push('/project/project-manage/add/addflowpath/add');
     }
@@ -233,40 +296,32 @@ class ProjectEdit extends Component {
 
   render() {
     const { selectedlabels, projectData, labels, projectId } = this.state;
+
+    console.log(projectId);
     return (
-      <PageHeaderWrapper>
-        <div
-          style={{
-            background: 'pink',
-            height: '80px',
-            fontSize: '20px',
-            color: 'red',
-            textAlign: 'center',
-            lineHeight: '80px',
-          }}
-        >
-          春去秋来
-        </div>
+      <div style={{ background: '#F0F2F5', width: '100%' }}>
+        <GlobalHeader />
         <Form
           ref={this.formRef}
           className="classPageHeaderWrapper"
-          style={{ margin: '0 150px 24px 150px' }}
+          style={{ margin: '0 24px 24px 24px' }}
         >
-          <Card bordered={false} style={{ background: 'skyblue' }}>
-            <div
-              style={{
-                background: 'yellowgreen',
-                height: '80px',
-                fontSize: '20px',
-                color: 'red',
-                textAlign: 'left',
-                paddingLeft: '24px',
-                lineHeight: '80px',
-                marginBottom: '20px',
-              }}
-            >
-              新建项目
-            </div>
+          <div
+            style={{
+              background: '#FFFFFF',
+              height: '80px',
+              fontSize: '20px',
+              fontWeight: 'bold',
+              textAlign: 'left',
+              paddingLeft: '24px',
+              lineHeight: '80px',
+              marginBottom: '20px',
+              marginTop: '24px',
+            }}
+          >
+            新建项目
+          </div>
+          <Card bordered={false}>
             <FormItem
               label="名称"
               name="name"
@@ -305,7 +360,11 @@ class ProjectEdit extends Component {
                   onSearch={() => this.showBPList.visibleShow(true)}
                   style={{ marginLeft: '26px' }}
                   readOnly
-                  disabled={JSON.stringify(projectId) !== '{}'}
+                  disabled={
+                    JSON.stringify(projectId) !== '{}' &&
+                    projectId.id !== 'addGoback'
+                  }
+                  // projectId.id ==='addGoback'
                 />
               </FormItem>
             </div>
@@ -326,17 +385,16 @@ class ProjectEdit extends Component {
                   <RangePicker
                     showTime={{ format: 'HH:mm:ss' }}
                     format="YYYY-MM-DD HH:mm:ss"
-                    // defaultValue={[
-                    //   moment(projectData.beginDate, 'YYYYMMDD HH:mm:ss'),
-                    //   moment(projectData.endDate, 'YYYYMMDD HH:mm:ss'),
-                    // ]}
                     initialValues={[
                       moment(projectData.beginDate, 'YYYYMMDD HH:mm:ss'),
                       moment(projectData.endDate, 'YYYYMMDD HH:mm:ss'),
                     ]}
                     onChange={this.handleOnChangeTime}
                     style={{ marginLeft: '40px' }}
-                    disabled={JSON.stringify(projectId) !== '{}'}
+                    disabled={
+                      JSON.stringify(projectId) !== '{}' &&
+                      projectId.id !== 'addGoback'
+                    }
                   />
                 )}
               </FormItem>
@@ -375,41 +433,49 @@ class ProjectEdit extends Component {
           style={{
             height: '56px',
             width: '100%',
-            borderTop: '1px solid #ccc',
-            borderBottom: '1px solid #ccc',
             lineHeight: '56px',
             textAlign: 'right',
+            background: '#FFFFFF',
           }}
           className="classPageHeaderWrapperFooter"
         >
-          <Button
-            type="default"
-            onClick={() => this.goBack(true)}
-            style={{ marginRight: '10px' }}
-          >
-            返回
-          </Button>
-          <Button
-            type="default"
-            onClick={() => this.handleSave()}
-            style={{ marginRight: '10px' }}
-          >
-            保存
-          </Button>
-          {JSON.stringify(projectId) === '{}' ? (
-            <Button type="primary" onClick={() => this.handleAdd(true)}>
-              添加流程
-            </Button>
-          ) : (
+          <div style={{ margin: '0 24px 24px 24px' }}>
             <Button
-              type="primary"
-              onClick={() => this.handleAdd(true)}
-              className="isShow"
+              type="default"
+              onClick={() => this.goBack(true)}
+              style={{ marginRight: '10px' }}
             >
-              添加流程
+              返回
             </Button>
-          )}
+            <Button
+              type="default"
+              onClick={() => this.handleSave()}
+              style={{ marginRight: '10px' }}
+            >
+              保存
+            </Button>
+            {JSON.stringify(projectId) === '{}' ? (
+              <Button
+                type="primary"
+                onClick={() => this.handleAdd(true)}
+                style={{ marginRight: '10px' }}
+              >
+                添加流程
+              </Button>
+            ) : (
+              <Button
+                type="primary"
+                onClick={() => this.handleAdd(true)}
+                className="isShow"
+                style={{ marginRight: '10px' }}
+              >
+                添加流程
+              </Button>
+            )}
+          </div>
         </div>
+
+        <GlobalFooter />
 
         {/* 业务伙伴模态框 */}
         <BPList
@@ -420,7 +486,7 @@ class ProjectEdit extends Component {
             this.getBPData(data);
           }}
         />
-      </PageHeaderWrapper>
+      </div>
     );
   }
 }

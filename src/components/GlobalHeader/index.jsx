@@ -11,7 +11,7 @@ class GlobalHeader extends React.Component {
 
   componentDidMount() {
     const userStorage = localStorage.getItem('user');
-    const user = userStorage && JSON.parse(userStorage);
+    const user = userStorage ? JSON.parse(userStorage) : {};
     this.setState({
       user,
     });
