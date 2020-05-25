@@ -9,7 +9,7 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { history } from 'umi';
 import GlobalHeader from '@/components/GlobalHeader';
 import GlobalFooter from '@/components/GlobalFooter';
-import styles from './index.less';
+// import styles from './index.less';
 import ProcessTable from './components/ProcessTable';
 import MemberTbale from './components/MemberTbale';
 import FiledList from './components/FiledList'
