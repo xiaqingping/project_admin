@@ -131,6 +131,21 @@ const projectModel = {
         color: 'orange',
       },
     ],
+    // 成员权限
+    jurisdiction: [
+      {
+        id: 1,
+        name: '所有者',
+      },
+      {
+        id: 2,
+        name: '管理者',
+      },
+      {
+        id: 3,
+        name: '参与者',
+      },
+    ],
     // 点击查看的数据
     viewlist: [],
     // 修改项目参数

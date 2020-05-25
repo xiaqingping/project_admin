@@ -4,50 +4,57 @@ import GlobalHeader from '@/components/GlobalHeader';
 import GlobalFooter from '@/components/GlobalFooter';
 import {
   Button,
-  // Card,
   Divider,
-  // Form,
   Select,
-  Popconfirm,
   message,
-  // Col,
-  // Badge,
-  // AutoComplete,
   Menu,
   Dropdown,
-  // Input,
   Tag,
-  // Progress,
-  // Tag,
+  Modal,
+  DatePicker,
 } from 'antd';
-// import TableSearchForm from '@/components/TableSearchForm';
-import { PlusOutlined } from '@ant-design/icons';
+import {
+  PlusOutlined,
+  ExclamationCircleOutlined,
+  SearchOutlined,
+} from '@ant-design/icons';
 import { connect } from 'dva';
 import debounce from 'lodash/debounce';
-// import _ from 'lodash';
-import history from 'umi';
+import { history } from 'umi';
 import ProTable from '@ant-design/pro-table';
-// import StandardTable from '@/pages/project/components/StandardTable';
+
 import { formatter } from '@/utils/utils';
 import api from '@/pages/project/api/projectManage';
-import './index.less';
+import style from './index.less';
 
 localStorage.setItem(
   'token',
   '2oKfjHGD8_Ks-GZ2j7IeFJSAdTARWPRHmUuO5eM34S0hXfahsxNFLPNEM1Si0RQr',
 );
 const { Option } = Select;
-// const FormItem = Form.Item;
+const { confirm } = Modal;
+const { RangePicker } = DatePicker;
 
 class ProjectManagement extends Component {
   tableSearchFormRef = React.createRef();
 
+  projectIds = null;
+
+  dateRange = [];
+
   constructor(props) {
     super(props);
     this.state = {
+      projectIds: null,
+      // currentPage: 1,
+      // pagination: {},
+      // loading: false,
+      // list: [],
+      createDate: [],
       modelSearchOptions: [], // 项目管理模糊搜素options
     };
     // 异步验证做节流处理
+
     this.fetchCodeData = debounce(this.fetchCodeData, 500);
   }
 
@@ -63,17 +70,24 @@ class ProjectManagement extends Component {
    * @param {object} params request返回的数据
    */
   getParamData = params => {
+    console.log(params);
+
     const newObj = {
-      page: params.current,
+      page: this.page === 1 ? 1 : params.current,
       pageSize: params.pageSize,
-      id: params.id ? params.id.value : '',
+      id: params.projectIds ? params.projectIds : '',
       // status: params.status ? params.status : '',
-      status:
-        params.status && params.status.length ? params.status.join(',') : '',
-      creatorCode: params.creatorCode,
+      // status:
+      //   params.status && params.status.length ? params.status.join(',') : '',
+      // creatorCode: params.creatorCode,
       beginDate: params.createDate ? params.createDate[0] : '',
       endDate: params.createDate ? params.createDate[1] : '',
     };
+    this.page = null;
+    console.log(newObj);
+    this.setState({
+      currentPage: newObj.page,
+    });
     Object.getOwnPropertyNames(newObj).forEach(key => {
       if (!newObj[key]) {
         delete newObj[key];
@@ -126,7 +140,7 @@ class ProjectManagement extends Component {
    * */
   searchDetails = row => {
     const projectId = row.id;
-    history.push(`/project/project-manage/detail/${projectId}`);
+    history.push(`/detail/${projectId}`);
   };
 
   /**
@@ -135,8 +149,7 @@ class ProjectManagement extends Component {
    * */
   deleteRow = row => {
     api.deleteProjectManage(row.id).then(() => {
-      // this.getTableData();
-      message.success('项目管理删除成功!');
+      message.success('项目删除成功!');
       this.tableSearchFormRef.current.reload();
     });
   };
@@ -184,13 +197,11 @@ class ProjectManagement extends Component {
    */
 
   columns = () => {
-    const { modelSearchOptions } = this.state;
     const { status, labels } = this.props;
     return [
       {
-        title: '编号/名称',
+        title: '项目',
         dataIndex: 'code',
-        width: 200,
         hideInSearch: true,
         render: (value, row) => (
           <>
@@ -212,35 +223,9 @@ class ProjectManagement extends Component {
         hideInSearch: true,
       },
       {
-        title: '创建人/时间',
-        dataIndex: 'creatorName',
-        width: 200,
-        hideInSearch: true,
-        render: (value, row) => (
-          <>
-            {value}
-            <br />
-            {row.createDate}
-          </>
-        ),
-      },
-      {
-        title: '修改人/时间',
-        width: 200,
-        dataIndex: 'changerName',
-        hideInSearch: true,
-        render: (value, row) => (
-          <>
-            {value}
-            <br />
-            {row.changeDate}
-          </>
-        ),
-      },
-      {
         title: '状态',
         dataIndex: 'status',
-        width: 200,
+        // width: 200,
         filters: status,
         hideInSearch: true,
         render: (value, row) => {
@@ -268,7 +253,6 @@ class ProjectManagement extends Component {
       {
         title: '标签',
         dataIndex: 'labels',
-        width: 250,
         hideInSearch: true,
         render: value => {
           const arr = [];
@@ -289,134 +273,132 @@ class ProjectManagement extends Component {
         },
       },
       {
-        title: '成员数',
-        dataIndex: 'memberCount',
-        width: 100,
-        hideInSearch: true,
-      },
-      {
-        title: '时间',
-        dataIndex: 'beginDate',
-        width: 200,
-        hideInSearch: true,
-        render: (value, row) => (
-          <>
-            {value}
-            <br />
-            {row.endDate}
-          </>
-        ),
-      },
-      {
         title: '操作',
         hideInSearch: true,
         render: row => (
           <>
-            <Popconfirm
-              title="确定删除数据？"
-              onConfirm={() => this.deleteRow(row)}
-            >
-              <a>删除</a>
-            </Popconfirm>
+            <a onClick={() => this.showConfirm(row)}>删除</a>
             <Divider type="vertical" />
             <a onClick={() => this.editRow(row)}>修改</a>
-          </>
-        ),
-      },
-      {
-        title: '项目',
-        dataIndex: 'id',
-        hideInTable: true,
-        renderFormItem: (item, { onChange }) => (
-          <Select
-            allowClear
-            showSearch
-            showArrow={false}
-            labelInValue
-            filterOption={false}
-            onSearch={this.fetchCodeData}
-            onChange={onChange}
-            style={{ width: '100%' }}
-            optionFilterProp="children" // 对子元素--option进行筛选
-            optionLabelProp="label" // 回填的属性
-          >
-            {modelSearchOptions.map(d => (
-              <Option key={d.code} value={d.id} label={d.name}>
-                {d.code}&nbsp;&nbsp;{d.name}
-              </Option>
-            ))}
-          </Select>
-        ),
-      },
-      {
-        title: '状态',
-        dataIndex: 'status',
-        hideInTable: true,
-        valueEnum: this.statusValue(),
-        renderFormItem: (item, { onChange }) => (
-          <Select
-            mode="multiple"
-            maxTagCount={2}
-            maxTagTextLength={3}
-            onChange={onChange}
-            allowClear
-            className="setSelectMultipleType"
-          >
-            {status.map(it => (
-              <Option key={it.value} value={it.value}>
-                {it.text}
-              </Option>
-            ))}
-          </Select>
-        ),
-      },
-      {
-        title: '创建人',
-        dataIndex: 'creatorCode',
-        hideInTable: true,
-      },
-      {
-        title: '创建时间',
-        dataIndex: 'createDate',
-        hideInTable: true,
-        valueType: 'dateRange',
-        render: (value, row) => (
-          <>
-            <div>{value}</div>
-            <div>{row.createDate}</div>
           </>
         ),
       },
     ];
   };
 
+  showConfirm = row => {
+    confirm({
+      title: '删除后将不可恢复,确定删除当前项目吗?',
+      icon: <ExclamationCircleOutlined />,
+      okText: '确定',
+      cancelText: '取消',
+      onOk: () => {
+        this.deleteRow(row);
+      },
+      onCancel() {
+        console.log('Cancel');
+      },
+    });
+  };
+
+  handleSearchCodeChange = value => {
+    this.projectIds = value && value.value;
+    this.page = 1;
+    // this.setState({
+    //   currentPage: 1,
+    // });
+  };
+
+  setParamState = () => {
+    this.setState({
+      projectIds: this.projectIds,
+      createDate: this.dateRange,
+    });
+  };
+
+  dateChange = (v, dateArr) => {
+    console.log(v, dateArr);
+    this.dateRange = dateArr;
+    this.page = 1;
+    // this.setState({
+    //   currentPage: 1,
+    // });
+  };
+
   render() {
+    const {
+      modelSearchOptions,
+      projectIds,
+      createDate,
+      currentPage,
+    } = this.state;
+    console.log(currentPage);
     return (
       <div>
         <GlobalHeader />
-        <ProTable
-          actionRef={this.tableSearchFormRef}
-          headerTitle={
-            <Button type="primary" onClick={() => this.handleAdd()}>
-              <PlusOutlined />
-              新建
-            </Button>
-          }
-          rowKey="id"
-          request={params =>
-            api.getProjectManage(this.getParamData(params)).then(res => ({
-              data: res.results,
-              total: res.total,
-              success: true,
-            }))
-          }
-          columns={this.columns()}
-          options={false}
-          pagination={{
-            defaultPageSize: 10,
-          }}
-          scroll={{ x: 2000 }}
-        />
+
+        <div style={{ padding: 24, background: '#F0F2F5' }}>
+          <div className={style.manageTitle}>项目列表</div>
+          <ProTable
+            actionRef={this.tableSearchFormRef}
+            headerTitle={
+              <Button type="primary" onClick={() => this.handleAdd()}>
+                <PlusOutlined />
+                新建
+              </Button>
+            }
+            search={false}
+            rowKey="id"
+            request={params => {
+              console.log(params);
+              return api
+                .getProjectManage(this.getParamData(params))
+                .then(res => ({
+                  data: res.results,
+                  total: res.total,
+                  success: true,
+                }));
+            }}
+            columns={this.columns()}
+            options={false}
+            pagination={{
+              defaultPageSize: 10,
+              current: currentPage,
+            }}
+            params={{ projectIds, createDate }}
+            toolBarRender={() => [
+              // <Input placeholder="项目名称" />,
+              <Select
+                placeholder="项目名称"
+                allowClear
+                showSearch
+                showArrow={false}
+                labelInValue
+                filterOption={false}
+                onSearch={this.fetchCodeData}
+                onChange={this.handleSearchCodeChange}
+                style={{ width: 200 }}
+                optionFilterProp="children" // 对子元素--option进行筛选
+                optionLabelProp="label" // 回填的属性
+              >
+                {modelSearchOptions.map(d => (
+                  <Option key={d.code} value={d.id} label={d.name}>
+                    {d.code}&nbsp;&nbsp;{d.name}
+                  </Option>
+                ))}
+              </Select>,
+              <RangePicker onChange={this.dateChange} />,
+              <Button
+                type="primary"
+                icon={<SearchOutlined />}
+                style={{ marginLeft: 8 }}
+                size="middle"
+                onClick={this.setParamState}
+              />,
+            ]}
+          />
+        </div>
+
         <GlobalFooter />
       </div>
     );
