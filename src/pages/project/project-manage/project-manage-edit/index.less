@@ -1,0 +1,70 @@
+:global {
+  .task_model_add_argument_list {
+    display: inline-block;
+    height: 35px;
+
+    &:hover {
+      background-color: #e6f7ff;
+    }
+  }
+  .isSelect {
+    position: relative;
+    box-sizing: border-box;
+    border: 1px solid #1890ff;
+
+    .isOk {
+      display: inline-block !important;
+    }
+  }
+
+  .classPageHeaderWrapper {
+    .ant-card:nth-child(1) {
+      .ant-card-body .ant-row {
+        margin-bottom: 20px !important;
+      }
+    }
+    > div:nth-child(1) .ant-card-body {
+      margin-bottom: 100px;
+      padding: 30px;
+      .ant-form-item-control {
+        margin-left: -15px !important;
+      }
+      > div {
+        margin-bottom: 20px;
+        textarea[placeholder='请输入项目描述'] {
+          height: 120px;
+        }
+      }
+      > div:last-child {
+        height: auto !important;
+      }
+    }
+  }
+
+  .classPageHeaderWrapperFooter {
+    .ant-card-body {
+      float: right;
+      padding: 12px !important;
+      padding-right: 35px;
+      button {
+        margin-left: 20px;
+        border-radius: 5px;
+      }
+      .isShow {
+        display: none;
+      }
+    }
+  }
+
+  // 设置弹框的title颜色
+  .setTitleColor {
+    .ant-table-content table thead {
+      tr {
+        .ant-table-cell {
+          color: rgba(0, 0, 0, 0.65) !important;
+          background-color: #fafafa !important;
+        }
+      }
+    }
+  }
+}
