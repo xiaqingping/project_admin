@@ -9,9 +9,10 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { history } from 'umi';
 import GlobalHeader from '@/components/GlobalHeader';
 import GlobalFooter from '@/components/GlobalFooter';
-import styles from './index.less';
+// import styles from './index.less';
 import ProcessTable from './components/ProcessTable';
 import MemberTbale from './components/MemberTbale';
+import FiledList from './components/FiledList'
 
 const { TabPane } = Tabs;
 
@@ -140,7 +141,9 @@ class projectDetail extends Component {
                   </div>
                 </TabPane>
                 <TabPane tab="文件" key="2">
-                  <div className="classFile">文件</div>
+                  <div className="classFile">
+                    <FiledList />
+                  </div>
                 </TabPane>
                 <TabPane tab="成员" key="3">
                   <div className="classMemberList">
