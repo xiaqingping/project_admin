@@ -12,7 +12,7 @@ import api from '@/pages/project/api/projectManage';
 import detailApi from '@/pages/project/api/projectManageDetail';
 // import classNames from 'classnames';
 import BPList from './components/BPList';
-// import './index.less';
+import './index.less';
 
 const FormItem = Form.Item;
 const { TextArea, Search } = Input;
@@ -24,9 +24,6 @@ class ProjectEdit extends Component {
 
   constructor(props) {
     super(props);
-    // const { id } = this.props.match.params;
-    // console.log(id)
-    // console.log(this.props)
     const projectId = this.props.match.params;
     console.log(this.props);
     const { labels } = props.projectManage;
@@ -137,7 +134,6 @@ class ProjectEdit extends Component {
     console.log(this.state);
 
     const formData = this.formRef.current.getFieldsValue();
-    console.log(formData);
 
     if (formData.name === undefined) {
       message.error('项目名称不能为空！');
@@ -210,7 +206,7 @@ class ProjectEdit extends Component {
       data = {
         name: addProjectInfor.name,
         describe: addProjectInfor.describe,
-        bpCode,
+        bpCode: addProjectInfor.bpCode,
         bpName: addProjectInfor.bpName,
         endDate,
         beginDate,
@@ -278,20 +274,6 @@ class ProjectEdit extends Component {
 
       history.push('/project/project-manage/add/addflowpath/add');
     }
-  };
-
-  // 导航列表title样式
-  navContent = () => {
-    const { projectId, projectData } = this.state;
-    let titleName;
-    if (JSON.stringify(projectId) === '{}') {
-      titleName = '新建项目';
-    }
-    if (JSON.stringify(projectId) !== '{}') {
-      titleName = projectData.name;
-    }
-
-    return <div>{titleName}</div>;
   };
 
   render() {
@@ -364,7 +346,6 @@ class ProjectEdit extends Component {
                     JSON.stringify(projectId) !== '{}' &&
                     projectId.id !== 'addGoback'
                   }
-                  // projectId.id ==='addGoback'
                 />
               </FormItem>
             </div>
@@ -466,8 +447,7 @@ class ProjectEdit extends Component {
               <Button
                 type="primary"
                 onClick={() => this.handleAdd(true)}
-                className="isShow"
-                style={{ marginRight: '10px' }}
+                style={{ marginRight: '10px', display: 'none' }}
               >
                 添加流程
               </Button>

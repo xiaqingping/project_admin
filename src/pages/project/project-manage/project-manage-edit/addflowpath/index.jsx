@@ -6,7 +6,7 @@ import GlobalFooter from '@/components/GlobalFooter';
 import { Button, message, Table, Form, Popconfirm, Avatar } from 'antd';
 import { history } from 'umi';
 import { connect } from 'dva';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
 import api from '@/pages/project/api/projectManage';
 import ChooseProcessModel from '../components/ChooseProcessModel';
 import '@/pages/project/project-manage/project-manage-edit/index.less';
@@ -183,9 +183,9 @@ class Test extends Component {
 
     let url;
     if (projectId === '' || projectId === "''") {
-      url = `/project/project-manage/process-parameter/${type}_${processModelId}`;
+      url = `/detail/parameter/${type}_${processModelId}`;
     } else {
-      url = `/project/project-manage/process-parameter/${type}_${processModelId}_${projectId}`;
+      url = `/detail/parameter/${type}_${processModelId}_${projectId}`;
     }
     history.push(url);
   };
@@ -405,24 +405,12 @@ class Test extends Component {
         dataIndex: 'parameter',
         width: 100,
         render: (value, row) => (
-          // </div>
-          <div
-            style={{ cursor: 'pointer' }}
-            className="task_model_add_task_icon"
+          <SettingOutlined
+            style={{ cursor: 'pointer', color: '#1890ff', fontSize: 20 }}
             onClick={() => this.handleOpen(row)}
           />
         ),
       },
-      // {
-      //   title: '版本',
-      //   dataIndex: 'version',
-      //   width: 130,
-      //   render: () => (
-      //     <Tag color="green" style={{ padding: '0 10px' }}>
-      //       V1.0
-      //     </Tag>
-      //   ),
-      // },
       {
         title: '操作',
         width: 200,

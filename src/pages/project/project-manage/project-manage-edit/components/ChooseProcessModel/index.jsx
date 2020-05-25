@@ -268,6 +268,8 @@ class ChooseProcessModel extends React.Component {
           onOk={this.handleOk}
           onCancel={this.handleCancel}
           width={1050}
+          okText="确认"
+          cancelText="取消"
         >
           <div className="tableList">
             <TableSearchForm

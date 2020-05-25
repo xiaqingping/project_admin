@@ -25,7 +25,7 @@ class GlobalHeader extends React.Component {
           <div className={style.headerContent}>
             <div className={style.logoImg} />
             <div>
-              <Avatar size={40} src={user.avatar} />
+              <Avatar size={36} src={user.avatar} />
               <span className={style.headerUser} style={{ marginLeft: 10 }}>
                 {user.name}
               </span>

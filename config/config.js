@@ -34,9 +34,15 @@ export default defineConfig({
       component: './project/project-manage/project-manage-edit/addflowpath',
     },
     {
-      path: '/detail',
-      component: '@/pages/project/project-manage/projectDetail',
+      path: '/detail/:id',
+      component: '@/pages/project/project-manage/project-manage-detail',
       title: '项目详情',
+    },
+    {
+      path: '/detail/parameter/:id',
+      component:
+        '@/pages/project/project-manage/project-manage-detail/process-parameter',
+      title: '流程参数',
     },
   ],
 });
