@@ -15,12 +15,13 @@ import {
   FileExclamationOutlined,
   SwapLeftOutlined,
   SwapRightOutlined,
-} from '@ant-design/icons';
+} from '@ant-design/icons'
 
+// 自定义
 import api from '@/pages/project/api/disk'
 import './index.less'
 
-const { Option } = Select;
+const { Option } = Select
 
 /**
  * 文件列表组件
