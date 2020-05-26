@@ -340,13 +340,7 @@ class Test extends Component {
     if (processType === 'add' && projectInfor !== '') {
       // console.log(
       //   '新建项目选择流程时，返回新建项目基础信息页面，这个页面是修改信息的操作',
-      // );
-      const projectInforList = JSON.parse(
-        sessionStorage.getItem('addProjectInfor'),
-      );
-      console.log('点击跳转暂存的基础信息', projectInforList);
-
-      sessionStorage.setItem('goBackInfors', JSON.stringify(projectInforList));
+      // // );
       const requestType = 'addGoback';
       url = `/project/project-manage/add/${requestType}`;
     } else {
