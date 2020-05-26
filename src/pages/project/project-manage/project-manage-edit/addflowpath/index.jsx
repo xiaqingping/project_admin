@@ -8,6 +8,8 @@ import { history } from 'umi';
 import { connect } from 'dva';
 import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
 import api from '@/pages/project/api/projectManage';
+import disk from '@/pages/project/api/disk';
+import DefaultHeadPicture from '@/assets/images/defaultheadpicture.jpg';
 import ChooseProcessModel from '../components/ChooseProcessModel';
 import '@/pages/project/project-manage/project-manage-edit/index.less';
 
@@ -19,17 +21,14 @@ localStorage.setItem(
 class Test extends Component {
   constructor(props) {
     super(props);
-    console.log(props);
+    // console.log(props);
     // 传过来的已有项目的id和类型
     // TODO:
     const { id } = this.props.match.params;
     const data = id.split('_');
     const { projectInfor } = this.props.projectManage;
-    console.log(this.props);
-    console.log(projectInfor);
 
     this.state = {
-      user: {},
       processType: data[0], // 请求类型 edit：流程列表跳转 携带项目id  add：新建项目跳转 无id
       projectId: data[1] || '', // 项目Id
       paramsType: data[2], // 参数页面带过来的判断是否强制刷新已选流程
@@ -40,7 +39,6 @@ class Test extends Component {
       projectInfor, // 项目基础信息
       buttonLoading: false,
     };
-    console.log(this.state.list);
   }
 
   /**
@@ -52,12 +50,6 @@ class Test extends Component {
    * @param processForParams 存储参数数据的值
    */
   componentDidMount() {
-    const userStorage = localStorage.getItem('user');
-    const user = userStorage ? JSON.parse(userStorage) : {};
-    this.setState({
-      user,
-    });
-
     const { processType, paramsType } = this.state;
     this.getData();
 
@@ -111,7 +103,6 @@ class Test extends Component {
    * */
   onOpen = () => {
     const { projectInfor, processType } = this.state;
-    // console.log(this.state);
     if (processType === 'add' && projectInfor.length === 0) {
       this.setState({
         visible: false,
@@ -238,7 +229,7 @@ class Test extends Component {
     let status = false;
 
     if (processType === 'add') {
-      console.log('新建项目跳转，基础信息有值的保存,');
+      // console.log('新建项目跳转，基础信息有值的保存,');
 
       if (list === '' || list === undefined) {
         status = true;
@@ -347,30 +338,27 @@ class Test extends Component {
     console.log(projectInfor);
     let url;
     if (processType === 'add' && projectInfor !== '') {
-      console.log(
-        '新建项目选择流程时，返回新建项目基础信息页面，这个页面是修改信息的操作',
+      // console.log(
+      //   '新建项目选择流程时，返回新建项目基础信息页面，这个页面是修改信息的操作',
+      // );
+      const projectInforList = JSON.parse(
+        sessionStorage.getItem('addProjectInfor'),
       );
-      sessionStorage.setItem('addProjectInfor', JSON.stringify(projectInfor));
+      console.log('点击跳转暂存的基础信息', projectInforList);
+
+      sessionStorage.setItem('goBackInfors', JSON.stringify(projectInforList));
       const requestType = 'addGoback';
       url = `/project/project-manage/add/${requestType}`;
     } else {
-      console.log('已建项目选择流程时，返回项目列表详情页');
-      url = `/project/project-manage/detail/${projectId}`;
+      // console.log('已建项目选择流程时，返回项目列表详情页');
+      url = `/detail/${projectId}`;
     }
-    // if (processType === 'add' || processType === 'update') {
-    //   if (projectId) url = `/project/project-manage/detailAdd/edit_${projectId}_2`;
-    //   if (projectId === '' || projectId === undefined)
-    //     url = `/project/project-manage/add/addflowpath/add_''_1`;
-    // } else {
-    //   if (projectId === '') url = `/project/project-manage`;
-    //   if (projectId !== '') url = `/project/project-manage/detail/${projectId}`;
-    // }
 
     return history.push(url);
   };
 
   render() {
-    const { list, loading, visible, buttonLoading, user } = this.state;
+    const { list, loading, visible, buttonLoading } = this.state;
     const columns = [
       {
         title: '流程',
@@ -390,7 +378,11 @@ class Test extends Component {
         render: (value, row) => (
           <>
             <Avatar
-              src={user.avatar}
+              src={
+                row.picture
+                  ? disk.downloadFiles(row.picture, { view: true })
+                  : DefaultHeadPicture
+              }
               style={{ float: 'left', width: '46px', height: '46px' }}
             />
             <div style={{ float: 'left' }}>
@@ -470,18 +462,6 @@ class Test extends Component {
               选择流程模型
             </Button>
           </div>
-          {/* <Card
-            style={{ height: '48px', width: '100%', position: 'fixed', bottom: '0', left: '0' }}
-          >
-            <Button
-              type="primary"
-              style={{ float: 'right', marginTop: '-16px' }}
-              htmlType="submit"
-              loading={buttonLoading}
-            >
-              保存
-            </Button>
-          </Card> */}
         </Form>
         <div
           style={{
