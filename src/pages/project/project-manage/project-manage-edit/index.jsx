@@ -25,7 +25,6 @@ class ProjectEdit extends Component {
   constructor(props) {
     super(props);
     const projectId = this.props.match.params;
-    console.log(this.props);
     const { labels } = props.projectManage;
 
     this.state = {
@@ -45,7 +44,6 @@ class ProjectEdit extends Component {
   componentDidMount = () => {
     // 加载table数据
     const { projectId, requestType } = this.state;
-    console.log(this.state);
     if (JSON.stringify(projectId) === '{}') {
       this.setState({
         requestType,
@@ -59,11 +57,9 @@ class ProjectEdit extends Component {
     }
 
     if (projectId.id === 'addGoback') {
-      console.log('从选择流程页面返回');
       const addProjectInfor = JSON.parse(
         sessionStorage.getItem('addProjectInfor'),
       );
-      // console.log(addProjectInfor);
       this.formRef.current.setFieldsValue({
         name: addProjectInfor.name,
         describe: addProjectInfor.describe,
@@ -106,7 +102,7 @@ class ProjectEdit extends Component {
   // 保存
   handleSave = () => {
     const data = this.saveData();
-    console.log(data);
+    // console.log(data);
     const { selectedlabels, endDate, beginDate, projectId } = this.state;
     // 新建
     if (JSON.stringify(projectId) === '{}') {
@@ -128,7 +124,6 @@ class ProjectEdit extends Component {
       );
 
       const bpModelList = JSON.parse(sessionStorage.getItem('bpModel'));
-      console.log(bpModelList);
 
       const datas = {
         name: addProjectInfor.name,
@@ -139,7 +134,7 @@ class ProjectEdit extends Component {
         beginDate,
         labels: selectedlabels,
       };
-      console.log(datas);
+      // console.log(datas);
 
       api.addProjects(datas).then(() => {
         history.push('/');
@@ -157,10 +152,10 @@ class ProjectEdit extends Component {
       beginDate,
       projectId,
     } = this.state;
-    console.log(this.state);
+    // console.log(this.state);
 
     const formData = this.formRef.current.getFieldsValue();
-    console.log(formData);
+    // console.log(formData);
 
     if (formData.name === undefined) {
       message.error('项目名称不能为空！');
@@ -168,6 +163,10 @@ class ProjectEdit extends Component {
     }
     if (formData.describe === undefined) {
       message.error('项目描述不能为空！');
+      return false;
+    }
+    if (formData.bpName === '' || formData.bpName === undefined) {
+      message.error('所有者不能为空！');
       return false;
     }
 
@@ -203,7 +202,6 @@ class ProjectEdit extends Component {
 
     // 修改项目
     if (JSON.stringify(projectId) !== '{}' && projectId.id !== 'addGoback') {
-      console.log('修改项目');
       data = {
         id: projectId.id,
         name: formData.name,
@@ -214,11 +212,9 @@ class ProjectEdit extends Component {
 
     // 选择流程时返回新建项目页面的保存
     if (projectId.id === 'addGoback') {
-      console.log('返回新建项目页面的保存');
       const addProjectInfor = JSON.parse(
         sessionStorage.getItem('addProjectInfor'),
       );
-      console.log(addProjectInfor);
       this.formRef.current.setFieldsValue({
         name: formData.name,
         describe: formData.describe,
@@ -239,30 +235,6 @@ class ProjectEdit extends Component {
         beginDate,
         labels: selectedlabels,
       };
-
-      // if(addProjectInfor.bpName === '') {
-      //   data = {
-      //     name: formData.name,
-      //     describe: formData.describe,
-      //     bpCode,
-      //     bpName,
-      //     endDate,
-      //     beginDate,
-      //     labels: selectedlabels,
-      //   };
-      //   console.log(data)
-      // }else {
-      //     data = {
-      //     name: formData.name,
-      //     describe: formData.describe,
-      //     bpCode,
-      //     bpName,
-      //     endDate,
-      //     beginDate,
-      //     labels: selectedlabels,
-      //   };
-      //   console.log(data)
-      // }
     }
     return data;
   };
@@ -275,7 +247,7 @@ class ProjectEdit extends Component {
 
   // 时间选中事件
   handleOnChangeTime = (value, dateString) => {
-    console.log(dateString);
+    // console.log(dateString);
     this.setState({
       beginDate: dateString[0],
       endDate: dateString[1],
@@ -294,7 +266,7 @@ class ProjectEdit extends Component {
 
   // 获取业务伙伴模态框回传数据
   getBPData = data => {
-    console.log(data);
+    // console.log(data);
     this.formRef.current.setFieldsValue({
       bpName: data.name,
     });
@@ -307,27 +279,33 @@ class ProjectEdit extends Component {
 
   // 跳转到添加流程页面
   handleAdd = () => {
-    const { projectId } = this.state;
+    const { projectId, endDate, beginDate, selectedlabels } = this.state;
 
     const data = this.saveData();
-    console.log(data);
     if (data === false) {
       this.props.dispatch({
         type: 'projectManage/setProjectInfor',
         payload: data,
       });
     } else {
-      if (projectId === 'addGoback') {
-        console.log(123);
+      if (projectId.id === 'addGoback') {
+        const goBackInfors = JSON.parse(sessionStorage.getItem('goBackInfors'));
+        const bpModelList = JSON.parse(sessionStorage.getItem('bpModel'));
+        const datas = {
+          name: goBackInfors.name,
+          describe: goBackInfors.describe,
+          bpCode: bpModelList.code,
+          bpName: bpModelList.name,
+          endDate,
+          beginDate,
+          labels: selectedlabels,
+        };
+
+        sessionStorage.setItem('addProjectInfor', JSON.stringify(datas));
       } else {
         data.requestType = 'add';
         sessionStorage.setItem('addProjectInfor', JSON.stringify(data));
       }
-
-      const projectInforList = JSON.parse(
-        sessionStorage.getItem('goBackInfors'),
-      );
-      console.log('点击返回带回来的值', projectInforList);
 
       this.props.dispatch({
         type: 'projectManage/setProjectInfor',
@@ -344,10 +322,10 @@ class ProjectEdit extends Component {
       projectData,
       labels,
       projectId,
-      beginDate,
-      endDate,
+      // beginDate,
+      // endDate,
     } = this.state;
-    console.log(this.state);
+    // console.log(this.state);
     return (
       <div style={{ background: '#F0F2F5', width: '100%' }}>
         <GlobalHeader />
@@ -429,10 +407,10 @@ class ProjectEdit extends Component {
                     showTime={{ format: 'HH:mm:ss' }}
                     format="YYYY-MM-DD HH:mm:ss"
                     onChange={this.handleOnChangeTime}
-                    defaultPickerValue={[
-                      moment(beginDate, 'YYYYMMDD HH:mm:ss'),
-                      moment(endDate, 'YYYYMMDD HH:mm:ss'),
-                    ]}
+                    // defaultPickerValue={[
+                    //   moment(beginDate, 'YYYYMMDD HH:mm:ss'),
+                    //   moment(endDate, 'YYYYMMDD HH:mm:ss'),
+                    // ]}
                     style={{ marginLeft: '40px' }}
                   />
                 ) : (
