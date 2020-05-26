@@ -12,7 +12,7 @@ import GlobalFooter from '@/components/GlobalFooter';
 // import styles from './index.less';
 import ProcessTable from './components/ProcessTable';
 import MemberTbale from './components/MemberTbale';
-import FiledList from './components/FiledList'
+import FiledList from './components/FiledList';
 
 const { TabPane } = Tabs;
 
@@ -96,9 +96,11 @@ class projectDetail extends Component {
   handleAddProcesses = projectData => {
     console.log('跳转');
     console.log(projectData);
-    // const type = 'edit';
-    // const projectId = data.id;
-    // history.push(`/project/project-manage/detailAdd/${type}_${projectId}`);
+    const type = 'edit';
+    const projectId = projectData.id;
+    history.push(
+      `/project/project-manage/add/addflowpath/${type}_${projectId}`,
+    );
   };
 
   /**

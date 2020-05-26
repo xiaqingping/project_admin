@@ -14,13 +14,13 @@ import {
   SearchOutlined,
   FileExclamationOutlined,
   SwapLeftOutlined,
-  SwapRightOutlined
-} from '@ant-design/icons'
+  SwapRightOutlined,
+} from '@ant-design/icons';
 
 import api from '@/pages/project/api/disk'
 import './index.less'
 
-const { Option } = Select
+const { Option } = Select;
 
 /**
  * 文件列表组件
@@ -45,13 +45,17 @@ const FiledList = props => {
   // 批量操作
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        'selectedRows: ',
+        selectedRows,
+      );
     },
     getCheckboxProps: record => ({
       disabled: record.name === 'Disabled User',
       name: record.name,
     }),
-  }
+  };
 
   // 表结构
   const columns = [
@@ -248,5 +252,5 @@ const FiledList = props => {
 }
 
 export default connect(({ projectManage }) => ({
-  filedList: projectManage.filedList
-}))(FiledList)
+  filedList: projectManage.filedList,
+}))(FiledList);
