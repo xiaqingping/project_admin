@@ -1,32 +1,26 @@
-import React, { useState } from 'react'
-import { connect } from 'dva'
-import {
-  Button,
-  Input,
-  Breadcrumb,
-  Select,
-  Modal
-} from 'antd'
-import ProTable from '@ant-design/pro-table'
+import React, { useState } from 'react';
+import { connect } from 'dva';
+import { Button, Input, Breadcrumb, Select, Modal } from 'antd';
+import ProTable from '@ant-design/pro-table';
 import {
   FolderOutlined,
   DownloadOutlined,
   SearchOutlined,
   FileExclamationOutlined,
   SwapLeftOutlined,
-  SwapRightOutlined
-} from '@ant-design/icons'
+  SwapRightOutlined,
+} from '@ant-design/icons';
 
-import './index.less'
+import './index.less';
 
-const { Option } = Select
+const { Option } = Select;
 
 const columns = [
   {
     title: '文件名称',
     dataIndex: 'name',
     width: 150,
-    render: (value) => (
+    render: value => (
       <>
         {/* <img src={this.imgtype(item.type)} alt="" /> */}
         <FileExclamationOutlined />
@@ -64,7 +58,7 @@ const columns = [
       </>
     ),
   },
-]
+];
 
 /**
  * 通过列筛选
@@ -72,7 +66,7 @@ const columns = [
  */
 const handleChange = value => {
   console.log(`${value}`);
-}
+};
 
 /**
  * 文件列表组件
@@ -80,22 +74,26 @@ const handleChange = value => {
  */
 const FiledList = props => {
   // 默认数据
-  const { filedList } = props
+  const { filedList } = props;
   // 排序状态
-  const [isActive, setIsActive] = useState(false)
+  const [isActive, setIsActive] = useState(false);
   // 新建文件夹状态
-  const [isVisible, setVisible] = useState(false)
+  const [isVisible, setVisible] = useState(false);
 
   // 批量操作
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        'selectedRows: ',
+        selectedRows,
+      );
     },
     getCheckboxProps: record => ({
       disabled: record.name === 'Disabled User',
       name: record.name,
     }),
-  }
+  };
 
   return (
     <div>
@@ -107,13 +105,18 @@ const FiledList = props => {
         options={false}
         columns={columns}
         request={() => {
-          return { data: filedList, success: true }
+          return { data: filedList, success: true };
         }}
-        className='classFiledList'
+        className="classFiledList"
         defaultData={filedList}
         headerTitle={
           <div>
-            <Button type="primary" onClick={() => { setVisible(true) }}>
+            <Button
+              type="primary"
+              onClick={() => {
+                setVisible(true);
+              }}
+            >
               <FolderOutlined />
               新建文件夹
             </Button>
@@ -121,18 +124,21 @@ const FiledList = props => {
               title="新建文件夹"
               visible={isVisible}
               onOk={() => {
-                setVisible(false)
+                setVisible(false);
               }}
-              onCancel={() => { setVisible(false) }}
+              onCancel={() => {
+                setVisible(false);
+              }}
               okText="确认"
               cancelText="取消"
             >
               <Input placeholder="输入文件夹名称" />
             </Modal>
-            <Button onClick={() => { }}>
+            <Button onClick={() => {}}>
               <DownloadOutlined />
               下载
-          </Button><br />
+            </Button>
+            <br />
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
               <Breadcrumb>
                 <Breadcrumb.Item>全部文件</Breadcrumb.Item>
@@ -142,8 +148,11 @@ const FiledList = props => {
           </div>
         }
         toolBarRender={() => [
-          <Input prefix={<SearchOutlined />} placeholder="搜索" onSearch={() => { }} />
-          ,
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="搜索"
+            onSearch={() => {}}
+          />,
           <div
             onClick={() => setIsActive(!isActive)}
             style={{ transform: 'translateX(10px)', zIndex: '999' }}
@@ -152,16 +161,17 @@ const FiledList = props => {
               style={{
                 transform: 'rotate(90deg) scaleY(-1) translateY(8px)',
                 fontSize: '20px',
-                color: isActive ? '#ccc' : '#1890ff'
-              }} />
+                color: isActive ? '#ccc' : '#1890ff',
+              }}
+            />
             <SwapLeftOutlined
               style={{
                 transform: 'rotate(90deg)',
                 fontSize: '20px',
-                color: isActive ? '#1890ff' : '#ccc'
-              }} />
-          </div>
-          ,
+                color: isActive ? '#1890ff' : '#ccc',
+              }}
+            />
+          </div>,
           <Select
             className="classSelect"
             defaultValue="文件名"
@@ -174,13 +184,13 @@ const FiledList = props => {
             <Option value="文件名">文件名</Option>
             <Option value="大小">大小</Option>
             <Option value="修改日期">修改日期</Option>
-          </Select>
+          </Select>,
         ]}
       />
     </div>
-  )
-}
+  );
+};
 
 export default connect(({ projectManage }) => ({
-  filedList: projectManage.filedList
-}))(FiledList)
+  filedList: projectManage.filedList,
+}))(FiledList);

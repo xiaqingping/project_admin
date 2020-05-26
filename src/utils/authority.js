@@ -3,7 +3,8 @@ import { reloadAuthorized } from './Authorized';
 
 export function getAuthority(str) {
   // authorityString could be admin, "admin", ["admin"]
-  const authorityString = typeof str === 'undefined' && localStorage ? str : str;
+  const authorityString =
+    typeof str === 'undefined' && localStorage ? str : str;
 
   let authority;
 

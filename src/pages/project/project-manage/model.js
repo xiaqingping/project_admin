@@ -156,9 +156,7 @@ const projectModel = {
     projectInfor: [],
     // 流程参数列表
     paramList: [],
-    filedStatus: {
-
-    },
+    filedStatus: {},
     filedList: [
       {
         id: 1,
