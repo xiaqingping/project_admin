@@ -1,6 +1,7 @@
 import React from 'react';
 import { Layout, Avatar } from 'antd';
 import style from './index.less';
+import GlobalFooter from '@/components/GlobalFooter';
 
 const { Header } = Layout;
 
@@ -20,7 +21,7 @@ class GlobalHeader extends React.Component {
   render() {
     const { user } = this.state;
     return (
-      <Layout>
+      <Layout style={{ display: 'flex', flexDirection: 'column' }}>
         <Header className={style.globalHeader}>
           <div className={style.headerContent}>
             <div className={style.logoImg} />
@@ -36,6 +37,7 @@ class GlobalHeader extends React.Component {
             </div>
           </div>
         </Header>
+        {/* <GlobalFooter style={{ flex: 1 }} /> */}
       </Layout>
     );
   }
