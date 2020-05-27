@@ -1,7 +1,6 @@
 import { defineConfig } from 'umi';
 
 const { BASE_API } = process.env;
-
 export default defineConfig({
   nodeModulesTransform: {
     type: 'none',
@@ -15,19 +14,35 @@ export default defineConfig({
       component: '@/pages/project/project-manage',
     },
     {
-      path: '/page',
-      component: '@/pages/project/project-manage/projectAdd',
+      path: '/project/project-manage/add',
+      component: '@/pages/project/project-manage/project-manage-edit',
       title: '新建项目',
     },
     {
-      path: '/detail',
-      component: '@/pages/project/project-manage/projectDetail',
+      path: '/project/project-manage/add/:id',
+      component: '@/pages/project/project-manage/project-manage-edit',
+      title: '返回新建项目',
+    },
+    {
+      title: '修改项目',
+      path: '/project/project-manage/edit/:id',
+      component: './project/project-manage/project-manage-edit',
+    },
+    {
+      title: '选择流程',
+      path: '/project/project-manage/add/addflowpath/:id',
+      component: './project/project-manage/project-manage-edit/addflowpath',
+    },
+    {
+      path: '/detail/:id',
+      component: '@/pages/project/project-manage/project-manage-detail',
       title: '项目详情',
     },
     {
-      path: '/addflowpath',
-      component: '@/pages/project/project-manage/project-manage-edit/addflowpath',
-      title: '项目详情',
+      path: '/detail/parameter/:id',
+      component:
+        '@/pages/project/project-manage/project-manage-detail/process-parameter',
+      title: '流程参数',
     },
   ],
 });
