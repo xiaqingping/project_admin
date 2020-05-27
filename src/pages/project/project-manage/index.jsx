@@ -12,6 +12,7 @@ import {
   Tag,
   Modal,
   DatePicker,
+  ConfigProvider,
 } from 'antd';
 import {
   PlusOutlined,
@@ -25,6 +26,7 @@ import ProTable from '@ant-design/pro-table';
 
 import { formatter } from '@/utils/utils';
 import api from '@/pages/project/api/projectManage';
+import zhCN from 'antd/es/locale/zh_CN';
 import style from './index.less';
 
 localStorage.setItem(
@@ -46,7 +48,6 @@ class ProjectManagement extends Component {
     super(props);
     this.state = {
       projectIds: null,
-      // currentPage: 1,
       // pagination: {},
       // loading: false,
       // list: [],
@@ -70,10 +71,8 @@ class ProjectManagement extends Component {
    * @param {object} params request返回的数据
    */
   getParamData = params => {
-    console.log(params);
-
     const newObj = {
-      page: this.page === 1 ? 1 : params.current,
+      page: params.current,
       pageSize: params.pageSize,
       id: params.projectIds ? params.projectIds : '',
       // status: params.status ? params.status : '',
@@ -83,11 +82,6 @@ class ProjectManagement extends Component {
       beginDate: params.createDate ? params.createDate[0] : '',
       endDate: params.createDate ? params.createDate[1] : '',
     };
-    this.page = null;
-    console.log(newObj);
-    this.setState({
-      currentPage: newObj.page,
-    });
     Object.getOwnPropertyNames(newObj).forEach(key => {
       if (!newObj[key]) {
         delete newObj[key];
@@ -303,104 +297,89 @@ class ProjectManagement extends Component {
 
   handleSearchCodeChange = value => {
     this.projectIds = value && value.value;
-    this.page = 1;
-    // this.setState({
-    //   currentPage: 1,
-    // });
   };
 
-  setParamState = () => {
+  setParamState = action => {
     this.setState({
       projectIds: this.projectIds,
       createDate: this.dateRange,
     });
+    action.setPageInfo({ page: 1 });
   };
 
   dateChange = (v, dateArr) => {
-    console.log(v, dateArr);
     this.dateRange = dateArr;
-    this.page = 1;
-    // this.setState({
-    //   currentPage: 1,
-    // });
   };
 
   render() {
-    const {
-      modelSearchOptions,
-      projectIds,
-      createDate,
-      currentPage,
-    } = this.state;
-    console.log(currentPage);
+    const { modelSearchOptions, projectIds, createDate } = this.state;
     return (
-      <div>
-        <GlobalHeader />
+      <ConfigProvider locale={zhCN}>
+        <div>
+          <GlobalHeader />
 
-        <div style={{ padding: 24, background: '#F0F2F5' }}>
-          <div className={style.manageTitle}>项目列表</div>
-          <ProTable
-            actionRef={this.tableSearchFormRef}
-            headerTitle={
-              <Button type="primary" onClick={() => this.handleAdd()}>
-                <PlusOutlined />
-                新建
-              </Button>
-            }
-            search={false}
-            rowKey="id"
-            request={params => {
-              console.log(params);
-              return api
-                .getProjectManage(this.getParamData(params))
-                .then(res => ({
-                  data: res.results,
-                  total: res.total,
-                  success: true,
-                }));
-            }}
-            columns={this.columns()}
-            options={false}
-            pagination={{
-              defaultPageSize: 10,
-              current: currentPage,
-            }}
-            params={{ projectIds, createDate }}
-            toolBarRender={() => [
-              // <Input placeholder="项目名称" />,
-              <Select
-                placeholder="项目名称"
-                allowClear
-                showSearch
-                showArrow={false}
-                labelInValue
-                filterOption={false}
-                onSearch={this.fetchCodeData}
-                onChange={this.handleSearchCodeChange}
-                style={{ width: 200 }}
-                optionFilterProp="children" // 对子元素--option进行筛选
-                optionLabelProp="label" // 回填的属性
-              >
-                {modelSearchOptions.map(d => (
-                  <Option key={d.code} value={d.id} label={d.name}>
-                    {d.code}&nbsp;&nbsp;{d.name}
-                  </Option>
-                ))}
-              </Select>,
-              <RangePicker onChange={this.dateChange} />,
-              <Button
-                type="primary"
-                icon={<SearchOutlined />}
-                style={{ marginLeft: 8 }}
-                size="middle"
-                onClick={this.setParamState}
-              />,
-            ]}
-          />
+          <div style={{ padding: 24, background: '#F0F2F5' }}>
+            <div className={style.manageTitle}>项目列表</div>
+            <ProTable
+              actionRef={this.tableSearchFormRef}
+              headerTitle={
+                <Button type="primary" onClick={() => this.handleAdd()}>
+                  <PlusOutlined />
+                  新建
+                </Button>
+              }
+              search={false}
+              rowKey="id"
+              request={params => {
+                return api
+                  .getProjectManage(this.getParamData(params))
+                  .then(res => ({
+                    data: res.results,
+                    total: res.total,
+                    success: true,
+                  }));
+              }}
+              columns={this.columns()}
+              options={false}
+              pagination={{
+                defaultPageSize: 10,
+              }}
+              params={{ projectIds, createDate }}
+              toolBarRender={action => [
+                <Select
+                  placeholder="项目名称"
+                  allowClear
+                  showSearch
+                  showArrow={false}
+                  labelInValue
+                  filterOption={false}
+                  onSearch={this.fetchCodeData}
+                  onChange={this.handleSearchCodeChange}
+                  style={{ width: 200 }}
+                  optionFilterProp="children" // 对子元素--option进行筛选
+                  optionLabelProp="label" // 回填的属性
+                >
+                  {modelSearchOptions.map(d => (
+                    <Option key={d.code} value={d.id} label={d.name}>
+                      {d.code}&nbsp;&nbsp;{d.name}
+                    </Option>
+                  ))}
+                </Select>,
+                <RangePicker onChange={this.dateChange} />,
+                <Button
+                  type="primary"
+                  icon={<SearchOutlined />}
+                  style={{ marginLeft: 8 }}
+                  size="middle"
+                  onClick={() => this.setParamState(action)}
+                />,
+              ]}
+            />
+          </div>
+
+          <GlobalFooter />
         </div>
-
-        <GlobalFooter />
-      </div>
+      </ConfigProvider>
     );
   }
 }
