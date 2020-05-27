@@ -16,7 +16,7 @@ import {
   FileExclamationOutlined,
   SwapLeftOutlined,
   SwapRightOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import zhCN from 'antd/es/locale/zh_CN';
 
@@ -40,7 +40,6 @@ const FiledList = props => {
 
   // 默认数据
   const { filedList } = props
-
   // 列表数据
   const [tableList, setTableList] = useState({})
   // 新建文件夹Model状态
@@ -51,6 +50,8 @@ const FiledList = props => {
   const [isActive, setIsActive] = useState(false)
   // 排序筛选参数
   const [sortParameters, setSortParameters] = useState(1)
+  // 列表加载状态
+  const [loading, setLoading] = useState(true)
 
   // 批量操作
   const rowSelection = {
@@ -66,8 +67,6 @@ const FiledList = props => {
       name: record.name,
     }),
   }
-
-
 
   /**
    * 方法对象
@@ -96,7 +95,11 @@ const FiledList = props => {
       api.getFiles(data).then(res => {
         console.log(res)
       })
-      setTableList({ data: filedList, success: true })
+      if(filedList.length > 0) {
+        setTableList({ data: filedList, success: true })
+        setTimeout(() => { setLoading(false) }, 1000)
+      }
+
     },
     /**
      * 设置单行文件小图标
@@ -189,6 +192,7 @@ const FiledList = props => {
   return (
     <ConfigProvider locale={zhCN}>
       <ProTable
+        loading={loading}
         rowSelection={{ ...rowSelection }}
         tableAlertRender={false}
         rowKey="id"
@@ -206,12 +210,12 @@ const FiledList = props => {
           <div>
             <Button type="primary" onClick={() => { setVisible(true) }}>
               <FolderOutlined />
-              新建文件夹
-            </Button>
+                    新建文件夹
+                  </Button>
             <Button onClick={() => { }}>
               <DownloadOutlined />
-              下载
-          </Button><br />
+                    下载
+                </Button><br />
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
               <Breadcrumb>
                 <Breadcrumb.Item>全部文件</Breadcrumb.Item>
@@ -221,6 +225,7 @@ const FiledList = props => {
           </div>
         }
         toolBarRender={() => [
+
           // 搜索框
           <Input prefix={<SearchOutlined />} placeholder="搜索" />
           ,
@@ -264,7 +269,6 @@ const FiledList = props => {
           </div>
         ]}
       />
-
       {/* Model新建文件夹 */}
       <Modal
         title="新建文件夹"
@@ -277,7 +281,6 @@ const FiledList = props => {
       >
         <Input placeholder="输入文件夹名称" />
       </Modal>
-
     </ConfigProvider>
   )
 }
