@@ -10,7 +10,8 @@ import { cutString, arrChangeObject } from '@/utils/utils';
 import api from '@/pages/project/api/fileUpload';
 
 import { UploadButton } from '@/pages/project/components/CustomComponents';
-import './index.less';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import style from './index.less';
 
 const { TextArea } = Input;
 const { confirm } = Modal;

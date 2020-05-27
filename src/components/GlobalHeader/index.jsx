@@ -20,12 +20,16 @@ class GlobalHeader extends React.Component {
   render() {
     const { user } = this.state;
     return (
-      <Layout>
+      <Layout style={{ display: 'flex', flexDirection: 'column' }}>
         <Header className={style.globalHeader}>
           <div className={style.headerContent}>
             <div className={style.logoImg} />
-            <div>
-              <Avatar size={36} src={user.avatar} />
+            <div style={{ position: 'relative' }}>
+              <Avatar
+                size={36}
+                src={user.avatar}
+                style={{ position: 'absolute', left: -35, top: 14 }}
+              />
               <span className={style.headerUser} style={{ marginLeft: 10 }}>
                 {user.name}
               </span>

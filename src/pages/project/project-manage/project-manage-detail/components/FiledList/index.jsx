@@ -37,17 +37,16 @@ const { confirm } = Modal
  * @param {*} props
  */
 const FiledList = props => {
-
   // 默认数据
-  const { filedList } = props
+  const { filedList } = props;
   // 列表数据
-  const [tableList, setTableList] = useState({})
+  const [tableList, setTableList] = useState({});
   // 新建文件夹Model状态
-  const [isVisible, setVisible] = useState(false)
+  const [isVisible, setVisible] = useState(false);
   // 单行下载按钮状态
-  const [isDownloadOutlined, setDownloadOutlined] = useState(false)
+  const [isDownloadOutlined, setDownloadOutlined] = useState(false);
   // 排序状态
-  const [isActive, setIsActive] = useState(false)
+  const [isActive, setIsActive] = useState(false);
   // 排序筛选参数
   const [sortParameters, setSortParameters] = useState(1)
   // 列表加载状态
@@ -125,9 +124,6 @@ const FiledList = props => {
         onOk() {
           console.log('OK')
         },
-        onCancel() {
-          console.log('Cancel')
-        },
       })
     }
   }
@@ -152,8 +148,12 @@ const FiledList = props => {
           {fn.setImg(record.type, record.extendName)}
           <span style={{ marginLeft: 10 }}>{value}</span>
           <DownloadOutlined
-            className='DownloadOutlined'
-            style={{ visibility: record.id === isDownloadOutlined ? 'visible' : 'hidden' }} />
+            className="DownloadOutlined"
+            style={{
+              visibility:
+                record.id === isDownloadOutlined ? 'visible' : 'hidden',
+            }}
+          />
         </>
       ),
     },
@@ -187,7 +187,7 @@ const FiledList = props => {
         </>
       ),
     },
-  ]
+  ];
 
   return (
     <ConfigProvider locale={zhCN}>
