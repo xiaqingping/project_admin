@@ -83,7 +83,7 @@ class ProcessTable extends Component {
 
     history.push(
       // eslint-disable-next-line max-len
-      `/detail/parameter/${type}_${processModelId}_${projectId}_${processId}`,
+      `/project/project-manage/process-parameter/${type}_${processModelId}_${projectId}_${processId}`,
     );
   };
 

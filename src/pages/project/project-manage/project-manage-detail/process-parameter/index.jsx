@@ -334,7 +334,8 @@ class ProcessParameter extends Component {
         .updateProcessesParameter(processId, paramList)
         .then(() => {
           if (projectId === '') url = `/project/project-manage`;
-          if (projectId !== '') url = `/detail/${projectId}`;
+          if (projectId !== '')
+            url = `/project/project-manage/detail/${projectId}`;
 
           return history.push(url);
         })
@@ -567,7 +568,7 @@ class ProcessParameter extends Component {
         url = `/project/project-manage/add/addflowpath/add_''_1`;
     } else {
       if (projectId === '') url = `/project/project-manage`;
-      if (projectId !== '') url = `/detail/${projectId}`;
+      if (projectId !== '') url = `/project/project-manage/detail/${projectId}`;
     }
 
     confirm({

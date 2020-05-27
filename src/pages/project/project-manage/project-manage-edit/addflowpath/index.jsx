@@ -174,9 +174,9 @@ class Test extends Component {
 
     let url;
     if (projectId === '' || projectId === "''") {
-      url = `/detail/parameter/${type}_${processModelId}`;
+      url = `/project/project-manage/process-parameter/${type}_${processModelId}`;
     } else {
-      url = `/detail/parameter/${type}_${processModelId}_${projectId}`;
+      url = `/project/project-manage/process-parameter/${type}_${processModelId}_${projectId}`;
     }
     history.push(url);
   };
@@ -351,7 +351,7 @@ class Test extends Component {
       url = `/project/project-manage/add/${requestType}`;
     } else {
       // console.log('已建项目选择流程时，返回项目列表详情页');
-      url = `/detail/${projectId}`;
+      url = `/project/project-manage/detail/${projectId}`;
     }
 
     return history.push(url);
