@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Modal, Form, Input, Button } from 'antd';
-import { InfoCircleOutlined } from '@ant-design/icons';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -80,49 +79,4 @@ const EditInforModel = props => {
   );
 };
 
-/**
- * 成员 修改权限 模态框
- * @param {String} visible 是否显示
- */
-const EditJurisdictionModel = props => {
-  const [confirmLoading] = useState(false);
-
-  // 关闭Model
-  const handleCancel = () => {
-    props.onClose();
-  };
-
-  // 确定保存
-  const handleOk = async () => {
-    const data = {
-      type: 'ok',
-      id: props.data.id,
-      jurisdictionValue: props.data.jurisdictionValue,
-    };
-    props.getData(data);
-    props.onClose();
-  };
-
-  return (
-    <div>
-      <Modal
-        visible={props.visible}
-        onOk={handleOk}
-        confirmLoading={confirmLoading}
-        onCancel={handleCancel}
-        centered
-        closable={false}
-        width={350}
-      >
-        <div style={{ textAlign: 'center' }}>
-          <InfoCircleOutlined style={{ fontSize: 40, color: '#f6b03b' }} />
-          <p style={{ marginTop: 25, fontSize: 16, marginBottom: 5 }}>
-            是否将{props.data.name}修改为{props.data.jurisdictionName}?
-          </p>
-        </div>
-      </Modal>
-    </div>
-  );
-};
-
-export { EditInforModel, EditJurisdictionModel };
+export { EditInforModel };
