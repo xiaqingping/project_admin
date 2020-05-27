@@ -52,10 +52,8 @@ class projectDetail extends Component {
     api
       .getProjectProcess(projectId)
       .then(res => {
-        if (res) {
-          const newRes = this.formatDate(res);
-          this.setState({ projectData: newRes });
-        }
+        const newRes = this.formatDate(res);
+        this.setState({ projectData: newRes });
       })
       .catch();
     this.setState({ loading: false });
@@ -113,8 +111,6 @@ class projectDetail extends Component {
    * @param {object} projectData 项目信息数据
    */
   handleAddProcesses = projectData => {
-    console.log('跳转');
-    console.log(projectData);
     const type = 'edit';
     const projectId = projectData.id;
     history.push(
