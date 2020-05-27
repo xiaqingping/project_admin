@@ -1,7 +1,5 @@
 // 项目列表
 import React, { Component } from 'react';
-import GlobalHeader from '@/components/GlobalHeader';
-import GlobalFooter from '@/components/GlobalFooter';
 import {
   Button,
   Divider,
@@ -316,8 +314,6 @@ class ProjectManagement extends Component {
     return (
       <ConfigProvider locale={zhCN}>
         <div>
-          <GlobalHeader />
-
           <div style={{ padding: 24, background: '#F0F2F5' }}>
             <div className={style.manageTitle}>项目列表</div>
             <ProTable
@@ -376,8 +372,6 @@ class ProjectManagement extends Component {
               ]}
             />
           </div>
-
-          <GlobalFooter />
         </div>
       </ConfigProvider>
     );
