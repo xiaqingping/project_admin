@@ -24,6 +24,7 @@
     "@ant-design/pro-layout": "^5.0.12",
     "@ant-design/pro-table": "^2.2.8",
     "@babel/helper-compilation-targets": "^7.9.6",
+    "@babel/plugin-syntax-numeric-separator": "^7.8.3",
     "@umijs/fabric": "^2.0.8",
     "@umijs/preset-react": "1.x",
     "@umijs/test": "^3.2.2",

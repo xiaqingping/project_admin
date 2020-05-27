@@ -1,13 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import { connect } from 'dva'
-import ProTable from '@ant-design/pro-table'
-import {
-  Button,
-  Input,
-  Breadcrumb,
-  Select,
-  Modal
-} from 'antd'
+import React, { useState, useEffect } from 'react';
+import { connect } from 'dva';
+import ProTable from '@ant-design/pro-table';
+import { Button, Input, Breadcrumb, Select, Modal } from 'antd';
 import {
   FolderOutlined,
   DownloadOutlined,
@@ -17,8 +11,8 @@ import {
   SwapRightOutlined,
 } from '@ant-design/icons';
 
-import api from '@/pages/project/api/disk'
-import './index.less'
+import api from '@/pages/project/api/disk';
+import './index.less';
 
 const { Option } = Select;
 
@@ -28,19 +22,18 @@ const { Option } = Select;
  * @param {*} props
  */
 const FiledList = props => {
-
   // 默认数据
-  const { filedList } = props
+  const { filedList } = props;
   // 列表数据
-  const [tableList, setTableList] = useState({})
+  const [tableList, setTableList] = useState({});
   // 新建文件夹Model状态
-  const [isVisible, setVisible] = useState(false)
+  const [isVisible, setVisible] = useState(false);
   // 单行下载按钮状态
-  const [isDownloadOutlined, setDownloadOutlined] = useState(false)
+  const [isDownloadOutlined, setDownloadOutlined] = useState(false);
   // 排序状态
-  const [isActive, setIsActive] = useState(false)
+  const [isActive, setIsActive] = useState(false);
   // 排序筛选参数
-  const [sortParameters, setSortParameters] = useState(1)
+  const [sortParameters, setSortParameters] = useState(1);
 
   // 批量操作
   const rowSelection = {
@@ -69,8 +62,12 @@ const FiledList = props => {
           <FileExclamationOutlined />
           <span style={{ marginLeft: 10 }}>{value}</span>
           <DownloadOutlined
-            className='DownloadOutlined'
-            style={{ visibility: record.id === isDownloadOutlined ? 'visible' : 'hidden' }} />
+            className="DownloadOutlined"
+            style={{
+              visibility:
+                record.id === isDownloadOutlined ? 'visible' : 'hidden',
+            }}
+          />
         </>
       ),
     },
@@ -104,7 +101,7 @@ const FiledList = props => {
         </>
       ),
     },
-  ]
+  ];
 
   /**
    * 方法对象
@@ -115,14 +112,14 @@ const FiledList = props => {
      * @param {String} value
      */
     test: () => {
-      console.log('test')
+      console.log('test');
     },
     /**
      * 通过列名称筛选
      * @param {String} value
      */
     handleChange: () => {
-      console.log(isActive, sortParameters)
+      console.log(isActive, sortParameters);
     },
     /**
      * 获取列表数据
@@ -136,27 +133,25 @@ const FiledList = props => {
         searchName: '1', // String 可选 搜索名称（文件或目录名称）
         sortType: 1, // Integer 必填 {1, 2, 3}
         sortWay: 1, // Integer 必填 {1, 2}
-      }
+      };
       api.getFiles(data).then(res => {
-        console.log(res)
-      })
-      setTableList({ data: filedList, success: true })
-    }
-  }
+        console.log(res);
+      });
+      setTableList({ data: filedList, success: true });
+    },
+  };
 
   /**
    * 副作用
    * 初始化操作
    */
   useEffect(() => {
-
     // 初始化列表数据
-    fn.getDateList()
+    fn.getDateList();
 
     // 封装方法对象
-    fn.test()
-
-  }, [])
+    fn.test();
+  }, []);
 
   return (
     <ProTable
@@ -172,30 +167,38 @@ const FiledList = props => {
         onMouseEnter: () => setDownloadOutlined(record.id),
         onMouseLeave: () => setDownloadOutlined(-1),
       })}
-      className='classFiledList'
+      className="classFiledList"
       // defaultData={{ data: filedList, success: true }}
       headerTitle={
         <div>
-          <Button type="primary" onClick={() => { setVisible(true) }}>
+          <Button
+            type="primary"
+            onClick={() => {
+              setVisible(true);
+            }}
+          >
             <FolderOutlined />
-              新建文件夹
-            </Button>
+            新建文件夹
+          </Button>
           <Modal
             title="新建文件夹"
             visible={isVisible}
             onOk={() => {
-              setVisible(false)
+              setVisible(false);
             }}
-            onCancel={() => { setVisible(false) }}
+            onCancel={() => {
+              setVisible(false);
+            }}
             okText="确认"
             cancelText="取消"
           >
             <Input placeholder="输入文件夹名称" />
           </Modal>
-          <Button onClick={() => { }}>
+          <Button onClick={() => {}}>
             <DownloadOutlined />
-              下载
-          </Button><br />
+            下载
+          </Button>
+          <br />
           <div style={{ padding: '10px 0' }} className="classBreadcrumb">
             <Breadcrumb>
               <Breadcrumb.Item>全部文件</Breadcrumb.Item>
@@ -206,29 +209,33 @@ const FiledList = props => {
       }
       toolBarRender={() => [
         // 搜索框
-        <Input prefix={<SearchOutlined />} placeholder="搜索" onSearch={() => { }} />
-        ,
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="搜索"
+          onSearch={() => {}}
+        />,
         <div
           onClick={() => {
-            setIsActive(!isActive)
-            fn.handleChange(sortParameters)
+            setIsActive(!isActive);
+            fn.handleChange(sortParameters);
           }}
           style={{ transform: 'translateX(10px)', zIndex: '999' }}
         >
-
           {/* 排序 */}
           <SwapRightOutlined
             style={{
               transform: 'rotate(90deg) scaleY(-1) translateY(8px)',
               fontSize: '20px',
-              color: isActive ? '#ccc' : '#1890ff'
-            }} />
+              color: isActive ? '#ccc' : '#1890ff',
+            }}
+          />
           <SwapLeftOutlined
             style={{
               transform: 'rotate(90deg)',
               fontSize: '20px',
-              color: isActive ? '#1890ff' : '#ccc'
-            }} />
+              color: isActive ? '#1890ff' : '#ccc',
+            }}
+          />
 
           {/* 筛选 */}
           <Select
@@ -245,11 +252,11 @@ const FiledList = props => {
             <Option value={2}>大小</Option>
             <Option value={3}>修改日期</Option>
           </Select>
-        </div>
+        </div>,
       ]}
     />
-  )
-}
+  );
+};
 
 export default connect(({ projectManage }) => ({
   filedList: projectManage.filedList,

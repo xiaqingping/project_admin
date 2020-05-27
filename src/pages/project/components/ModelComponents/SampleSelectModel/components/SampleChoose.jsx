@@ -4,9 +4,9 @@ import React from 'react';
 import { Table, Button, Checkbox, Modal } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import classnames from 'classnames';
+import { cutString } from '@/utils/utils';
 import FileUpload from '../../UploadSequenceFile/sequenUpload';
 import api from '../api/sample.js';
-import { cutString } from '@/utils/utils';
 
 /**
  * 选择样品弹框
