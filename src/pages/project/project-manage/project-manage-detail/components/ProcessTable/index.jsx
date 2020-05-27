@@ -1,6 +1,15 @@
 /** 流程列表 渲染Table页面 */
 import React, { Component } from 'react';
-import { Table, Tag, Divider, message, Avatar, Tooltip, Modal } from 'antd';
+import {
+  Table,
+  Tag,
+  Divider,
+  message,
+  Avatar,
+  Tooltip,
+  Modal,
+  Button,
+} from 'antd';
 import { history } from 'umi';
 import api from '@/pages/project/api/projectManageDetail';
 import disk from '@/pages/project/api/disk';
@@ -140,6 +149,17 @@ class ProcessTable extends Component {
     this.setState({ loading: false });
   };
 
+  /**
+   * 添加流程
+   */
+  handleAddProcesses = () => {
+    const type = 'edit';
+    const { projectId } = this.props;
+    history.push(
+      `/project/project-manage/add/addflowpath/${type}_${projectId}`,
+    );
+  };
+
   render() {
     const { tableData, loading, editIndex, visibleModel, rowData } = this.state;
 
@@ -236,6 +256,13 @@ class ProcessTable extends Component {
 
     return (
       <>
+        <Button
+          type="primary"
+          onClick={() => this.handleAddProcesses()}
+          style={{ borderRadius: 5 }}
+        >
+          添加流程
+        </Button>
         <Table
           rowKey="id"
           loading={loading}
