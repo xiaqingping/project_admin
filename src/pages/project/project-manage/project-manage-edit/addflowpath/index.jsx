@@ -9,7 +9,7 @@ import { connect } from 'dva';
 import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
 import api from '@/pages/project/api/projectManage';
 import disk from '@/pages/project/api/disk';
-import DefaultHeadPicture from '@/assets/images/defaultheadpicture.jpg';
+import DefaultHeadPicture from '@/assets/imgs/defaultheadpicture.jpg';
 import ChooseProcessModel from '../components/ChooseProcessModel';
 import '@/pages/project/project-manage/project-manage-edit/index.less';
 

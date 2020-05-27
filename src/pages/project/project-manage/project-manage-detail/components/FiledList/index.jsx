@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react'
-import { connect } from 'dva'
-import ProTable from '@ant-design/pro-table'
+import React, { useState, useEffect } from 'react';
+import { connect } from 'dva';
+import ProTable from '@ant-design/pro-table';
 import {
   Button,
   Input,
   Breadcrumb,
   Select,
   Modal,
-  ConfigProvider
-} from 'antd'
+  ConfigProvider,
+} from 'antd';
 import {
   FolderOutlined,
   DownloadOutlined,
@@ -16,14 +16,20 @@ import {
   FileExclamationOutlined,
   SwapLeftOutlined,
   SwapRightOutlined,
-} from '@ant-design/icons'
-import zhCN from 'antd/es/locale/zh_CN'
+  ExclamationCircleOutlined
+} from '@ant-design/icons';
+import zhCN from 'antd/es/locale/zh_CN';
 
 // 自定义
-import api from '@/pages/project/api/disk'
-import './index.less'
+import api from '@/pages/project/api/disk';
+import file from '@/assets/imgs/file.png';
+import word from '@/assets/imgs/word.png';
+import excel from '@/assets/imgs/excel.png';
+import pdf from '@/assets/imgs/pdf.png';
+import './index.less';
 
 const { Option } = Select
+const { confirm } = Modal
 
 /**
  * 文件列表组件
@@ -53,13 +59,84 @@ const FiledList = props => {
         `selectedRowKeys: ${selectedRowKeys}`,
         'selectedRows: ',
         selectedRows,
-      );
+      )
     },
     getCheckboxProps: record => ({
       disabled: record.name === 'Disabled User',
       name: record.name,
     }),
-  };
+  }
+
+
+
+  /**
+   * 方法对象
+   */
+  const fn = {
+    /**
+     * 通过列名称筛选
+     * @param {String} value
+     */
+    handleChange: () => {
+      console.log(isActive, sortParameters)
+    },
+    /**
+     * 获取列表数据
+     * @param {*} props
+     */
+    getDateList: () => {
+      const data = {
+        spaceType: 'smaple', // String 必填 空间类型（来源可以为服务名称...）
+        spaceCode: '25c54bccdbe375c75a2402aa05a0a69f', // String 必填 空间编号(可以为功能ID/编号...)
+        directoryId: '35c54bccdbe375c75a2402aa05a0a69f', // String 可选 目录ID
+        searchName: 'smaple', // String 可选 搜索名称（文件或目录名称）
+        sortType: 2, // Integer 必填 {1, 2, 3}
+        sortWay: 1, // Integer 必填 {1, 2}
+      }
+      api.getFiles(data).then(res => {
+        console.log(res)
+      })
+      setTableList({ data: filedList, success: true })
+    },
+    /**
+     * 设置单行文件小图标
+     * @param {Integer} mediaType 类型
+     * @param {String} extendName 文件后缀
+     */
+    setImg: (type, extendName) => {
+      const extendType = { file, word, excel, pdf }
+      if (type) {
+        if (type === 2) return <img src={file} alt="" />
+
+        return <img src={extendType[extendName]} alt="" />
+      }
+      return <FileExclamationOutlined />
+    },
+    /** 删除警告 */
+    showDeleteConfirm: () => {
+      confirm({
+        title: '删除后将不可恢复，确定删除当前项目吗？',
+        icon: <ExclamationCircleOutlined />,
+        content: '',
+        centered: true,
+        onOk() {
+          console.log('OK')
+        },
+        onCancel() {
+          console.log('Cancel')
+        },
+      })
+    }
+  }
+
+  /**
+   * 初始化操作
+   */
+  useEffect(() => {
+    // 初始化列表数据
+    fn.getDateList()
+  }, [])
+
 
   // 表结构
   const columns = [
@@ -69,8 +146,7 @@ const FiledList = props => {
       width: 150,
       render: (value, record) => (
         <>
-          {/* <img src={this.imgtype(item.type)} alt="" /> */}
-          <FileExclamationOutlined />
+          {fn.setImg(record.type, record.extendName)}
           <span style={{ marginLeft: 10 }}>{value}</span>
           <DownloadOutlined
             className='DownloadOutlined'
@@ -104,63 +180,11 @@ const FiledList = props => {
       width: 80,
       render: () => (
         <>
-          <a onClick={() => console.log('删除')}>删除</a>
+          <a onClick={() => fn.showDeleteConfirm()}>删除</a>
         </>
       ),
     },
   ]
-
-  /**
-   * 方法对象
-   */
-  const fn = {
-    /**
-     * 这是一个测试方法
-     * @param {String} value
-     */
-    test: () => {
-      console.log('test')
-    },
-    /**
-     * 通过列名称筛选
-     * @param {String} value
-     */
-    handleChange: () => {
-      console.log(isActive, sortParameters)
-    },
-    /**
-     * 获取列表数据
-     * @param {*} props
-     */
-    getDateList: () => {
-      const data = {
-        spaceType: 'smaple', // String 必填 空间类型（来源可以为服务名称...）
-        spaceCode: '25c54bccdbe375c75a2402aa05a0a69f', // String 必填 空间编号(可以为功能ID/编号...)
-        directoryId: '35c54bccdbe375c75a2402aa05a0a69f', // String 可选 目录ID
-        searchName: 'smaple', // String 可选 搜索名称（文件或目录名称）
-        sortType: 2, // Integer 必填 {1, 2, 3}
-        sortWay: 1, // Integer 必填 {1, 2}
-      }
-      api.getFiles(data).then(res => {
-        console.log(res)
-      })
-      setTableList({ data: filedList, success: true })
-    }
-  }
-
-  /**
-   * 副作用
-   * 初始化操作
-   */
-  useEffect(() => {
-
-    // 初始化列表数据
-    fn.getDateList()
-
-    // 封装方法对象
-    fn.test()
-
-  }, [])
 
   return (
     <ConfigProvider locale={zhCN}>
@@ -178,7 +202,6 @@ const FiledList = props => {
           onMouseLeave: () => setDownloadOutlined(-1),
         })}
         className='classFiledList'
-        // defaultData={{ data: filedList, success: true }}
         headerTitle={
           <div>
             <Button type="primary" onClick={() => { setVisible(true) }}>
@@ -246,6 +269,7 @@ const FiledList = props => {
       <Modal
         title="新建文件夹"
         visible={isVisible}
+        centered
         onOk={() => {
           setVisible(false)
         }}
@@ -253,10 +277,11 @@ const FiledList = props => {
       >
         <Input placeholder="输入文件夹名称" />
       </Modal>
+
     </ConfigProvider>
   )
 }
 
 export default connect(({ projectManage }) => ({
   filedList: projectManage.filedList,
-}))(FiledList);
+}))(FiledList)

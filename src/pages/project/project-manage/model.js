@@ -168,9 +168,9 @@ const projectModel = {
         "sourceId": 1,
         "size": 122313,
         "changeDate": "2020/05/26 15:15",
-        "type": 1,
-        "mediaType": "35c54bccdbe375c75a2402aa05a0a69f",
-        "extendName": "word"
+        "type": 2,
+        "mediaType": "1",
+        "extendName": ""
       },
       {
         "id": "2",
@@ -182,7 +182,7 @@ const projectModel = {
         "size": 122313,
         "changeDate": "2020/05/26 15:15",
         "type": 1,
-        "mediaType": "35c54bccdbe375c75a2402aa05a0a69f",
+        "mediaType": "2",
         "extendName": "word"
       },
       {
@@ -195,8 +195,8 @@ const projectModel = {
         "size": 122313,
         "changeDate": "2020/05/26 15:15",
         "type": 1,
-        "mediaType": "35c54bccdbe375c75a2402aa05a0a69f",
-        "extendName": "word"
+        "mediaType": "2",
+        "extendName": "excel"
       },
       {
         "id": "4",
@@ -208,8 +208,8 @@ const projectModel = {
         "size": 122313,
         "changeDate": "2020/05/26 15:15",
         "type": 1,
-        "mediaType": "35c54bccdbe375c75a2402aa05a0a69f",
-        "extendName": "word"
+        "mediaType": "2",
+        "extendName": "pdf"
       },
     ],
   },
