@@ -3,7 +3,16 @@ import React, { Component } from 'react';
 import GlobalHeader from '@/components/GlobalHeader';
 import GlobalFooter from '@/components/GlobalFooter';
 // import { PageHeaderWrapper } from '@ant-design/pro-layout';
-import { Input, Card, Form, Tag, Button, DatePicker, message } from 'antd';
+import {
+  Input,
+  Card,
+  Form,
+  Tag,
+  Button,
+  DatePicker,
+  message,
+  ConfigProvider,
+} from 'antd';
 // import router from 'umi/router';
 import { history } from 'umi';
 import { connect } from 'dva';
@@ -11,6 +20,7 @@ import moment from 'moment';
 import api from '@/pages/project/api/projectManage';
 import detailApi from '@/pages/project/api/projectManageDetail';
 // import classNames from 'classnames';
+import zhCN from 'antd/es/locale/zh_CN';
 import BPList from './components/BPList';
 import './index.less';
 
@@ -24,8 +34,8 @@ class ProjectEdit extends Component {
 
   constructor(props) {
     super(props);
-    const projectId = this.props.match.params;
     console.log(this.props);
+    const projectId = this.props.match.params;
     const { labels } = props.projectManage;
 
     this.state = {
@@ -45,7 +55,6 @@ class ProjectEdit extends Component {
   componentDidMount = () => {
     // 加载table数据
     const { projectId, requestType } = this.state;
-    console.log(this.state);
     if (JSON.stringify(projectId) === '{}') {
       this.setState({
         requestType,
@@ -59,20 +68,21 @@ class ProjectEdit extends Component {
     }
 
     if (projectId.id === 'addGoback') {
-      console.log('从选择流程页面返回');
-      const addProjectInfor = JSON.parse(
-        sessionStorage.getItem('addProjectInfor'),
-      );
-      // console.log(addProjectInfor);
+      const { projectInfor } = this.props.projectManage;
+      console.log(projectInfor);
       this.formRef.current.setFieldsValue({
-        name: addProjectInfor.name,
-        describe: addProjectInfor.describe,
-        bpName: addProjectInfor.bpName,
+        name: projectInfor.name,
+        describe: projectInfor.describe,
+        bpName: projectInfor.bpName,
+        time: [
+          moment(projectInfor.beginDate, 'YYYYMMDD HH:mm:ss'),
+          moment(projectInfor.endDate, 'YYYYMMDD HH:mm:ss'),
+        ],
       });
       this.setState({
-        selectedlabels: addProjectInfor.labels || [],
-        beginDate: addProjectInfor.beginDate,
-        endDate: addProjectInfor.endDate,
+        selectedlabels: projectInfor.labels || [],
+        beginDate: projectInfor.beginDate,
+        endDate: projectInfor.endDate,
       });
     }
     return false;
@@ -93,6 +103,10 @@ class ProjectEdit extends Component {
           name: res.name,
           describe: res.describe,
           bpName: res.bpName,
+          time: [
+            moment(res.beginDate, 'YYYYMMDD HH:mm:ss'),
+            moment(res.endDate, 'YYYYMMDD HH:mm:ss'),
+          ],
         });
       }
       this.setState({
@@ -105,9 +119,11 @@ class ProjectEdit extends Component {
 
   // 保存
   handleSave = () => {
+    const { projectInfor } = this.props;
+    console.log(projectInfor);
     const data = this.saveData();
     console.log(data);
-    const { selectedlabels, endDate, beginDate, projectId } = this.state;
+    const { projectId } = this.state;
     // 新建
     if (JSON.stringify(projectId) === '{}') {
       api.addProjects(data).then(() => {
@@ -123,44 +139,32 @@ class ProjectEdit extends Component {
 
     // 点击返回修改基础信息的保存
     if (JSON.stringify(projectId) !== '{}' && projectId.id === 'addGoback') {
-      const addProjectInfor = JSON.parse(
-        sessionStorage.getItem('addProjectInfor'),
-      );
-
-      const bpModelList = JSON.parse(sessionStorage.getItem('bpModel'));
-      console.log(bpModelList);
-
-      const datas = {
-        name: addProjectInfor.name,
-        describe: addProjectInfor.describe,
-        bpCode: bpModelList.code,
-        bpName: bpModelList.name,
-        endDate,
-        beginDate,
-        labels: selectedlabels,
-      };
-      console.log(datas);
-
-      api.addProjects(datas).then(() => {
+      api.addProjects(data).then(() => {
         history.push('/');
       });
     }
+    this.props.dispatch({
+      type: 'projectManage/setProjectInfor',
+      payload: [],
+    });
+
+    sessionStorage.removeItem('bpModel');
+    sessionStorage.removeItem('addProjectInfor');
   };
 
   // 保存时所需数据
   saveData = () => {
     const {
       selectedlabels,
-      bpCode,
+      // bpCode,
       bpName,
       endDate,
       beginDate,
       projectId,
     } = this.state;
-    console.log(this.state);
 
     const formData = this.formRef.current.getFieldsValue();
-    console.log(formData);
+    const bpModelList = JSON.parse(sessionStorage.getItem('bpModel'));
 
     if (formData.name === undefined) {
       message.error('项目名称不能为空！');
@@ -168,6 +172,10 @@ class ProjectEdit extends Component {
     }
     if (formData.describe === undefined) {
       message.error('项目描述不能为空！');
+      return false;
+    }
+    if (formData.bpName === '' || formData.bpName === undefined) {
+      message.error('所有者不能为空！');
       return false;
     }
 
@@ -193,8 +201,8 @@ class ProjectEdit extends Component {
       data = {
         name: formData.name,
         describe: formData.describe,
-        bpCode,
-        bpName,
+        bpCode: bpModelList.code,
+        bpName: bpModelList.name,
         endDate,
         beginDate,
         labels: selectedlabels,
@@ -203,7 +211,6 @@ class ProjectEdit extends Component {
 
     // 修改项目
     if (JSON.stringify(projectId) !== '{}' && projectId.id !== 'addGoback') {
-      console.log('修改项目');
       data = {
         id: projectId.id,
         name: formData.name,
@@ -213,56 +220,20 @@ class ProjectEdit extends Component {
     }
 
     // 选择流程时返回新建项目页面的保存
-    if (projectId.id === 'addGoback') {
-      console.log('返回新建项目页面的保存');
-      const addProjectInfor = JSON.parse(
-        sessionStorage.getItem('addProjectInfor'),
-      );
-      console.log(addProjectInfor);
-      this.formRef.current.setFieldsValue({
-        name: formData.name,
-        describe: formData.describe,
-        bpName: formData.bpName,
-      });
-      this.setState({
-        selectedlabels: addProjectInfor.labels || [],
-        beginDate: addProjectInfor.beginDate,
-        endDate: addProjectInfor.endDate,
-      });
-
+    if (JSON.stringify(projectId) !== '{}' && projectId.id === 'addGoback') {
       data = {
         name: formData.name,
         describe: formData.describe,
-        bpCode,
-        bpName,
+        bpCode: bpModelList.code,
+        bpName: bpModelList.name,
         endDate,
         beginDate,
         labels: selectedlabels,
       };
-
-      // if(addProjectInfor.bpName === '') {
-      //   data = {
-      //     name: formData.name,
-      //     describe: formData.describe,
-      //     bpCode,
-      //     bpName,
-      //     endDate,
-      //     beginDate,
-      //     labels: selectedlabels,
-      //   };
-      //   console.log(data)
-      // }else {
-      //     data = {
-      //     name: formData.name,
-      //     describe: formData.describe,
-      //     bpCode,
-      //     bpName,
-      //     endDate,
-      //     beginDate,
-      //     labels: selectedlabels,
-      //   };
-      //   console.log(data)
-      // }
+      this.props.dispatch({
+        type: 'projectManage/setProjectInfor',
+        payload: data,
+      });
     }
     return data;
   };
@@ -270,12 +241,17 @@ class ProjectEdit extends Component {
   // 返回
   goBack = () => {
     message.success('返回项目列表页');
+    sessionStorage.removeItem('bpModel');
+    sessionStorage.removeItem('addProjectInfor');
+    this.props.dispatch({
+      type: 'projectManage/setProjectInfor',
+      payload: [],
+    });
     history.push('/');
   };
 
   // 时间选中事件
   handleOnChangeTime = (value, dateString) => {
-    console.log(dateString);
     this.setState({
       beginDate: dateString[0],
       endDate: dateString[1],
@@ -294,7 +270,7 @@ class ProjectEdit extends Component {
 
   // 获取业务伙伴模态框回传数据
   getBPData = data => {
-    console.log(data);
+    // console.log(data);
     this.formRef.current.setFieldsValue({
       bpName: data.name,
     });
@@ -307,7 +283,9 @@ class ProjectEdit extends Component {
 
   // 跳转到添加流程页面
   handleAdd = () => {
-    const { projectId } = this.state;
+    const { projectId, endDate, beginDate, selectedlabels } = this.state;
+    const { projectInfor } = this.props;
+    console.log(projectInfor);
 
     const data = this.saveData();
     console.log(data);
@@ -316,236 +294,244 @@ class ProjectEdit extends Component {
         type: 'projectManage/setProjectInfor',
         payload: data,
       });
-    } else {
-      if (projectId === 'addGoback') {
-        console.log(123);
+    }
+    if (data) {
+      if (projectId.id === 'addGoback') {
+        console.log('返回以后的页面点击跳转');
+        const formData =
+          this.formRef.current && this.formRef.current.getFieldsValue();
+        console.log(formData);
+        const bpModelList = JSON.parse(sessionStorage.getItem('bpModel'));
+        const datas = {
+          name: formData.name,
+          describe: formData.describe,
+          bpCode: bpModelList.code,
+          bpName: bpModelList.name,
+          endDate,
+          beginDate,
+          labels: selectedlabels,
+        };
+        console.log(datas);
       } else {
         data.requestType = 'add';
         sessionStorage.setItem('addProjectInfor', JSON.stringify(data));
       }
 
-      const projectInforList = JSON.parse(
-        sessionStorage.getItem('goBackInfors'),
-      );
-      console.log('点击返回带回来的值', projectInforList);
-
       this.props.dispatch({
         type: 'projectManage/setProjectInfor',
         payload: data,
       });
-
       history.push('/project/project-manage/add/addflowpath/add');
     }
   };
 
+  initialValues = () => {
+    const formData =
+      this.formRef.current && this.formRef.current.getFieldsValue();
+    return {
+      ...formData,
+    };
+  };
+
   render() {
-    const {
-      selectedlabels,
-      projectData,
-      labels,
-      projectId,
-      beginDate,
-      endDate,
-    } = this.state;
+    const { selectedlabels, labels, projectId } = this.state;
     console.log(this.state);
+    // 设置默认值
+
     return (
-      <div style={{ background: '#F0F2F5', width: '100%' }}>
-        <GlobalHeader />
-        <Form
-          ref={this.formRef}
-          className="classPageHeaderWrapper"
-          style={{ margin: '0 24px 24px 24px' }}
-        >
-          <div
-            style={{
-              background: '#FFFFFF',
-              height: '80px',
-              fontSize: '20px',
-              fontWeight: 'bold',
-              textAlign: 'left',
-              paddingLeft: '24px',
-              lineHeight: '80px',
-              marginBottom: '20px',
-              marginTop: '24px',
-            }}
+      <ConfigProvider locale={zhCN}>
+        <div style={{ background: '#F0F2F5', width: '100%' }}>
+          <GlobalHeader />
+          <Form
+            ref={this.formRef}
+            className="classPageHeaderWrapper"
+            style={{ margin: '0 24px 24px 24px' }}
+            initialValues={this.initialValues()}
           >
-            新建项目
-          </div>
-          <Card bordered={false}>
-            <FormItem
-              label="名称"
-              name="name"
+            <div
               style={{
-                paddingRight: '50px',
-                width: '600px',
+                background: '#FFFFFF',
+                height: '80px',
+                fontSize: '20px',
+                fontWeight: 'bold',
+                textAlign: 'left',
+                paddingLeft: '24px',
+                lineHeight: '80px',
                 marginBottom: '20px',
+                marginTop: '24px',
               }}
             >
-              <Input
-                placeholder="请输入项目名称"
-                maxLength={20}
-                style={{ marginLeft: '40px' }}
-              />
-            </FormItem>
-            <FormItem
-              label="描述"
-              name="describe"
-              style={{
-                paddingRight: '50px',
-                width: '600px',
-                marginBottom: '20px',
-              }}
-            >
-              <TextArea
-                rows={4}
-                placeholder="请输入项目描述"
-                maxLength="200"
-                spellCheck="false"
-                style={{ marginLeft: '40px' }}
-              />
-            </FormItem>
-            <div style={{ width: '300px', marginBottom: '20px' }}>
-              <FormItem label="所有者" name="bpName">
-                <Search
-                  onSearch={() => this.showBPList.visibleShow(true)}
-                  style={{ marginLeft: '26px' }}
-                  readOnly
-                  disabled={
-                    JSON.stringify(projectId) !== '{}' &&
-                    projectId.id !== 'addGoback'
-                  }
+              新建项目
+            </div>
+            <Card bordered={false}>
+              <FormItem
+                label="名称"
+                name="name"
+                style={{
+                  paddingRight: '50px',
+                  width: '600px',
+                  marginBottom: '20px',
+                }}
+              >
+                <Input
+                  placeholder="请输入项目名称"
+                  maxLength={20}
+                  style={{ marginLeft: '40px' }}
                 />
               </FormItem>
-            </div>
-            <div style={{ marginBottom: '20px' }}>
               <FormItem
-                label="时间"
-                name="time"
-                style={{ paddingRight: '50px' }}
+                label="描述"
+                name="describe"
+                style={{
+                  paddingRight: '50px',
+                  width: '600px',
+                  marginBottom: '20px',
+                }}
               >
-                {JSON.stringify(projectId) === '{}' ||
-                projectId.id === 'addGoback' ? (
-                  <RangePicker
-                    showTime={{ format: 'HH:mm:ss' }}
-                    format="YYYY-MM-DD HH:mm:ss"
-                    onChange={this.handleOnChangeTime}
-                    defaultPickerValue={[
-                      moment(beginDate, 'YYYYMMDD HH:mm:ss'),
-                      moment(endDate, 'YYYYMMDD HH:mm:ss'),
-                    ]}
-                    style={{ marginLeft: '40px' }}
-                  />
-                ) : (
-                  <RangePicker
-                    showTime={{ format: 'HH:mm:ss' }}
-                    format="YYYY-MM-DD HH:mm:ss"
-                    initialValues={[
-                      moment(projectData.beginDate, 'YYYYMMDD HH:mm:ss'),
-                      moment(projectData.endDate, 'YYYYMMDD HH:mm:ss'),
-                    ]}
-                    onChange={this.handleOnChangeTime}
-                    style={{ marginLeft: '40px' }}
+                <TextArea
+                  rows={4}
+                  placeholder="请输入项目描述"
+                  maxLength="200"
+                  spellCheck="false"
+                  style={{ marginLeft: '40px' }}
+                />
+              </FormItem>
+              <div style={{ width: '300px', marginBottom: '20px' }}>
+                <FormItem label="所有者" name="bpName">
+                  <Search
+                    onSearch={() => this.showBPList.visibleShow(true)}
+                    style={{ marginLeft: '26px' }}
+                    readOnly
                     disabled={
                       JSON.stringify(projectId) !== '{}' &&
                       projectId.id !== 'addGoback'
                     }
                   />
-                )}
-              </FormItem>
-            </div>
-            <div style={{ height: '250px' }}>
-              <FormItem label="标签" name="label">
-                <div style={{ marginLeft: '40px', marginRight: '270px' }}>
-                  {labels.map(item => (
-                    <CheckableTag
-                      key={item.id}
-                      checked={selectedlabels.indexOf(item.id) > -1}
-                      onChange={checked =>
-                        this.handleOnChangelabel(item.id, checked)
+                </FormItem>
+              </div>
+              <div style={{ marginBottom: '20px' }}>
+                <FormItem
+                  label="时间"
+                  name="time"
+                  style={{ paddingRight: '50px' }}
+                >
+                  {JSON.stringify(projectId) === '{}' ||
+                  projectId.id === 'addGoback' ? (
+                    <RangePicker
+                      showTime={{ format: 'HH:mm:ss' }}
+                      format="YYYY-MM-DD HH:mm:ss"
+                      onChange={this.handleOnChangeTime}
+                      style={{ marginLeft: '40px' }}
+                    />
+                  ) : (
+                    <RangePicker
+                      showTime={{ format: 'HH:mm:ss' }}
+                      format="YYYY-MM-DD HH:mm:ss"
+                      onChange={this.handleOnChangeTime}
+                      style={{ marginLeft: '40px' }}
+                      disabled={
+                        JSON.stringify(projectId) !== '{}' &&
+                        projectId.id !== 'addGoback'
                       }
-                      style={{
-                        height: '30px',
-                        border: '1px',
-                        borderStyle: 'solid',
-                        borderColor: '#dcdcdc',
-                        lineHeight: '30px',
-                        textAlign: 'center',
-                        cursor: 'pointer',
-                        marginBottom: '5px',
-                      }}
-                    >
-                      {item.name} {item.text}
-                    </CheckableTag>
-                  ))}
-                </div>
-                {/* 12467678 */}
-              </FormItem>
-            </div>
-          </Card>
-        </Form>
-        <div
-          style={{
-            height: '56px',
-            width: '100%',
-            lineHeight: '56px',
-            textAlign: 'right',
-            background: '#FFFFFF',
-          }}
-          className="classPageHeaderWrapperFooter"
-        >
-          <div style={{ margin: '0 24px 24px 24px' }}>
-            <Button
-              type="default"
-              onClick={() => this.goBack(true)}
-              style={{ marginRight: '10px' }}
-            >
-              返回
-            </Button>
-            <Button
-              type="default"
-              onClick={() => this.handleSave()}
-              style={{ marginRight: '10px' }}
-            >
-              保存
-            </Button>
-            {JSON.stringify(projectId) === '{}' ||
-            projectId.id === 'addGoback' ? (
+                    />
+                  )}
+                </FormItem>
+              </div>
+              <div style={{ height: '250px' }}>
+                <FormItem label="标签" name="label">
+                  <div style={{ marginLeft: '40px', marginRight: '270px' }}>
+                    {labels.map(item => (
+                      <CheckableTag
+                        key={item.id}
+                        checked={selectedlabels.indexOf(item.id) > -1}
+                        onChange={checked =>
+                          this.handleOnChangelabel(item.id, checked)
+                        }
+                        style={{
+                          height: '30px',
+                          border: '1px',
+                          borderStyle: 'solid',
+                          borderColor: '#dcdcdc',
+                          lineHeight: '30px',
+                          textAlign: 'center',
+                          cursor: 'pointer',
+                          marginBottom: '5px',
+                        }}
+                      >
+                        {item.name} {item.text}
+                      </CheckableTag>
+                    ))}
+                  </div>
+                  {/* 12467678 */}
+                </FormItem>
+              </div>
+            </Card>
+          </Form>
+          <div
+            style={{
+              height: '56px',
+              width: '100%',
+              lineHeight: '56px',
+              textAlign: 'right',
+              background: '#FFFFFF',
+            }}
+            className="classPageHeaderWrapperFooter"
+          >
+            <div style={{ margin: '0 24px 24px 24px' }}>
               <Button
-                type="primary"
-                onClick={() => this.handleAdd(true)}
+                type="default"
+                onClick={() => this.goBack(true)}
                 style={{ marginRight: '10px' }}
               >
-                添加流程
+                返回
               </Button>
-            ) : (
               <Button
-                type="primary"
-                onClick={() => this.handleAdd(true)}
-                style={{ marginRight: '10px', display: 'none' }}
+                type="default"
+                onClick={() => this.handleSave()}
+                style={{ marginRight: '10px' }}
               >
-                添加流程
+                保存
               </Button>
-            )}
+              {JSON.stringify(projectId) === '{}' ||
+              projectId.id === 'addGoback' ? (
+                <Button
+                  type="primary"
+                  onClick={() => this.handleAdd(true)}
+                  style={{ marginRight: '10px' }}
+                >
+                  添加流程
+                </Button>
+              ) : (
+                <Button
+                  type="primary"
+                  onClick={() => this.handleAdd(true)}
+                  style={{ marginRight: '10px', display: 'none' }}
+                >
+                  添加流程
+                </Button>
+              )}
+            </div>
           </div>
+
+          <GlobalFooter />
+
+          {/* 业务伙伴模态框 */}
+          <BPList
+            onRef={ref => {
+              this.showBPList = ref;
+            }}
+            getData={data => {
+              this.getBPData(data);
+            }}
+          />
         </div>
-
-        <GlobalFooter />
-
-        {/* 业务伙伴模态框 */}
-        <BPList
-          onRef={ref => {
-            this.showBPList = ref;
-          }}
-          getData={data => {
-            this.getBPData(data);
-          }}
-        />
-      </div>
+      </ConfigProvider>
     );
   }
 }
 
 export default connect(({ projectManage }) => ({
   projectManage,
+  projectInfor: projectManage.projectInfor,
 }))(ProjectEdit);
 // export default ProjectEdit;
