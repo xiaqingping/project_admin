@@ -1,6 +1,15 @@
 /** 流程参数 */
 import React, { Component } from 'react';
-import { Card, List, Form, Button, message, Tooltip, Modal } from 'antd';
+import {
+  Card,
+  List,
+  Form,
+  Button,
+  message,
+  Tooltip,
+  Modal,
+  ConfigProvider,
+} from 'antd';
 import { connect } from 'dva';
 import { history } from 'umi';
 import api from '@/pages/project/api/projectManageDetail';
@@ -8,6 +17,7 @@ import {
   QuestionCircleOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
+import empty from '@/assets/imgs/empty.png';
 import { isEmpty } from '@/utils/utils';
 import GlobalHeader from '@/components/GlobalHeader';
 
@@ -577,174 +587,189 @@ class ProcessParameter extends Component {
     const { paramGroupList, sampleList, requestType } = this.state;
     const data = paramGroupList;
     if (data.length === 0) return false;
+
+    // 自定义空状态
+    const customizeRenderEmpty = () => (
+      <div style={{ textAlign: 'center' }}>
+        <img alt="" src={empty} />
+        <p>暂无数据</p>
+      </div>
+    );
+
     return (
       <>
         <GlobalHeader />
-        <div className="class-process-params">
-          <Form name="basic" ref={this.formRef} className="process-params-form">
-            <div className="process-params-name">
-              <span className="name-canshu">参数维护</span>
-            </div>
-            <List
-              dataSource={data}
-              renderItem={item => (
-                <List.Item>
-                  <Card
-                    title={
-                      <>
-                        <span style={{ display: 'inline-block' }}>
-                          {item.groupName === 'no' ? '未分组' : item.groupName}
-                        </span>
-                        <span
-                          style={{ display: 'inline-block', marginLeft: 30 }}
-                        >
-                          {item.groupDescribe && (
-                            <Tooltip
-                              placement="right"
-                              title={<span>{item.groupDescribe}</span>}
-                            >
-                              <QuestionCircleOutlined />
-                            </Tooltip>
-                          )}
-                        </span>
-                      </>
-                    }
-                    style={{ width: '100%' }}
-                  >
-                    {item.params.map((it, index) => {
-                      const newIndex = JSON.parse(JSON.stringify(index));
-                      if (it.type === 'input')
-                        return (
-                          <>
-                            <InputModel
-                              paramList={it}
-                              key={newIndex}
-                              disabled={requestType === 'view'} // 禁用
-                              getData={this.getModelData} // 提交数据
-                            />
-                            <div className="parmas-hr" />
-                          </>
-                        );
-                      // // 数值输入框
-                      if (it.type === 'number_input') {
-                        return (
-                          <>
-                            <InputNumberModel
-                              paramList={it}
-                              key={newIndex}
-                              disabled={requestType === 'view'}
-                              getData={this.getModelData}
-                            />
-                            <div className="parmas-hr" />
-                          </>
-                        );
+        <ConfigProvider renderEmpty={customizeRenderEmpty}>
+          <div className={style.processParams}>
+            <Form name="basic" ref={this.formRef} className={style.form}>
+              <div className={style.name}>
+                <span className={style.canshu}>参数维护</span>
+              </div>
+              <List
+                dataSource={data}
+                renderItem={item => (
+                  <List.Item>
+                    <Card
+                      title={
+                        <>
+                          <span style={{ display: 'inline-block' }}>
+                            {item.groupName === 'no'
+                              ? '未分组'
+                              : item.groupName}
+                          </span>
+                          <span
+                            style={{ display: 'inline-block', marginLeft: 30 }}
+                          >
+                            {item.groupDescribe && (
+                              <Tooltip
+                                placement="right"
+                                title={<span>{item.groupDescribe}</span>}
+                              >
+                                <QuestionCircleOutlined />
+                              </Tooltip>
+                            )}
+                          </span>
+                        </>
                       }
-                      // 单选
-                      if (it.type === 'radio')
-                        return (
-                          <>
-                            <RadioModel
-                              paramList={it}
-                              key={newIndex}
-                              disabled={requestType === 'view'}
-                              getData={this.getModelData}
-                            />
-                            <div className="parmas-hr" />
-                          </>
-                        );
+                      style={{ width: '100%' }}
+                    >
+                      {item.params.map(it => {
+                        if (it.type === 'input')
+                          return (
+                            <div key={it.id}>
+                              <InputModel
+                                paramList={it}
+                                key={it.id}
+                                disabled={requestType === 'view'} // 禁用
+                                getData={this.getModelData} // 提交数据
+                              />
+                              <div className={style.hr} />
+                            </div>
+                          );
+                        // 数值输入框
+                        if (it.type === 'number_input') {
+                          return (
+                            <div key={it.id}>
+                              <InputNumberModel
+                                paramList={it}
+                                key={it.id}
+                                disabled={requestType === 'view'}
+                                getData={this.getModelData}
+                              />
+                              <div className={style.hr} />
+                            </div>
+                          );
+                        }
+                        // 单选
+                        if (it.type === 'radio')
+                          return (
+                            <div key={it.id}>
+                              <RadioModel
+                                paramList={it}
+                                key={it.id}
+                                disabled={requestType === 'view'}
+                                getData={this.getModelData}
+                              />
+                              <div className={style.hr} />
+                            </div>
+                          );
 
-                      // 多选
-                      if (it.type === 'checkbox')
-                        return (
-                          <>
-                            <CheckBoxModel
-                              paramList={it}
-                              key={newIndex}
-                              disabled={requestType === 'view'}
-                              getData={this.getModelData}
-                            />
-                            <div className="parmas-hr" />
-                          </>
-                        );
-                      // 样品选择框
-                      if (it.type === 'sample_select') {
-                        return (
-                          <>
-                            <SampleSelectModel
-                              paramList={it}
-                              key={newIndex}
-                              disabled={requestType === 'view'}
-                              sampleList={sampleList} // 样品列表
-                              getData={this.getModelData}
-                              // 当样品选择改变的时候
-                              emitData={this.getSelectUpdateData}
-                              setSelectState={this.setSelectState}
-                            />
-                            <div className="parmas-hr" />
-                          </>
-                        );
-                      }
-                      // 样品分组方案
-                      if (it.type === 'sample_group') {
-                        return (
-                          <>
-                            <SampleGroupModel
-                              paramList={it}
-                              key={newIndex}
-                              disabled={requestType === 'view'}
-                              sampleList={sampleList}
-                              getData={this.getModelData}
-                              // 样品列表改变执行事件
-                              getFun={func => {
-                                this.handleUpdateSampleGroup = func;
-                              }}
-                            />
-                            <div className="parmas-hr" />
-                          </>
-                        );
-                      }
-                      // 样品环境因子
-                      if (it.type === 'sample_environment_factor') {
-                        return (
-                          <>
-                            <EnvironmentalFactorsModel
-                              paramList={it}
-                              key={newIndex}
-                              disabled={requestType === 'view'}
-                              sampleList={sampleList}
-                              getData={this.getModelData}
-                              // 样品列表改变执行事件
-                              getFun={func => {
-                                this.handleUpdateEnvironmentFactor = func;
-                              }}
-                            />
-                            <div className="parmas-hr" />
-                          </>
-                        );
-                      }
-                      return false;
-                    })}
-                  </Card>
-                </List.Item>
-              )}
-            />
-          </Form>
+                        // 多选
+                        if (it.type === 'checkbox')
+                          return (
+                            <div key={it.id}>
+                              <CheckBoxModel
+                                paramList={it}
+                                key={it.id}
+                                disabled={requestType === 'view'}
+                                getData={this.getModelData}
+                              />
+                              <div className={style.hr} />
+                            </div>
+                          );
+                        // 样品选择框
+                        if (it.type === 'sample_select') {
+                          return (
+                            <div key={it.id}>
+                              <SampleSelectModel
+                                paramList={it}
+                                key={it.id}
+                                disabled={requestType === 'view'}
+                                sampleList={sampleList} // 样品列表
+                                getData={this.getModelData}
+                                // 当样品选择改变的时候
+                                emitData={this.getSelectUpdateData}
+                                setSelectState={this.setSelectState}
+                              />
+                              <div className={style.hr} />
+                            </div>
+                          );
+                        }
+                        // 样品分组方案
+                        if (it.type === 'sample_group') {
+                          return (
+                            <div key={it.id}>
+                              <SampleGroupModel
+                                paramList={it}
+                                key={it.id}
+                                disabled={requestType === 'view'}
+                                sampleList={sampleList}
+                                getData={this.getModelData}
+                                // 样品列表改变执行事件
+                                getFun={func => {
+                                  this.handleUpdateSampleGroup = func;
+                                }}
+                              />
+                              <div className={style.hr} />
+                            </div>
+                          );
+                        }
+                        // 样品环境因子
+                        if (it.type === 'sample_environment_factor') {
+                          return (
+                            <div key={it.id}>
+                              <EnvironmentalFactorsModel
+                                paramList={it}
+                                key={it.id}
+                                disabled={requestType === 'view'}
+                                sampleList={sampleList}
+                                getData={this.getModelData}
+                                // 样品列表改变执行事件
+                                getFun={func => {
+                                  this.handleUpdateEnvironmentFactor = func;
+                                }}
+                              />
+                              <div className={style.hr} />
+                            </div>
+                          );
+                        }
+                        return false;
+                      })}
+                    </Card>
+                  </List.Item>
+                )}
+              />
+            </Form>
 
-          <div className="process-parameter-footer">
-            <div className="process-parameter-button">
-              <Button className="back" onClick={() => this.goBackLink()}>
-                返回
-              </Button>
-              {requestType === 'view' ? (
-                ''
-              ) : (
-                <Button type="primary" onClick={this.onSubmit}>
-                  提交
+            <div className={style.footer}>
+              <div className={style.button}>
+                <Button
+                  className={style.back}
+                  onClick={() => this.goBackLink()}
+                >
+                  返回
                 </Button>
-              )}
+                {requestType === 'view' ? (
+                  ''
+                ) : (
+                  <Button type="primary" onClick={this.onSubmit}>
+                    提交
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </ConfigProvider>
       </>
     );
   }
