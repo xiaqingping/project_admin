@@ -69,10 +69,9 @@ export default {
 
   // 修改成员权限
   updateMemberJurisdiction(data) {
-    // eslint-disable-next-line max-len
     return request(
-      `${http1}/projects/v1/member/
-    ${data.id}/jurisdiction?jurisdictionValue=${data.jurisdictionValue}`,
+      // eslint-disable-next-line max-len
+      `${http1}/projects/v1/member/${data.id}/jurisdiction?jurisdictionValue=${data.jurisdictionValue}`,
       { method: 'PUT' },
     );
   },

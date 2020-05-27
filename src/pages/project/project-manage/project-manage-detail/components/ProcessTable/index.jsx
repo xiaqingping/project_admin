@@ -1,12 +1,11 @@
 /** 流程列表 渲染Table页面 */
 import React, { Component } from 'react';
 import { Table, Tag, Divider, message, Avatar, Tooltip, Modal } from 'antd';
-// import { connect } from 'dva';
 import { history } from 'umi';
 import api from '@/pages/project/api/projectManageDetail';
 import disk from '@/pages/project/api/disk';
-import DefaultHeadPicture from '@/assets/images/defaultheadpicture.jpg';
-import edit from '@/assets/images/edit.png';
+import DefaultHeadPicture from '@/assets/imgs/defaultheadpicture.jpg';
+import edit from '@/assets/imgs/edit.png';
 import { ExclamationCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import style from './index.less';
 import { EditInforModel } from '../ModelUI';
@@ -153,9 +152,7 @@ class ProcessTable extends Component {
           <>
             <span className={style.textEllipsis}>
               <Tooltip placement="top" title={row.describe}>
-                {/* <a onClick={() => this.searchTaskList(row)}> */}
                 {value} <br /> {row.describe}
-                {/* </a> */}
               </Tooltip>
             </span>
             {index === editIndex && (

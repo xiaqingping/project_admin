@@ -1,11 +1,12 @@
 /** 成员列表 渲染Table页面 */
-import { Form, Table, Select, message, Avatar } from 'antd';
+import { Form, Table, Select, Avatar, Modal } from 'antd';
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import api from '@/pages/project/api/projectManageDetail';
-import { EditJurisdictionModel } from '../ModelUI';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
+const { confirm } = Modal;
 
 class MemberTbale extends Component {
   tableFormRef = React.createRef();
@@ -13,8 +14,6 @@ class MemberTbale extends Component {
   state = {
     list: [], // 表格数据
     loading: true, // 加载状态
-    visibleModel: false, // 编辑名称描述模态框是否显示
-    menberInfor: [], // 成员名称描述
   };
 
   /** 组件挂载时 */
@@ -47,24 +46,33 @@ class MemberTbale extends Component {
 
   /**
    * 修改成员权限
-   * @param {Number} value  权限值
-   * @param {Object} row  行数据
+   * @param {Number} value  选中的权限值
+   * @param {Object} row  当前行数据
    */
   handleUpdateJurisdiction = (value, row) => {
-    let jurisdictionName = '';
-    if (value === 1) jurisdictionName = '所有者';
-    if (value === 2) jurisdictionName = '管理者';
-    if (value === 3) jurisdictionName = '参与者';
+    let name = '';
+    if (value === 2) name = '管理者';
+    if (value === 3) name = '参与者';
+
+    let contenText = '';
+    if (value === 1) contenText = `是否将当前项目转交给${row.name}？`;
+    else contenText = `是否将当前用户修改为${name}？`;
 
     const data = {
       id: row.id,
-      name: row.creatorName,
-      jurisdictionName,
       jurisdictionValue: value,
     };
-    this.setState({
-      visibleModel: true,
-      menberInfor: data,
+
+    confirm({
+      icon: <ExclamationCircleOutlined />,
+      content: contenText,
+      centered: true,
+      okText: '确定',
+      cancelText: '取消',
+      onOk: () => {
+        this.getEditModelData(data);
+      },
+      onCancel: () => {},
     });
   };
 
@@ -73,25 +81,12 @@ class MemberTbale extends Component {
    * @param {Object} data  修改数据
    */
   getEditModelData = data => {
-    if (data.type === 'ok') {
-      api
-        .updateMemberJurisdiction(data)
-        .then(() => {
-          this.getTableData(this.props.projectId);
-        })
-        .catch(e => {
-          this.getTableData(this.props.projectId);
-          return message.error(e.message);
-        });
-    }
-    return false;
-  };
-
-  /** 关闭编辑模态框 */
-  onCloseModel = () => {
-    this.setState({
-      visibleModel: false,
-    });
+    api
+      .updateMemberJurisdiction(data)
+      .then(() => {
+        this.getTableData(this.props.projectId);
+      })
+      .catch();
   };
 
   /** 退出 */
@@ -102,7 +97,7 @@ class MemberTbale extends Component {
   };
 
   render() {
-    const { list, loading, visibleModel, menberInfor } = this.state;
+    const { list, loading } = this.state;
     const { jurisdiction } = this.props.projectManage;
 
     let columns = [
@@ -142,7 +137,7 @@ class MemberTbale extends Component {
               disabled={disabledIs}
               defaultValue={value}
               // bordered={false}
-              onChange={() => this.handleUpdateJurisdiction(value, row)}
+              onChange={val => this.handleUpdateJurisdiction(val, row)}
             >
               {jurisdiction.map(e => (
                 <Option value={e.id} key={e.name}>
@@ -183,12 +178,6 @@ class MemberTbale extends Component {
             pagination={false}
           />
         </Form>
-        <EditJurisdictionModel
-          visible={visibleModel}
-          onClose={this.onCloseModel}
-          data={menberInfor}
-          getData={this.getEditModelData}
-        />
       </>
     );
   }
