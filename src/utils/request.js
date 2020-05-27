@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { notification } from 'antd';
-import { router } from 'umi';
+// import { router } from 'umi';
+import { history } from 'umi';
 // import { formatMessage } from 'umi/locale';
 
 const baseURLMap = {
@@ -49,7 +50,7 @@ const requestErr = data => {
       localStorage.removeItem('token');
       const URL = window.location.href;
       if (URL.indexOf('/user/login') === -1) {
-        router.push(
+        history.push(
           `/user/login?redirect=${encodeURIComponent(window.location.href)}`,
         );
       }

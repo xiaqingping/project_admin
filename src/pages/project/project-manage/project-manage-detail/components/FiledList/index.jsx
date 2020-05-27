@@ -6,7 +6,8 @@ import {
   Input,
   Breadcrumb,
   Select,
-  Modal
+  Modal,
+  ConfigProvider
 } from 'antd'
 import {
   FolderOutlined,
@@ -16,6 +17,7 @@ import {
   SwapLeftOutlined,
   SwapRightOutlined,
 } from '@ant-design/icons'
+import zhCN from 'antd/es/locale/zh_CN'
 
 // 自定义
 import api from '@/pages/project/api/disk'
@@ -32,6 +34,7 @@ const FiledList = props => {
 
   // 默认数据
   const { filedList } = props
+
   // 列表数据
   const [tableList, setTableList] = useState({})
   // 新建文件夹Model状态
@@ -131,11 +134,11 @@ const FiledList = props => {
      */
     getDateList: () => {
       const data = {
-        spaceType: '1', // String 必填 空间类型（来源可以为服务名称...）
-        spaceCode: '1', // String 必填 空间编号(可以为功能ID/编号...)
-        directoryId: '1', // String 可选 目录ID
-        searchName: '1', // String 可选 搜索名称（文件或目录名称）
-        sortType: 1, // Integer 必填 {1, 2, 3}
+        spaceType: 'smaple', // String 必填 空间类型（来源可以为服务名称...）
+        spaceCode: '25c54bccdbe375c75a2402aa05a0a69f', // String 必填 空间编号(可以为功能ID/编号...)
+        directoryId: '35c54bccdbe375c75a2402aa05a0a69f', // String 可选 目录ID
+        searchName: 'smaple', // String 可选 搜索名称（文件或目录名称）
+        sortType: 2, // Integer 必填 {1, 2, 3}
         sortWay: 1, // Integer 必填 {1, 2}
       }
       api.getFiles(data).then(res => {
@@ -160,95 +163,97 @@ const FiledList = props => {
   }, [])
 
   return (
-    <ProTable
-      rowSelection={{ ...rowSelection }}
-      tableAlertRender={false}
-      rowKey="id"
-      search={false}
-      options={false}
-      columns={columns}
-      request={() => tableList}
-      onRow={record => ({
-        // 显示隐藏单行下载图标
-        onMouseEnter: () => setDownloadOutlined(record.id),
-        onMouseLeave: () => setDownloadOutlined(-1),
-      })}
-      className='classFiledList'
-      // defaultData={{ data: filedList, success: true }}
-      headerTitle={
-        <div>
-          <Button type="primary" onClick={() => { setVisible(true) }}>
-            <FolderOutlined />
+    <ConfigProvider locale={zhCN}>
+      <ProTable
+        rowSelection={{ ...rowSelection }}
+        tableAlertRender={false}
+        rowKey="id"
+        search={false}
+        options={false}
+        columns={columns}
+        request={() => tableList}
+        onRow={record => ({
+          // 显示隐藏单行下载图标
+          onMouseEnter: () => setDownloadOutlined(record.id),
+          onMouseLeave: () => setDownloadOutlined(-1),
+        })}
+        className='classFiledList'
+        // defaultData={{ data: filedList, success: true }}
+        headerTitle={
+          <div>
+            <Button type="primary" onClick={() => { setVisible(true) }}>
+              <FolderOutlined />
               新建文件夹
             </Button>
-          <Modal
-            title="新建文件夹"
-            visible={isVisible}
-            onOk={() => {
-              setVisible(false)
-            }}
-            onCancel={() => { setVisible(false) }}
-            okText="确认"
-            cancelText="取消"
-          >
-            <Input placeholder="输入文件夹名称" />
-          </Modal>
-          <Button onClick={() => { }}>
-            <DownloadOutlined />
+            <Button onClick={() => { }}>
+              <DownloadOutlined />
               下载
           </Button><br />
-          <div style={{ padding: '10px 0' }} className="classBreadcrumb">
-            <Breadcrumb>
-              <Breadcrumb.Item>全部文件</Breadcrumb.Item>
-              <Breadcrumb.Item>xxx文件夹</Breadcrumb.Item>
-            </Breadcrumb>
+            <div style={{ padding: '10px 0' }} className="classBreadcrumb">
+              <Breadcrumb>
+                <Breadcrumb.Item>全部文件</Breadcrumb.Item>
+                <Breadcrumb.Item>xxx文件夹</Breadcrumb.Item>
+              </Breadcrumb>
+            </div>
           </div>
-        </div>
-      }
-      toolBarRender={() => [
-        // 搜索框
-        <Input prefix={<SearchOutlined />} placeholder="搜索" onSearch={() => { }} />
-        ,
-        <div
-          onClick={() => {
-            setIsActive(!isActive)
-            fn.handleChange(sortParameters)
-          }}
-          style={{ transform: 'translateX(10px)', zIndex: '999' }}
-        >
-
-          {/* 排序 */}
-          <SwapRightOutlined
-            style={{
-              transform: 'rotate(90deg) scaleY(-1) translateY(8px)',
-              fontSize: '20px',
-              color: isActive ? '#ccc' : '#1890ff'
-            }} />
-          <SwapLeftOutlined
-            style={{
-              transform: 'rotate(90deg)',
-              fontSize: '20px',
-              color: isActive ? '#1890ff' : '#ccc'
-            }} />
-
-          {/* 筛选 */}
-          <Select
-            className="classSelect"
-            defaultValue="文件名"
-            style={{ width: 100, textAlign: 'center', fontSize: '14px' }}
-            onChange={value => setSortParameters(value)}
-            bordered={false}
-            dropdownMatchSelectWidth={120}
-            dropdownStyle={{ textAlign: 'center' }}
-            onClick={e => e.stopPropagation()}
+        }
+        toolBarRender={() => [
+          // 搜索框
+          <Input prefix={<SearchOutlined />} placeholder="搜索" />
+          ,
+          <div
+            onClick={() => {
+              setIsActive(!isActive)
+              fn.handleChange(sortParameters)
+            }}
+            style={{ transform: 'translateX(10px)', zIndex: '999' }}
           >
-            <Option value={1}>文件名</Option>
-            <Option value={2}>大小</Option>
-            <Option value={3}>修改日期</Option>
-          </Select>
-        </div>
-      ]}
-    />
+
+            {/* 排序 */}
+            <SwapRightOutlined
+              style={{
+                transform: 'rotate(90deg) scaleY(-1) translateY(8px)',
+                fontSize: '20px',
+                color: isActive ? '#ccc' : '#1890ff'
+              }} />
+            <SwapLeftOutlined
+              style={{
+                transform: 'rotate(90deg)',
+                fontSize: '20px',
+                color: isActive ? '#1890ff' : '#ccc'
+              }} />
+
+            {/* 筛选 */}
+            <Select
+              className="classSelect"
+              defaultValue="文件名"
+              style={{ width: 100, textAlign: 'center', fontSize: '14px' }}
+              onChange={value => setSortParameters(value)}
+              bordered={false}
+              dropdownMatchSelectWidth={120}
+              dropdownStyle={{ textAlign: 'center' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <Option value={1}>文件名</Option>
+              <Option value={2}>大小</Option>
+              <Option value={3}>修改日期</Option>
+            </Select>
+          </div>
+        ]}
+      />
+
+      {/* Model新建文件夹 */}
+      <Modal
+        title="新建文件夹"
+        visible={isVisible}
+        onOk={() => {
+          setVisible(false)
+        }}
+        onCancel={() => { setVisible(false) }}
+      >
+        <Input placeholder="输入文件夹名称" />
+      </Modal>
+    </ConfigProvider>
   )
 }
 
