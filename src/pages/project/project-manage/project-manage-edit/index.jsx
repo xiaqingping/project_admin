@@ -74,16 +74,16 @@ class ProjectEdit extends Component {
         name: projectInfor.name,
         describe: projectInfor.describe,
         bpName: projectInfor.bpName,
+        time: [
+          moment(projectInfor.beginDate, 'YYYYMMDD HH:mm:ss'),
+          moment(projectInfor.endDate, 'YYYYMMDD HH:mm:ss'),
+        ],
       });
       this.setState({
         selectedlabels: projectInfor.labels || [],
         beginDate: projectInfor.beginDate,
         endDate: projectInfor.endDate,
       });
-      // this.props.dispatch({
-      //   type: 'projectManage/setProjectInfor',
-      //   payload: datas,
-      // });
     }
     return false;
   };
@@ -103,6 +103,10 @@ class ProjectEdit extends Component {
           name: res.name,
           describe: res.describe,
           bpName: res.bpName,
+          time: [
+            moment(res.beginDate, 'YYYYMMDD HH:mm:ss'),
+            moment(res.endDate, 'YYYYMMDD HH:mm:ss'),
+          ],
         });
       }
       this.setState({
@@ -118,7 +122,7 @@ class ProjectEdit extends Component {
     const { projectInfor } = this.props;
     console.log(projectInfor);
     const data = this.saveData();
-    // const { selectedlabels, endDate, beginDate, projectId } = this.state;
+    console.log(data);
     const { projectId } = this.state;
     // 新建
     if (JSON.stringify(projectId) === '{}') {
@@ -216,41 +220,10 @@ class ProjectEdit extends Component {
     }
 
     // 选择流程时返回新建项目页面的保存
-    // if (projectId.id === 'addGoback') {
-    //   const addProjectInfor = JSON.parse(
-    //     sessionStorage.getItem('addProjectInfor'),
-    //   );
-    //   this.formRef.current.setFieldsValue({
-    //     name: formData.name,
-    //     describe: formData.describe,
-    //     bpName: formData.bpName,
-    //   });
-    //   this.setState({
-    //     selectedlabels: addProjectInfor.labels || [],
-    //     beginDate: addProjectInfor.beginDate,
-    //     endDate: addProjectInfor.endDate,
-    //   });
-
-    //   data = {
-    //     name: formData.name,
-    //     describe: formData.describe,
-    //     bpCode: bpModelList.code,
-    //     bpName: bpModelList.name,
-    //     endDate,
-    //     beginDate,
-    //     labels: selectedlabels,
-    //   };
-    // }
     if (JSON.stringify(projectId) !== '{}' && projectId.id === 'addGoback') {
-      const addProjectInfor = JSON.parse(
-        sessionStorage.getItem('addProjectInfor'),
-      );
-
-      // const bpModelList = JSON.parse(sessionStorage.getItem('bpModel'));
-
       data = {
-        name: addProjectInfor.name,
-        describe: addProjectInfor.describe,
+        name: formData.name,
+        describe: formData.describe,
         bpCode: bpModelList.code,
         bpName: bpModelList.name,
         endDate,
@@ -315,6 +288,7 @@ class ProjectEdit extends Component {
     console.log(projectInfor);
 
     const data = this.saveData();
+    console.log(data);
     if (data === false) {
       this.props.dispatch({
         type: 'projectManage/setProjectInfor',
@@ -324,10 +298,13 @@ class ProjectEdit extends Component {
     if (data) {
       if (projectId.id === 'addGoback') {
         console.log('返回以后的页面点击跳转');
+        const formData =
+          this.formRef.current && this.formRef.current.getFieldsValue();
+        console.log(formData);
         const bpModelList = JSON.parse(sessionStorage.getItem('bpModel'));
         const datas = {
-          name: projectInfor.name,
-          describe: projectInfor.describe,
+          name: formData.name,
+          describe: formData.describe,
           bpCode: bpModelList.code,
           bpName: bpModelList.name,
           endDate,
@@ -335,11 +312,6 @@ class ProjectEdit extends Component {
           labels: selectedlabels,
         };
         console.log(datas);
-
-        this.props.dispatch({
-          type: 'projectManage/setProjectInfor',
-          payload: datas,
-        });
       } else {
         data.requestType = 'add';
         sessionStorage.setItem('addProjectInfor', JSON.stringify(data));
@@ -353,52 +325,19 @@ class ProjectEdit extends Component {
     }
   };
 
+  initialValues = () => {
+    const formData =
+      this.formRef.current && this.formRef.current.getFieldsValue();
+    return {
+      ...formData,
+    };
+  };
+
   render() {
-    const {
-      selectedlabels,
-      projectData,
-      labels,
-      projectId,
-      requestType,
-      beginDate,
-      endDate,
-    } = this.state;
+    const { selectedlabels, labels, projectId } = this.state;
     console.log(this.state);
     // 设置默认值
-    const initialValues = () => {
-      const { projectInfor } = this.props;
-      console.log(projectInfor);
-      return {
-        time: [
-          moment(beginDate, 'YYYYMMDD HH:mm:ss'),
-          moment(endDate, 'YYYYMMDD HH:mm:ss'),
-        ],
-      };
 
-      // if(projectInfor) {
-      //   console.log('新建基础信息')
-      //   return {
-      //     time: [
-      //       moment(beginDate, 'YYYYMMDD HH:mm:ss'),
-      //       moment(endDate, 'YYYYMMDD HH:mm:ss'),
-      //     ],
-      //   };
-      // }
-
-      // // console.log('修改项目时，日期组件的值')
-      // return {
-      //   time: [
-      //     moment(projectData.beginDate, 'YYYYMMDD HH:mm:ss'),
-      //     moment(projectData.endDate, 'YYYYMMDD HH:mm:ss'),
-      //   ],
-      // };
-    };
-    console.log(initialValues());
-
-    // if (!projectData.beginDate && requestType === 'editProject') {
-    //   console.log('修改日期组件')
-    //   return false;
-    // }
     return (
       <ConfigProvider locale={zhCN}>
         <div style={{ background: '#F0F2F5', width: '100%' }}>
@@ -407,12 +346,7 @@ class ProjectEdit extends Component {
             ref={this.formRef}
             className="classPageHeaderWrapper"
             style={{ margin: '0 24px 24px 24px' }}
-            // initialValues={initialValues()}
-            initialValues={
-              !projectData.beginDate && requestType === 'editProject'
-                ? initialValues()
-                : ''
-            }
+            initialValues={this.initialValues()}
           >
             <div
               style={{
