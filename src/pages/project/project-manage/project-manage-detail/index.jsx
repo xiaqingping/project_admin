@@ -4,11 +4,8 @@ import { Card, Tabs, Button, Tag, ConfigProvider } from 'antd';
 import { connect } from 'dva';
 import api from '@/pages/project/api/projectManageDetail';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
-import add from '@/assets/imgs/add.png';
 import empty from '@/assets/imgs/empty.png';
 import { history } from 'umi';
-import GlobalHeader from '@/components/GlobalHeader';
-import GlobalFooter from '@/components/GlobalFooter';
 import { formatter } from '@/utils/utils';
 import style from './index.less';
 import ProcessTable from './components/ProcessTable';
@@ -27,8 +24,6 @@ class projectDetail extends Component {
       projectData: [],
       // 项目ID
       projectId: '',
-      // Tabs切换
-      selectKey: '1',
     };
   }
 
@@ -74,51 +69,6 @@ class projectDetail extends Component {
   };
 
   /**
-   * Tabs切换
-   * @param {string} key Tabs 参数
-   */
-  callback = key => {
-    this.setState({
-      selectKey: key,
-    });
-    this.operations();
-  };
-
-  /**
-   * Tabs抬头操作
-   * */
-  operations = () => {
-    const { selectKey, projectData } = this.state;
-    if (selectKey === '1') {
-      return (
-        <img
-          alt=""
-          src={add}
-          onClick={() => this.handleAddProcesses(projectData)}
-          style={{
-            fontSize: 20,
-            color: '#1890ff',
-            paddingRight: 10,
-          }}
-        />
-      );
-    }
-    return '';
-  };
-
-  /**
-   * 添加流程
-   * @param {object} projectData 项目信息数据
-   */
-  handleAddProcesses = projectData => {
-    const type = 'edit';
-    const projectId = projectData.id;
-    history.push(
-      `/project/project-manage/add/addflowpath/${type}_${projectId}`,
-    );
-  };
-
-  /**
    * 返回跳转
    */
   goBackLink = () => {
@@ -141,8 +91,6 @@ class projectDetail extends Component {
       <>
         <ConfigProvider renderEmpty={customizeRenderEmpty}>
           <div className={style.projectDetail}>
-            <GlobalHeader />
-
             <PageHeaderWrapper className={style.detailInfor}>
               <Card className={style.name}>{projectData.name}</Card>
               <Card className={style.describe}>
@@ -166,13 +114,7 @@ class projectDetail extends Component {
                 <p>{projectData.describe}</p>
               </Card>
               <Card>
-                <Tabs
-                  defaultActiveKey="1"
-                  onChange={key => this.callback(key)}
-                  tabBarExtraContent={this.operations()}
-                  loading={loading}
-                  size="large"
-                >
+                <Tabs defaultActiveKey="1" loading={loading} size="large">
                   <TabPane tab="流程列表" key="1" width="120px">
                     <div className="classProcessList">
                       <ProcessTable
@@ -203,8 +145,6 @@ class projectDetail extends Component {
                 返回
               </Button>
             </div>
-
-            <GlobalFooter />
           </div>
         </ConfigProvider>
       </>

@@ -19,7 +19,6 @@ import {
 } from '@ant-design/icons';
 import empty from '@/assets/imgs/empty.png';
 import { isEmpty } from '@/utils/utils';
-import GlobalHeader from '@/components/GlobalHeader';
 
 /** 参数组件引用 */
 // eslint-disable-next-line max-len
@@ -599,7 +598,6 @@ class ProcessParameter extends Component {
 
     return (
       <>
-        <GlobalHeader />
         <ConfigProvider renderEmpty={customizeRenderEmpty}>
           <div className={style.processParams}>
             <Form name="basic" ref={this.formRef} className={style.form}>
