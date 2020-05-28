@@ -10,7 +10,9 @@ import {
   DatePicker,
   message,
   ConfigProvider,
+  Modal,
 } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 // import router from 'umi/router';
 import { history } from 'umi';
 import { connect } from 'dva';
@@ -26,6 +28,7 @@ const FormItem = Form.Item;
 const { TextArea, Search } = Input;
 const { CheckableTag } = Tag;
 const { RangePicker } = DatePicker;
+const { confirm } = Modal;
 
 class ProjectEdit extends Component {
   formRef = React.createRef();
@@ -90,9 +93,6 @@ class ProjectEdit extends Component {
    */
   getTableData = projectId => {
     detailApi.getProjectEdit(projectId).then(res => {
-      // this.setState({
-      //   projectData: res,
-      // });
       // 设置初始值
       if (!(this.formRef.current === null)) {
         this.formRef.current.setFieldsValue({
@@ -233,14 +233,25 @@ class ProjectEdit extends Component {
 
   // 返回
   goBack = () => {
-    message.success('返回项目列表页');
-    sessionStorage.removeItem('bpModel');
-    sessionStorage.removeItem('addProjectInfor');
     this.props.dispatch({
       type: 'projectManage/setProjectInfor',
       payload: [],
     });
-    history.push('/');
+
+    confirm({
+      icon: <ExclamationCircleOutlined />,
+      content: '未保存的数据将丢失，是否返回？',
+      centered: true,
+      okText: '确定',
+      cancelText: '取消',
+      onOk: () => {
+        sessionStorage.removeItem('bpModel');
+        sessionStorage.removeItem('addProjectInfor');
+        sessionStorage.removeItem('introduction');
+        history.push('/');
+      },
+      onCancel: () => {},
+    });
   };
 
   // 时间选中事件
@@ -263,12 +274,10 @@ class ProjectEdit extends Component {
 
   // 获取业务伙伴模态框回传数据
   getBPData = data => {
-    // console.log(data);
     this.formRef.current.setFieldsValue({
       bpName: data.name,
     });
     this.setState({
-      // bpCode: data.code,
       bpName: data.name,
     });
     sessionStorage.setItem('bpModel', JSON.stringify(data));
@@ -276,8 +285,6 @@ class ProjectEdit extends Component {
 
   // 跳转到添加流程页面
   handleAdd = () => {
-    // const { projectId, endDate, beginDate, selectedlabels } = this.state;
-
     const data = this.saveData();
     if (data === false) {
       this.props.dispatch({
@@ -286,27 +293,7 @@ class ProjectEdit extends Component {
       });
     }
     if (data) {
-      // if (projectId.id === 'addGoback') {
-      //   // console.log('返回以后的页面点击跳转');
-      //   const formData =
-      //     this.formRef.current && this.formRef.current.getFieldsValue();
-      //   const bpModelList = JSON.parse(sessionStorage.getItem('bpModel'));
-      //   const datas = {
-      //     name: formData.name,
-      //     describe: formData.describe,
-      //     bpCode: bpModelList.code,
-      //     bpName: bpModelList.name,
-      //     endDate,
-      //     beginDate,
-      //     labels: selectedlabels,
-      //   };
-      //   console.log(datas);
-      // } else {
-      //   data.requestType = 'add';
-      //   sessionStorage.setItem('addProjectInfor', JSON.stringify(data));
-      // }
       data.requestType = 'add';
-      // sessionStorage.setItem('addProjectInfor', JSON.stringify(data));
 
       this.props.dispatch({
         type: 'projectManage/setProjectInfor',
