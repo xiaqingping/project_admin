@@ -1,7 +1,5 @@
 // 项目管理：新建项目：添加流程
 import React, { Component } from 'react';
-import GlobalHeader from '@/components/GlobalHeader';
-import GlobalFooter from '@/components/GlobalFooter';
 // import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { Button, message, Table, Form, Popconfirm, Avatar } from 'antd';
 import { history } from 'umi';
@@ -416,7 +414,6 @@ class Test extends Component {
     ];
     return (
       <div style={{ background: '#F0F2F5', width: '100%' }}>
-        <GlobalHeader />
         <Form ref={this.tableFormRef} style={{ margin: '0 24px 24px 24px' }}>
           <div
             style={{
@@ -485,8 +482,6 @@ class Test extends Component {
             </Button>
           </div>
         </div>
-
-        <GlobalFooter />
 
         {visible ? (
           <ChooseProcessModel
