@@ -142,9 +142,7 @@ class ProcessTable extends Component {
           this.getTableData(this.props.projectId);
         });
       },
-      onCancel: () => {
-        message.error('删除失败！');
-      },
+      onCancel: () => {},
     });
     this.setState({ loading: false });
   };

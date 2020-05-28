@@ -36,9 +36,7 @@ class MemberTbale extends Component {
     api
       .getProjectMember(data)
       .then(res => {
-        this.setState({
-          list: res,
-        });
+        this.setState({ list: res });
       })
       .catch();
     this.setState({ loading: false });
@@ -106,11 +104,9 @@ class MemberTbale extends Component {
         dataIndex: 'name',
         width: 150,
         render: value => {
-          const userStorage = localStorage.getItem('user');
-          const user = userStorage ? JSON.parse(userStorage) : {};
           return (
             <div style={{ display: 'flex' }}>
-              <Avatar size={40} src={user.avatar} />
+              <Avatar size={40} src="" />
               <div style={{ marginLeft: 10, marginTop: 6 }}>
                 <p>{value}</p>
               </div>
@@ -128,9 +124,10 @@ class MemberTbale extends Component {
         dataIndex: 'jurisdictionValue',
         width: 180,
         render: (value, row) => {
-          const userData = JSON.parse(localStorage.user);
-          let disabledIs = true;
-          if (value === 1 && userData.code === row.code) disabledIs = false;
+          // const userData = JSON.parse(localStorage.user);
+          // let disabledIs = true;
+          // if (value === 1 && userData.code === row.code) disabledIs = false;
+          const disabledIs = true;
           return (
             <Select
               style={{ width: 100 }}

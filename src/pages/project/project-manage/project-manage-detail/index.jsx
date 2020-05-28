@@ -1,6 +1,6 @@
 /** 项目详情页面 */
 import React, { Component } from 'react';
-import { Card, Tabs, Button, Tag, ConfigProvider } from 'antd';
+import { Card, Tabs, Button, Tag, ConfigProvider, Spin } from 'antd';
 import { connect } from 'dva';
 import api from '@/pages/project/api/projectManageDetail';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
@@ -81,11 +81,19 @@ class projectDetail extends Component {
 
     // 自定义空状态
     const customizeRenderEmpty = () => (
-      <div style={{ textAlign: 'center' }}>
+      <div style={{ textAlign: 'center', padding: '32px 0' }}>
         <img alt="" src={empty} />
-        <p>暂无数据</p>
+        <p style={{ marginTop: '8px' }}>暂无数据</p>
       </div>
     );
+
+    if (loading) {
+      return (
+        <div className={style.example}>
+          <Spin />
+        </div>
+      );
+    }
 
     return (
       <>
@@ -98,18 +106,19 @@ class projectDetail extends Component {
                   {projectData.createDate}由用户{projectData.createName}创建
                 </p>
                 <p>
-                  {projectData.labels.map(id => {
-                    const { labels } = this.props.projectManage;
-                    const name = formatter(labels, id, 'id', 'name');
-                    const text = formatter(labels, id, 'id', 'text');
-                    const color = formatter(labels, id, 'id', 'color');
+                  {projectData.labels &&
+                    projectData.labels.map(id => {
+                      const { labels } = this.props.projectManage;
+                      const name = formatter(labels, id, 'id', 'name');
+                      const text = formatter(labels, id, 'id', 'text');
+                      const color = formatter(labels, id, 'id', 'color');
 
-                    return (
-                      <Tag color={color} key={id}>
-                        {name} {text}
-                      </Tag>
-                    );
-                  })}
+                      return (
+                        <Tag color={color} key={id}>
+                          {name} {text}
+                        </Tag>
+                      );
+                    })}
                 </p>
                 <p>{projectData.describe}</p>
               </Card>
