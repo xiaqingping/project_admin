@@ -27,8 +27,14 @@ function verifySourceKey(sourceKey) {
 
 export default {
   // 查询文件
+  // getFiles(params) {
+  //   return request('/zuul/api/disk/v1/files', {
+  //     params,
+  //   });
+  // },
+
   getFiles(params) {
-    return request('/zuul/api/disk/v1/files', {
+    return request(`http://192.168.20.14:8150/disk/v2/${params.spaceType}/${params.spaceCode}/files`, {
       params,
     });
   },

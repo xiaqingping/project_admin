@@ -1,5 +1,7 @@
 import { defineConfig } from 'umi';
 
+import proxy from './proxy'
+
 const { BASE_API } = process.env;
 export default defineConfig({
   nodeModulesTransform: {
@@ -56,4 +58,5 @@ export default defineConfig({
       ],
     },
   ],
+  proxy,
 });
