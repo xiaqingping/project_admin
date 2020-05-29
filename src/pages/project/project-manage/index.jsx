@@ -21,7 +21,7 @@ import { connect } from 'dva';
 import debounce from 'lodash/debounce';
 import { history } from 'umi';
 import ProTable from '@ant-design/pro-table';
-
+import empty from '@/assets/imgs/empty.png';
 import { formatter } from '@/utils/utils';
 import api from '@/pages/project/api/projectManage';
 import zhCN from 'antd/es/locale/zh_CN';
@@ -317,6 +317,14 @@ class ProjectManagement extends Component {
           <div style={{ padding: 24, background: '#F0F2F5' }}>
             <div className={style.manageTitle}>项目列表</div>
             <ProTable
+              locale={{
+                emptyText: (
+                  <div>
+                    <img alt="" src={empty} />
+                    <p>暂无数据</p>
+                  </div>
+                ),
+              }}
               actionRef={this.tableSearchFormRef}
               headerTitle={
                 <Button type="primary" onClick={() => this.handleAdd()}>

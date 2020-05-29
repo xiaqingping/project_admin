@@ -1,7 +1,5 @@
 // 项目管理：新建项目
 import React, { Component } from 'react';
-import GlobalHeader from '@/components/GlobalHeader';
-import GlobalFooter from '@/components/GlobalFooter';
 // import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import {
   Input,
@@ -12,7 +10,9 @@ import {
   DatePicker,
   message,
   ConfigProvider,
+  Modal,
 } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 // import router from 'umi/router';
 import { history } from 'umi';
 import { connect } from 'dva';
@@ -28,23 +28,23 @@ const FormItem = Form.Item;
 const { TextArea, Search } = Input;
 const { CheckableTag } = Tag;
 const { RangePicker } = DatePicker;
+const { confirm } = Modal;
 
 class ProjectEdit extends Component {
   formRef = React.createRef();
 
   constructor(props) {
     super(props);
-    console.log(this.props);
     const projectId = this.props.match.params;
     const { labels } = props.projectManage;
 
     this.state = {
       selectedlabels: [], // 选中标签
-      bpCode: '', // bp编号
+      // bpCode: '', // bp编号
       bpName: '', // bp名称
       beginDate: '', // 开始时间
       endDate: '', // 结束时间
-      projectData: [],
+      // projectData: [],
       labels,
       projectId,
       requestType: '',
@@ -69,7 +69,6 @@ class ProjectEdit extends Component {
 
     if (projectId.id === 'addGoback') {
       const { projectInfor } = this.props.projectManage;
-      console.log(projectInfor);
       this.formRef.current.setFieldsValue({
         name: projectInfor.name,
         describe: projectInfor.describe,
@@ -94,9 +93,6 @@ class ProjectEdit extends Component {
    */
   getTableData = projectId => {
     detailApi.getProjectEdit(projectId).then(res => {
-      this.setState({
-        projectData: res,
-      });
       // 设置初始值
       if (!(this.formRef.current === null)) {
         this.formRef.current.setFieldsValue({
@@ -119,10 +115,7 @@ class ProjectEdit extends Component {
 
   // 保存
   handleSave = () => {
-    const { projectInfor } = this.props;
-    console.log(projectInfor);
     const data = this.saveData();
-    console.log(data);
     const { projectId } = this.state;
     // 新建
     if (JSON.stringify(projectId) === '{}') {
@@ -240,14 +233,25 @@ class ProjectEdit extends Component {
 
   // 返回
   goBack = () => {
-    message.success('返回项目列表页');
-    sessionStorage.removeItem('bpModel');
-    sessionStorage.removeItem('addProjectInfor');
     this.props.dispatch({
       type: 'projectManage/setProjectInfor',
       payload: [],
     });
-    history.push('/');
+
+    confirm({
+      icon: <ExclamationCircleOutlined />,
+      content: '未保存的数据将丢失，是否返回？',
+      centered: true,
+      okText: '确定',
+      cancelText: '取消',
+      onOk: () => {
+        sessionStorage.removeItem('bpModel');
+        sessionStorage.removeItem('addProjectInfor');
+        sessionStorage.removeItem('introduction');
+        history.push('/');
+      },
+      onCancel: () => {},
+    });
   };
 
   // 时间选中事件
@@ -270,12 +274,10 @@ class ProjectEdit extends Component {
 
   // 获取业务伙伴模态框回传数据
   getBPData = data => {
-    // console.log(data);
     this.formRef.current.setFieldsValue({
       bpName: data.name,
     });
     this.setState({
-      bpCode: data.code,
       bpName: data.name,
     });
     sessionStorage.setItem('bpModel', JSON.stringify(data));
@@ -283,12 +285,7 @@ class ProjectEdit extends Component {
 
   // 跳转到添加流程页面
   handleAdd = () => {
-    const { projectId, endDate, beginDate, selectedlabels } = this.state;
-    const { projectInfor } = this.props;
-    console.log(projectInfor);
-
     const data = this.saveData();
-    console.log(data);
     if (data === false) {
       this.props.dispatch({
         type: 'projectManage/setProjectInfor',
@@ -296,26 +293,7 @@ class ProjectEdit extends Component {
       });
     }
     if (data) {
-      if (projectId.id === 'addGoback') {
-        console.log('返回以后的页面点击跳转');
-        const formData =
-          this.formRef.current && this.formRef.current.getFieldsValue();
-        console.log(formData);
-        const bpModelList = JSON.parse(sessionStorage.getItem('bpModel'));
-        const datas = {
-          name: formData.name,
-          describe: formData.describe,
-          bpCode: bpModelList.code,
-          bpName: bpModelList.name,
-          endDate,
-          beginDate,
-          labels: selectedlabels,
-        };
-        console.log(datas);
-      } else {
-        data.requestType = 'add';
-        sessionStorage.setItem('addProjectInfor', JSON.stringify(data));
-      }
+      data.requestType = 'add';
 
       this.props.dispatch({
         type: 'projectManage/setProjectInfor',
@@ -335,13 +313,11 @@ class ProjectEdit extends Component {
 
   render() {
     const { selectedlabels, labels, projectId } = this.state;
-    console.log(this.state);
     // 设置默认值
 
     return (
       <ConfigProvider locale={zhCN}>
         <div style={{ background: '#F0F2F5', width: '100%' }}>
-          <GlobalHeader />
           <Form
             ref={this.formRef}
             className="classPageHeaderWrapper"
@@ -512,8 +488,6 @@ class ProjectEdit extends Component {
               )}
             </div>
           </div>
-
-          <GlobalFooter />
 
           {/* 业务伙伴模态框 */}
           <BPList
