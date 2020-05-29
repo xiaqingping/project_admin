@@ -6,7 +6,7 @@ const BaseLayout = props => {
   const { children } = props;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div style={{ display: 'flex', flexFlow: 'column', minHeight: '100vh' }}>
       <GlobalHeader />
       <div style={{ flex: 1 }}>{children}</div>
       <GlobalFooter />
