@@ -23,7 +23,7 @@ import zhCN from 'antd/es/locale/zh_CN';
 // 自定义
 import api from '@/pages/project/api/disk';
 import file from '@/assets/imgs/file.png';
-import word from '@/assets/imgs/word.png';
+import docx from '@/assets/imgs/word.png';
 import excel from '@/assets/imgs/excel.png';
 import pdf from '@/assets/imgs/pdf.png';
 import './index.less';
@@ -36,9 +36,7 @@ const { confirm } = Modal
  * 文件服务
  * @param {*} props
  */
-const FiledList = props => {
-  // 默认数据
-  const { filedList } = props;
+const FiledList = () => {
   // 列表数据
   const [tableList, setTableList] = useState({});
   // 新建文件夹Model状态
@@ -77,28 +75,38 @@ const FiledList = props => {
      */
     handleChange: () => {
       console.log(isActive, sortParameters)
+      const sortWay = isActive ? 1 : 2
+      const data = {
+        spaceType: 'smaple',
+        spaceCode: 'smaple',
+        directoryId: '1',
+        searchName: '',
+        sortType: sortParameters,
+        sortWay,
+      }
+      fn.getDateList(data)
     },
     /**
      * 获取列表数据
      * @param {*} props
      */
-    getDateList: () => {
+    getDateList: dataProcess => {
+      const { spaceType, spaceCode, directoryId, searchName, sortType, sortWay } = {}
       const data = {
-        spaceType: 'smaple', // String 必填 空间类型（来源可以为服务名称...）
-        spaceCode: '25c54bccdbe375c75a2402aa05a0a69f', // String 必填 空间编号(可以为功能ID/编号...)
-        directoryId: '35c54bccdbe375c75a2402aa05a0a69f', // String 可选 目录ID
-        searchName: 'smaple', // String 可选 搜索名称（文件或目录名称）
-        sortType: 2, // Integer 必填 {1, 2, 3}
-        sortWay: 1, // Integer 必填 {1, 2}
+        spaceType: spaceType || 'smaple', // String 必填 空间类型（来源可以为服务名称...）
+        spaceCode: spaceCode || 'smaple', // String 必填 空间编号(可以为功能ID/编号...)
+        directoryId: directoryId || '1', // String 可选 目录ID
+        searchName: searchName || '', // String 可选 搜索名称（文件或目录名称）
+        sortType: sortType || 1, // Integer 必填 {1, 2, 3}
+        sortWay: sortWay || 1, // Integer 必填 {1, 2}
       }
+      // if(dataProcess) data = dataProcess
+      setLoading(true)
+      console.log(111)
       api.getFiles(data).then(res => {
-        console.log(res)
+        setTableList({ data: res})
+        setLoading(false)
       })
-      if(filedList.length > 0) {
-        setTableList({ data: filedList, success: true })
-        setTimeout(() => { setLoading(false) }, 1000)
-      }
-
     },
     /**
      * 设置单行文件小图标
@@ -106,11 +114,11 @@ const FiledList = props => {
      * @param {String} extendName 文件后缀
      */
     setImg: (type, extendName) => {
-      const extendType = { file, word, excel, pdf }
+      const extendType = { file, docx, excel, pdf }
       if (type) {
         if (type === 2) return <img src={file} alt="" />
 
-        return <img src={extendType[extendName]} alt="" />
+        if(extendType[extendName]) return <img src={extendType[extendName]} alt="" />
       }
       return <FileExclamationOutlined />
     },
@@ -145,7 +153,7 @@ const FiledList = props => {
       width: 150,
       render: (value, record) => (
         <>
-          {fn.setImg(record.type, record.extendName)}
+          {fn.setImg(record.fileType, record.extendName)}
           <span style={{ marginLeft: 10 }}>{value}</span>
           <DownloadOutlined
             className="DownloadOutlined"
