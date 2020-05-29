@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import { Card, Tabs, Button, Tag, ConfigProvider, Spin } from 'antd';
 import { connect } from 'dva';
 import api from '@/pages/project/api/projectManageDetail';
-import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import empty from '@/assets/imgs/empty.png';
 import { history } from 'umi';
 import { formatter } from '@/utils/utils';
@@ -11,6 +10,7 @@ import style from './index.less';
 import ProcessTable from './components/ProcessTable';
 import MemberTbale from './components/MemberTbale';
 import FiledList from './components/FiledList';
+import FiledListTest from './components/FiledListTest';
 
 const { TabPane } = Tabs;
 
@@ -97,65 +97,69 @@ class projectDetail extends Component {
 
     return (
       <>
-        <ConfigProvider renderEmpty={customizeRenderEmpty}>
-          <div className={style.projectDetail}>
-            <PageHeaderWrapper className={style.detailInfor}>
-              <Card className={style.name}>{projectData.name}</Card>
-              <Card className={style.describe}>
-                <p>
-                  {projectData.createDate}由用户{projectData.createName}创建
-                </p>
-                <p>
-                  {projectData.labels &&
-                    projectData.labels.map(id => {
-                      const { labels } = this.props.projectManage;
-                      const name = formatter(labels, id, 'id', 'name');
-                      const text = formatter(labels, id, 'id', 'text');
-                      const color = formatter(labels, id, 'id', 'color');
+        <div className={style.projectDetail}>
+          <div className={style.detailInfor}>
+            <Card className={style.name}>{projectData.name}</Card>
+            <Card className={style.describe}>
+              <p>
+                {projectData.createDate}由用户{projectData.createName}创建
+              </p>
+              <p>
+                {projectData.labels &&
+                  projectData.labels.map(id => {
+                    const { labels } = this.props.projectManage;
+                    const name = formatter(labels, id, 'id', 'name');
+                    const text = formatter(labels, id, 'id', 'text');
+                    const color = formatter(labels, id, 'id', 'color');
 
-                      return (
-                        <Tag color={color} key={id}>
-                          {name} {text}
-                        </Tag>
-                      );
-                    })}
-                </p>
-                <p>{projectData.describe}</p>
-              </Card>
+                    return (
+                      <Tag color={color} key={id}>
+                        {name} {text}
+                      </Tag>
+                    );
+                  })}
+              </p>
+              <p>{projectData.describe}</p>
+            </Card>
+            <div className="projectDetail">
               <Card>
-                <Tabs defaultActiveKey="1" loading={loading} size="large">
-                  <TabPane tab="流程列表" key="1" width="120px">
-                    <div className="classProcessList">
-                      <ProcessTable
-                        projectId={projectId}
-                        processData={projectData.processes}
-                      />
-                    </div>
-                  </TabPane>
-                  <TabPane tab="文件" key="2">
-                    <div className="classFile">
-                      <FiledList projectId={projectId} />
-                    </div>
-                  </TabPane>
-                  <TabPane tab="成员" key="3">
-                    <div className="classMemberList">
-                      <MemberTbale projectId={projectId} />
-                    </div>
-                  </TabPane>
-                </Tabs>
+                <ConfigProvider renderEmpty={customizeRenderEmpty}>
+                  <Tabs defaultActiveKey="1" loading={loading} size="large">
+                    <TabPane tab="流程列表" key="1" width="120px">
+                      <div className="classProcessList">
+                        <ProcessTable
+                          projectId={projectId}
+                          processData={projectData.processes}
+                        />
+                      </div>
+                    </TabPane>
+                    <TabPane tab="文件" key="2">
+                      <div className="classFile">
+                        <FiledList projectId={projectId} />
+                      </div>
+                    </TabPane>
+                    <TabPane tab="成员" key="3">
+                      <div className="classMemberList">
+                        <MemberTbale projectId={projectId} />
+                      </div>
+                    </TabPane>
+                    <TabPane tab="测试文件列表" key="4">
+                      <div className="classFileListTest">
+                        <FiledListTest projectId={projectId} />
+                      </div>
+                    </TabPane>
+                  </Tabs>
+                </ConfigProvider>
               </Card>
-            </PageHeaderWrapper>
-
-            <div className={style.footer}>
-              <Button
-                className={style.button}
-                onClick={() => this.goBackLink()}
-              >
-                返回
-              </Button>
             </div>
           </div>
-        </ConfigProvider>
+
+          <div className={style.footer}>
+            <Button className={style.button} onClick={() => this.goBackLink()}>
+              返回
+            </Button>
+          </div>
+        </div>
       </>
     );
   }
