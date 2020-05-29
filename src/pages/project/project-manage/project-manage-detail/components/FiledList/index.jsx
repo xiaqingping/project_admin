@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'dva';
-import ProTable from '@ant-design/pro-table';
 import {
   Button,
   Input,
@@ -8,6 +7,9 @@ import {
   Select,
   Modal,
   ConfigProvider,
+  Table,
+  Row,
+  Col
 } from 'antd';
 import {
   FolderOutlined,
@@ -42,13 +44,13 @@ const FiledList = () => {
   // 新建文件夹Model状态
   const [isVisible, setVisible] = useState(false);
   // 单行下载按钮状态
-  const [isDownloadOutlined, setDownloadOutlined] = useState(false);
+  const [isDownloadOutlined, setDownloadOutlined] = useState(true);
   // 排序状态
   const [isActive, setIsActive] = useState(false);
   // 排序筛选参数
   const [sortParameters, setSortParameters] = useState(1)
   // 列表加载状态
-  const [loading, setLoading] = useState(true)
+  const [isloading, setLoading] = useState(true)
 
   // 批量操作
   const rowSelection = {
@@ -74,11 +76,8 @@ const FiledList = () => {
      * @param {String} value
      */
     handleChange: () => {
-      console.log(isActive, sortParameters)
       const sortWay = isActive ? 1 : 2
       const data = {
-        spaceType: 'smaple',
-        spaceCode: 'smaple',
         directoryId: '1',
         searchName: '',
         sortType: sortParameters,
@@ -90,21 +89,23 @@ const FiledList = () => {
      * 获取列表数据
      * @param {*} props
      */
-    getDateList: dataProcess => {
+    getDateList: parameters => {
       const { spaceType, spaceCode, directoryId, searchName, sortType, sortWay } = {}
-      const data = {
-        spaceType: spaceType || 'smaple', // String 必填 空间类型（来源可以为服务名称...）
-        spaceCode: spaceCode || 'smaple', // String 必填 空间编号(可以为功能ID/编号...)
+      let data = {
+        spaceType: spaceType || 'project', // String 必填 空间类型（来源可以为服务名称...）
+        spaceCode: spaceCode || '6e761a1aa7934884b11bf57ebf69db51', // String 必填 空间编号(可以为功能ID/编号...)
         directoryId: directoryId || '1', // String 可选 目录ID
         searchName: searchName || '', // String 可选 搜索名称（文件或目录名称）
         sortType: sortType || 1, // Integer 必填 {1, 2, 3}
         sortWay: sortWay || 1, // Integer 必填 {1, 2}
       }
-      // if(dataProcess) data = dataProcess
+      if (parameters) data = {
+        ...data,
+        ...parameters
+      }
       setLoading(true)
-      console.log(111)
-      api.getFiles(data).then(res => {
-        setTableList({ data: res})
+      return api.getFiles(data).then(res => {
+        setTableList(res)
         setLoading(false)
       })
     },
@@ -118,7 +119,7 @@ const FiledList = () => {
       if (type) {
         if (type === 2) return <img src={file} alt="" />
 
-        if(extendType[extendName]) return <img src={extendType[extendName]} alt="" />
+        if (extendType[extendName]) return <img src={extendType[extendName]} alt="" />
       }
       return <FileExclamationOutlined />
     },
@@ -133,6 +134,11 @@ const FiledList = () => {
           console.log('OK')
         },
       })
+    },
+    // 查询
+    queryList: e => {
+      console.log(e.target.value)
+      fn.getDateList({'searchName': e.target.value})
     }
   }
 
@@ -154,12 +160,12 @@ const FiledList = () => {
       render: (value, record) => (
         <>
           {fn.setImg(record.fileType, record.extendName)}
-          <span style={{ marginLeft: 10 }}>{value}</span>
+          <span style={{ marginLeft: 10 }} onClick={()=>{}}>{value}</span>
           <DownloadOutlined
-            className="DownloadOutlined"
+            className="classDown"
             style={{
               visibility:
-                record.id === isDownloadOutlined ? 'visible' : 'hidden',
+                record.name === isDownloadOutlined ? 'visible' : 'hidden',
             }}
           />
         </>
@@ -168,7 +174,7 @@ const FiledList = () => {
     {
       title: '描述',
       dataIndex: 'describe',
-      width: 350,
+      width: 300,
     },
     {
       title: '来源',
@@ -199,25 +205,11 @@ const FiledList = () => {
 
   return (
     <ConfigProvider locale={zhCN}>
-      <ProTable
-        loading={loading}
-        rowSelection={{ ...rowSelection }}
-        tableAlertRender={false}
-        rowKey="id"
-        search={false}
-        options={false}
-        columns={columns}
-        request={() => tableList}
-        onRow={record => ({
-          // 显示隐藏单行下载图标
-          onMouseEnter: () => setDownloadOutlined(record.id),
-          onMouseLeave: () => setDownloadOutlined(-1),
-        })}
-        className='classFiledList'
-        headerTitle={
-          <div>
-            <Button type="primary" onClick={() => { setVisible(true) }}>
-              <FolderOutlined />
+      {/* 搜索模块 */}
+      <div>
+        <Row>
+          <Col span={8}><Button type="primary" onClick={() => { setVisible(true) }}>
+            <FolderOutlined />
                     新建文件夹
                   </Button>
             <Button onClick={() => { }}>
@@ -229,58 +221,75 @@ const FiledList = () => {
                 <Breadcrumb.Item>全部文件</Breadcrumb.Item>
                 <Breadcrumb.Item>xxx文件夹</Breadcrumb.Item>
               </Breadcrumb>
-            </div>
-          </div>
-        }
-        toolBarRender={() => [
+            </div></Col>
+          <Col span={8} offset={8}>
+            <Row>
+              <Col span={12}>
+                <Input
+                  prefix={<SearchOutlined />}
+                  placeholder="搜索"
+                  onPressEnter={value => { fn.queryList(value) }}
+                />
+              </Col>
+              <Col span={12}>
+                <div
+                  onClick={() => {
+                    setIsActive(!isActive)
+                    fn.handleChange(sortParameters)
+                  }}
+                  style={{ transform: 'translateX(10px)', zIndex: '999' }}
+                >
 
-          // 搜索框
-          <Input prefix={<SearchOutlined />} placeholder="搜索" />
-          ,
-          <div
-            onClick={() => {
-              setIsActive(!isActive)
-              fn.handleChange(sortParameters)
-            }}
-            style={{ transform: 'translateX(10px)', zIndex: '999' }}
-          >
+                  {/* 排序 */}
+                  <SwapRightOutlined
+                    style={{
+                      transform: 'rotate(90deg) scaleY(-1) translateY(8px)',
+                      fontSize: '20px',
+                      color: isActive ? '#ccc' : '#1890ff'
+                    }} />
+                  <SwapLeftOutlined
+                    style={{
+                      transform: 'rotate(90deg)',
+                      fontSize: '20px',
+                      color: isActive ? '#1890ff' : '#ccc'
+                    }} />
 
-            {/* 排序 */}
-            <SwapRightOutlined
-              style={{
-                transform: 'rotate(90deg) scaleY(-1) translateY(8px)',
-                fontSize: '20px',
-                color: isActive ? '#ccc' : '#1890ff'
-              }} />
-            <SwapLeftOutlined
-              style={{
-                transform: 'rotate(90deg)',
-                fontSize: '20px',
-                color: isActive ? '#1890ff' : '#ccc'
-              }} />
-
-            {/* 筛选 */}
-            <Select
-              className="classSelect"
-              defaultValue="文件名"
-              style={{ width: 100, textAlign: 'center', fontSize: '14px' }}
-              onChange={value => setSortParameters(value)}
-              bordered={false}
-              dropdownMatchSelectWidth={120}
-              dropdownStyle={{ textAlign: 'center' }}
-              onClick={e => e.stopPropagation()}
-            >
-              <Option value={1}>文件名</Option>
-              <Option value={2}>大小</Option>
-              <Option value={3}>修改日期</Option>
-            </Select>
-          </div>
-        ]}
+                  {/* 筛选 */}
+                  <Select
+                    className="classSelect"
+                    defaultValue="文件名"
+                    style={{ width: 100, textAlign: 'center', fontSize: '14px' }}
+                    onChange={value => setSortParameters(value)}
+                    bordered={false}
+                    dropdownMatchSelectWidth={120}
+                    dropdownStyle={{ textAlign: 'center' }}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <Option value={1}>文件名</Option>
+                    <Option value={2}>大小</Option>
+                    <Option value={3}>修改日期</Option>
+                  </Select>
+                </div></Col>
+            </Row>
+          </Col>
+        </Row>
+      </div>
+      <Table
+        rowKey='name'
+        rowSelection={rowSelection}
+        columns={columns}
+        dataSource={tableList.length > 0 ? tableList : []}
+        pagination={false}
+        onRow={record => ({
+          onMouseEnter: () => setDownloadOutlined(record.name),
+          onMouseLeave: () => setDownloadOutlined(-1),
+        })}
       />
       {/* Model新建文件夹 */}
       <Modal
         title="新建文件夹"
         visible={isVisible}
+        loading={isloading}
         centered
         onOk={() => {
           setVisible(false)
@@ -296,3 +305,4 @@ const FiledList = () => {
 export default connect(({ projectManage }) => ({
   filedList: projectManage.filedList,
 }))(FiledList)
+
