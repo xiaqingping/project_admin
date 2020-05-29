@@ -5,6 +5,7 @@
 }
 
 .detailInfor {
+  margin-top: 24px;
   padding: 0 24px;
 }
 
@@ -29,4 +30,29 @@
   float: right;
   margin-top: 12px;
   margin-right: 50px;
+}
+
+.example {
+  margin: 20px 0;
+  margin-bottom: 20px;
+  padding: 30px 50px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+:global {
+  .projectDetail {
+    .ant-card-body {
+      padding: 0;
+
+      .ant-tabs-nav-container {
+        margin-left: 24px;
+      }
+
+      .ant-table-cell {
+        padding: 16px 24px;
+      }
+    }
+  }
 }

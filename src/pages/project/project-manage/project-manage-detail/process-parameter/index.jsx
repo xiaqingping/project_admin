@@ -1,15 +1,6 @@
 /** 流程参数 */
 import React, { Component } from 'react';
-import {
-  Card,
-  List,
-  Form,
-  Button,
-  message,
-  Tooltip,
-  Modal,
-  ConfigProvider,
-} from 'antd';
+import { Card, List, Form, Button, message, Tooltip, Modal, Empty } from 'antd';
 import { connect } from 'dva';
 import { history } from 'umi';
 import api from '@/pages/project/api/projectManageDetail';
@@ -586,24 +577,16 @@ class ProcessParameter extends Component {
   render() {
     const { paramGroupList, sampleList, requestType } = this.state;
     const data = paramGroupList;
-    if (data.length === 0) return false;
-
-    // 自定义空状态
-    const customizeRenderEmpty = () => (
-      <div style={{ textAlign: 'center' }}>
-        <img alt="" src={empty} />
-        <p>暂无数据</p>
-      </div>
-    );
 
     return (
       <>
-        <ConfigProvider renderEmpty={customizeRenderEmpty}>
-          <div className={style.processParams}>
-            <Form name="basic" ref={this.formRef} className={style.form}>
-              <div className={style.name}>
-                <span className={style.canshu}>参数维护</span>
-              </div>
+        <div className={style.processParams}>
+          <Form name="basic" ref={this.formRef} className={style.form}>
+            <div className={style.name}>
+              <span className={style.canshu}>参数维护</span>
+            </div>
+
+            {data.length ? (
               <List
                 dataSource={data}
                 renderItem={item => (
@@ -748,27 +731,28 @@ class ProcessParameter extends Component {
                   </List.Item>
                 )}
               />
-            </Form>
+            ) : (
+              <Card style={{ width: '100%', padding: '32px 0 ' }}>
+                <Empty image={empty} description="暂无数据" />
+              </Card>
+            )}
+          </Form>
 
-            <div className={style.footer}>
-              <div className={style.button}>
-                <Button
-                  className={style.back}
-                  onClick={() => this.goBackLink()}
-                >
-                  返回
+          <div className={style.footer}>
+            <div className={style.button}>
+              <Button className={style.back} onClick={() => this.goBackLink()}>
+                返回
+              </Button>
+              {requestType === 'view' ? (
+                ''
+              ) : (
+                <Button type="primary" onClick={this.onSubmit}>
+                  提交
                 </Button>
-                {requestType === 'view' ? (
-                  ''
-                ) : (
-                  <Button type="primary" onClick={this.onSubmit}>
-                    提交
-                  </Button>
-                )}
-              </div>
+              )}
             </div>
           </div>
-        </ConfigProvider>
+        </div>
       </>
     );
   }

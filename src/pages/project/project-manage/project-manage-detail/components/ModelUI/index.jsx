@@ -43,6 +43,7 @@ const EditInforModel = props => {
             type="primary"
             loading={confirmLoading}
             onClick={handleOk}
+            style={{ borderRadius: 5 }}
           >
             确定
           </Button>,
@@ -60,7 +61,7 @@ const EditInforModel = props => {
             }}
           >
             <FormItem label="" name="name" rules={[{ message: '请输入名称!' }]}>
-              <Input style={{ width: 260, height: 32 }} />
+              <Input style={{ width: 272, height: 32, borderRadius: 5 }} />
             </FormItem>
             <FormItem
               label=""
@@ -69,7 +70,12 @@ const EditInforModel = props => {
             >
               <TextArea
                 rows={4}
-                style={{ width: 470, height: 129, marginBottom: -10 }}
+                style={{
+                  width: 552,
+                  height: 128,
+                  marginBottom: -10,
+                  borderRadius: 5,
+                }}
               />
             </FormItem>
           </Form>

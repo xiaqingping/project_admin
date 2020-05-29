@@ -142,9 +142,7 @@ class ProcessTable extends Component {
           this.getTableData(this.props.projectId);
         });
       },
-      onCancel: () => {
-        message.error('删除失败！');
-      },
+      onCancel: () => {},
     });
     this.setState({ loading: false });
   };
@@ -259,7 +257,7 @@ class ProcessTable extends Component {
         <Button
           type="primary"
           onClick={() => this.handleAddProcesses()}
-          style={{ borderRadius: 5 }}
+          style={{ borderRadius: 5, margin: '8px 0 24px 24px' }}
         >
           添加流程
         </Button>
