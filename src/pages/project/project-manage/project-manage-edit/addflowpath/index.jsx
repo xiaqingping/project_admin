@@ -1,14 +1,22 @@
 // 项目管理：新建项目：添加流程
 import React, { Component } from 'react';
-import GlobalHeader from '@/components/GlobalHeader';
-import GlobalFooter from '@/components/GlobalFooter';
 // import { PageHeaderWrapper } from '@ant-design/pro-layout';
-import { Button, message, Table, Form, Popconfirm, Avatar } from 'antd';
+import {
+  Button,
+  message,
+  Table,
+  Form,
+  Popconfirm,
+  Avatar,
+  ConfigProvider,
+  Empty,
+} from 'antd';
 import { history } from 'umi';
 import { connect } from 'dva';
 import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
 import api from '@/pages/project/api/projectManage';
 import disk from '@/pages/project/api/disk';
+import emptyImg from '@/assets/imgs/empty.png';
 import DefaultHeadPicture from '@/assets/imgs/defaultheadpicture.jpg';
 import ChooseProcessModel from '../components/ChooseProcessModel';
 import '@/pages/project/project-manage/project-manage-edit/index.less';
@@ -328,6 +336,7 @@ class Test extends Component {
     }
     sessionStorage.removeItem('introduction');
     sessionStorage.removeItem('processForParams');
+    sessionStorage.removeItem('bpModel');
     return '';
   };
 
@@ -335,26 +344,20 @@ class Test extends Component {
   goBack = () => {
     const { processType, projectId } = this.state;
     const { projectInfor } = this.props.projectManage;
-    console.log(projectInfor);
     let url;
     if (processType === 'add' && projectInfor !== '') {
       // console.log(
       //   '新建项目选择流程时，返回新建项目基础信息页面，这个页面是修改信息的操作',
-      // );
-      const projectInforList = JSON.parse(
-        sessionStorage.getItem('addProjectInfor'),
-      );
-      console.log('点击跳转暂存的基础信息', projectInforList);
-
-      sessionStorage.setItem('goBackInfors', JSON.stringify(projectInforList));
+      // // );
       const requestType = 'addGoback';
       url = `/project/project-manage/add/${requestType}`;
     } else {
       // console.log('已建项目选择流程时，返回项目列表详情页');
       url = `/project/project-manage/detail/${projectId}`;
     }
+    sessionStorage.removeItem('introduction');
 
-    return history.push(url);
+    history.push(url);
   };
 
   render() {
@@ -420,90 +423,136 @@ class Test extends Component {
         ),
       },
     ];
+
+    // 判断list数组的长度，为0时控制form的margin-bottom的值，
+    let listLength;
+    if (list.length === 0) {
+      listLength = {
+        margin: '0 24px 286px 24px',
+      };
+    }
+    if (list.length !== 0 && list.length === 1) {
+      listLength = {
+        margin: '0 24px 375px 24px',
+      };
+    }
+    if (list.length !== 0 && list.length === 2) {
+      listLength = {
+        margin: '0 24px 300px 24px',
+      };
+    }
+    if (list.length !== 0 && list.length === 3) {
+      listLength = {
+        margin: '0 24px 220px 24px',
+      };
+    }
+    if (list.length !== 0 && list.length === 4) {
+      listLength = {
+        margin: '0 24px 144px 24px',
+      };
+    }
+    if (list.length !== 0 && list.length === 5) {
+      listLength = {
+        margin: '0 24px 65px 24px',
+      };
+    }
+    if ((list.length !== 0 && list.length === 6) || list.length > 6) {
+      listLength = {
+        margin: '0 24px 24px 24px',
+      };
+    }
+
     return (
-      <div style={{ background: '#F0F2F5', width: '100%' }}>
-        <GlobalHeader />
-        <Form ref={this.tableFormRef} style={{ margin: '0 24px 24px 24px' }}>
-          <div
-            style={{
-              background: '#FFFFFF',
-              height: '80px',
-              fontSize: '20px',
-              fontWeight: 'bold',
-              textAlign: 'left',
-              paddingLeft: '24px',
-              lineHeight: '80px',
-              marginBottom: '20px',
-              marginTop: '24px',
-            }}
-          >
-            添加流程
-          </div>
-          <div style={{ background: '#FFFFFF' }}>
-            <Table
-              rowClassName="editable-row"
-              rowKey="id"
-              loading={loading}
-              dataSource={list}
-              columns={columns}
-              pagination={false}
-              onSelectRow={this.handleSelectRows}
-            />
-            <Button
-              type="dashed"
-              onClick={this.onOpen}
-              icon={<PlusOutlined />}
+      // <ConfigProvider renderEmpty={this.EmptyState}>
+      <ConfigProvider>
+        <div style={{ background: '#F0F2F5', width: '100%' }}>
+          <Form style={listLength}>
+            <div
               style={{
-                width: '98%',
-                height: '30px',
-                margin: '24px 0 24px 8px ',
+                background: '#FFFFFF',
+                height: '80px',
+                fontSize: '20px',
+                fontWeight: 'bold',
+                textAlign: 'left',
+                paddingLeft: '24px',
+                lineHeight: '80px',
+                marginBottom: '20px',
+                marginTop: '24px',
               }}
             >
-              选择流程模型
-            </Button>
+              添加流程
+            </div>
+            <div style={{ background: '#FFFFFF' }}>
+              {list.length === 0 ? (
+                <Empty
+                  image={emptyImg}
+                  style={{ padding: '48px 0' }}
+                  description={<span>暂无数据</span>}
+                />
+              ) : (
+                <Table
+                  rowClassName="editable-row"
+                  rowKey="id"
+                  loading={loading}
+                  dataSource={list}
+                  columns={columns}
+                  pagination={false}
+                />
+              )}
+              <Button
+                type="dashed"
+                onClick={this.onOpen}
+                icon={<PlusOutlined />}
+                style={{
+                  width: '98%',
+                  height: '30px',
+                  margin: '24px 0 24px 8px ',
+                }}
+              >
+                选择流程模型
+              </Button>
+            </div>
+          </Form>
+          <div
+            style={{
+              height: '56px',
+              width: '100%',
+              lineHeight: '56px',
+              textAlign: 'right',
+              background: '#FFFFFF',
+            }}
+            className="classPageHeaderWrapperFooter"
+          >
+            <div style={{ margin: '0 150px 24px 150px' }}>
+              <Button
+                type="default"
+                onClick={() => this.goBack(true)}
+                style={{ marginRight: '10px' }}
+              >
+                返回
+              </Button>
+              <Button
+                type="primary"
+                onClick={() => this.handleSave()}
+                style={{ marginRight: '10px' }}
+                loading={buttonLoading}
+              >
+                保存
+              </Button>
+            </div>
           </div>
-        </Form>
-        <div
-          style={{
-            height: '56px',
-            width: '100%',
-            lineHeight: '56px',
-            textAlign: 'right',
-            background: '#FFFFFF',
-          }}
-          className="classPageHeaderWrapperFooter"
-        >
-          <div style={{ margin: '0 150px 24px 150px' }}>
-            <Button
-              type="default"
-              onClick={() => this.goBack(true)}
-              style={{ marginRight: '10px' }}
-            >
-              返回
-            </Button>
-            <Button
-              type="primary"
-              onClick={() => this.handleSave()}
-              style={{ marginRight: '10px' }}
-              loading={buttonLoading}
-            >
-              保存
-            </Button>
-          </div>
+
+          {visible ? (
+            <ChooseProcessModel
+              visible={visible}
+              onClose={v => this.onClose(v)}
+              getData={v => this.getData(v)}
+            />
+          ) : (
+            ''
+          )}
         </div>
-
-        <GlobalFooter />
-
-        {visible ? (
-          <ChooseProcessModel
-            visible={visible}
-            onClose={v => this.onClose(v)}
-            getData={v => this.getData(v)}
-          />
-        ) : (
-          ''
-        )}
-      </div>
+      </ConfigProvider>
     );
   }
 }
