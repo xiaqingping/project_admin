@@ -34,7 +34,9 @@ export default {
   // },
 
   getFiles(params) {
-    return request(`http://192.168.20.14:8150/disk/v2/${params.spaceType}/${params.spaceCode}/files`, {
+    return request
+    (`http://192.168.20.14:8150/disk/v2/${params.spaceType}/${params.spaceCode}/files`,
+    {
       params,
     });
   },
@@ -73,5 +75,14 @@ export default {
     if (!verifySourceKey(sourceKey)) return false;
     const { origin } = new URL(baseURL);
     return `${origin}/zuul/api/disk/v1/files/upload/${sourceKey}/${sourceCode}`;
+  },
+  // 创建目录
+  createDirctory(params) {
+    return request
+    (`http://192.168.20.27:8150/disk/v1/${params.spaceType}/${params.spaceCode}/dirctory`,
+    {
+      method: 'POST',
+      data: params,
+    });
   },
 };

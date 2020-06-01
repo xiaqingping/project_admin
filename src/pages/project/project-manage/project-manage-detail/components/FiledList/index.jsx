@@ -9,7 +9,8 @@ import {
   ConfigProvider,
   Table,
   Row,
-  Col
+  Col,
+  message
 } from 'antd';
 import {
   FolderOutlined,
@@ -24,6 +25,7 @@ import zhCN from 'antd/es/locale/zh_CN';
 
 // 自定义
 import api from '@/pages/project/api/disk';
+import api1 from '@/pages/project/api/projectManageDetail';
 import file from '@/assets/imgs/file.png';
 import docx from '@/assets/imgs/word.png';
 import excel from '@/assets/imgs/excel.png';
@@ -38,13 +40,29 @@ const { confirm } = Modal
  * 文件服务
  * @param {*} props
  */
-const FiledList = () => {
+const FiledList = props => {
   // 列表数据
   const [tableList, setTableList] = useState({});
+  // 面包屑
+  const [BreadcrumbName, setBreadcrumbName] = useState([])
+  // 当前层级
+  const [hierarchy, setHierarchy] = useState('1')
+  // 创建文件夹名称
+  const [projectParma, setProjectParma] = useState({
+    "name": '',
+    "describe": "",
+  })
+  // 项目基础信息
+  const [baseList, setBaseList] = useState()
+  // 用户信息
+  const [businessParma, setBusinessParma] = useState({
+    "businessName": "",
+    "businessCode": "",
+  })
+
+  /** 状态 */
   // 新建文件夹Model状态
   const [isVisible, setVisible] = useState(false);
-  // 单行下载按钮状态
-  const [isDownloadOutlined, setDownloadOutlined] = useState(true);
   // 排序状态
   const [isActive, setIsActive] = useState(false);
   // 排序筛选参数
@@ -90,20 +108,25 @@ const FiledList = () => {
      * @param {*} props
      */
     getDateList: parameters => {
-      const { spaceType, spaceCode, directoryId, searchName, sortType, sortWay } = {}
+      const { projectId } = props
       let data = {
-        spaceType: spaceType || 'project', // String 必填 空间类型（来源可以为服务名称...）
-        spaceCode: spaceCode || '6e761a1aa7934884b11bf57ebf69db51', // String 必填 空间编号(可以为功能ID/编号...)
-        directoryId: directoryId || '1', // String 可选 目录ID
-        searchName: searchName || '', // String 可选 搜索名称（文件或目录名称）
-        sortType: sortType || 1, // Integer 必填 {1, 2, 3}
-        sortWay: sortWay || 1, // Integer 必填 {1, 2}
+        spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
+        spaceCode: projectId, // String 必填 空间编号(可以为功能ID/编号...)
+        directoryId: '', // String 可选 目录ID
+        searchName: '', // String 可选 搜索名称（文件或目录名称）
+        sortType: 1, // Integer 必填 {1, 2, 3}
+        sortWay: 1, // Integer 必填 {1, 2}
       }
+
       if (parameters) data = {
         ...data,
         ...parameters
       }
+
+      if (!data.directoryId) setBreadcrumbName([])
+
       setLoading(true)
+
       return api.getFiles(data).then(res => {
         setTableList(res)
         setLoading(false)
@@ -136,10 +159,69 @@ const FiledList = () => {
       })
     },
     // 查询
-    queryList: e => {
-      console.log(e.target.value)
-      fn.getDateList({'searchName': e.target.value})
+    queryList: e => fn.getDateList({ 'searchName': e.target.value }),
+    // 目录查询
+    querydirectory: (id, type, name) => {
+      if (type === 2) {
+        setBreadcrumbName([
+          ...BreadcrumbName,
+          { name, id }
+        ])
+        setHierarchy(id)
+        fn.getDateList({
+          directoryId: id
+        })
+      }
+    },
+    // 创建目录
+    createDirctory: () => {
+      const { projectId } = props
+      const { code } = baseList
+      const data = {
+        "spaceType": "project",
+        "sourceCode": code,
+        "parentId": hierarchy,
+        "sourceType": "project",
+        "spaceCode": projectId,
+        "sourceId": projectId,
+        "userName": "",
+        "userCode": "",
+        ...businessParma,
+        ...projectParma,
+      }
+      // 校验输入值
+      const result = fn.verifyInput(data)
+      if (!result) return false
+
+      setLoading(true)
+
+      return api.createDirctory(data).then(res => {
+        setTableList(res)
+        fn.getDateList(hierarchy)
+        setLoading(false)
+      })
+    },
+    // 清除创建
+    clearParam: () => {
+      setVisible(false)
+      setProjectParma({
+        name: '',
+        describe: ''
+      })
+    },
+    // 输入框验证
+    verifyInput: data => {
+      const { name } = data
+      const arr = ["&", "\\", "/", "*", ">", "<", "@", "!"]
+      for (let i = 0; i < arr.length; i++) {
+        if (name.indexOf(arr[i]) !== -1 || name.indexOf(arr[i]) !== -1) {
+          message.error('输入字符不合法！')
+          return false
+        }
+      }
+      return true
     }
+
   }
 
   /**
@@ -148,6 +230,16 @@ const FiledList = () => {
   useEffect(() => {
     // 初始化列表数据
     fn.getDateList()
+    // 查询项目基础信息及流程列表
+    api1.getProjectProcess(props.projectId).then(res => setBaseList(res))
+    // 查询成员列表
+    api1.getProjectMember({ projectId: props.projectId }).then(res => {
+      const { code, name } = res[0]
+      setBusinessParma({
+        "businessName": name,
+        "businessCode": code,
+      })
+    })
   }, [])
 
 
@@ -158,17 +250,17 @@ const FiledList = () => {
       dataIndex: 'name',
       width: 150,
       render: (value, record) => (
-        <>
+        <div>
           {fn.setImg(record.fileType, record.extendName)}
-          <span style={{ marginLeft: 10 }} onClick={()=>{}}>{value}</span>
-          <DownloadOutlined
-            className="classDown"
-            style={{
-              visibility:
-                record.name === isDownloadOutlined ? 'visible' : 'hidden',
-            }}
-          />
-        </>
+          <span
+            style={{ marginLeft: 10, cursor: 'pointer' }}
+            onClick={() => {
+              fn.querydirectory(record.id, record.fileType, record.name)
+            }}>
+            {value}
+          </span>
+          <DownloadOutlined className="classDown" />
+        </div>
       ),
     },
     {
@@ -206,20 +298,32 @@ const FiledList = () => {
   return (
     <ConfigProvider locale={zhCN}>
       {/* 搜索模块 */}
-      <div>
+      <div className="classQuery">
         <Row>
-          <Col span={8}><Button type="primary" onClick={() => { setVisible(true) }}>
-            <FolderOutlined />
-                    新建文件夹
-                  </Button>
+          <Col span={8}>
+            <Button type="primary" onClick={() => { setVisible(true) }}>
+              <FolderOutlined />新建文件夹
+            </Button>
             <Button onClick={() => { }}>
-              <DownloadOutlined />
-                    下载
-                </Button><br />
+              <DownloadOutlined />下载
+            </Button><br />
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
-              <Breadcrumb>
-                <Breadcrumb.Item>全部文件</Breadcrumb.Item>
-                <Breadcrumb.Item>xxx文件夹</Breadcrumb.Item>
+              <Breadcrumb style={{ cursor: 'pointer' }}>
+                <Breadcrumb.Item>
+                  <span onClick={() => { fn.getDateList() }}>全部文件</span>
+                </Breadcrumb.Item>
+                {
+                  BreadcrumbName && BreadcrumbName.length > 0 ?
+                    BreadcrumbName.map((item, index) => {
+                      const key = index
+                      return <Breadcrumb.Item key={key}>
+                        <span onClick={() => {
+                          fn.getDateList(item.id, 2)
+                        }}>{item.name}</span>
+                      </Breadcrumb.Item>
+                    }) : ''
+                }
+
               </Breadcrumb>
             </div></Col>
           <Col span={8} offset={8}>
@@ -231,7 +335,7 @@ const FiledList = () => {
                   onPressEnter={value => { fn.queryList(value) }}
                 />
               </Col>
-              <Col span={12}>
+              <Col span={8} offset={4}>
                 <div
                   onClick={() => {
                     setIsActive(!isActive)
@@ -258,12 +362,16 @@ const FiledList = () => {
                   <Select
                     className="classSelect"
                     defaultValue="文件名"
-                    style={{ width: 100, textAlign: 'center', fontSize: '14px' }}
+                    style={{
+                      width: 100, textAlign: 'center', fontSize: '14px', color: 'rgb(24, 144, 255)'
+                    }}
                     onChange={value => setSortParameters(value)}
                     bordered={false}
                     dropdownMatchSelectWidth={120}
                     dropdownStyle={{ textAlign: 'center' }}
                     onClick={e => e.stopPropagation()}
+                    showArrow={false}
+
                   >
                     <Option value={1}>文件名</Option>
                     <Option value={2}>大小</Option>
@@ -275,28 +383,41 @@ const FiledList = () => {
         </Row>
       </div>
       <Table
+        className="classrow"
         rowKey='name'
         rowSelection={rowSelection}
         columns={columns}
         dataSource={tableList.length > 0 ? tableList : []}
         pagination={false}
-        onRow={record => ({
-          onMouseEnter: () => setDownloadOutlined(record.name),
-          onMouseLeave: () => setDownloadOutlined(-1),
-        })}
+        loading={isloading}
       />
       {/* Model新建文件夹 */}
       <Modal
         title="新建文件夹"
         visible={isVisible}
-        loading={isloading}
         centered
         onOk={() => {
-          setVisible(false)
+          fn.createDirctory()
+          fn.clearParam()
         }}
-        onCancel={() => { setVisible(false) }}
+        onCancel={() => fn.clearParam()}
       >
-        <Input placeholder="输入文件夹名称" />
+        <div>
+          文件夹名称： <Input placeholder="输入文件夹名称" value={projectParma.name} onChange={e => {
+            setProjectParma({
+              ...projectParma,
+              name: e.target.value.trim()
+            })
+          }} />
+        </div>
+        <div>
+          描述： <Input placeholder="输入描述" value={projectParma.describe} onChange={e => {
+            setProjectParma({
+              ...projectParma,
+              describe: e.target.value.trim()
+            })
+          }} />
+        </div>
       </Modal>
     </ConfigProvider>
   )
