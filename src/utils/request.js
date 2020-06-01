@@ -114,8 +114,11 @@ service.interceptors.request.use(config => {
       config.headers.username = '123';
       // 项目管理开发
       if (config.url.indexOf('http://192.168.20.14:8150/') > -1) {
-        console.log(config.url)
         config.url = config.url.replace('http://192.168.20.14:8150/', '/192.168.20.14:8150/');
+        config.baseURL = '/';
+      }
+      if (config.url.indexOf('http://192.168.20.27:8150/') > -1) {
+        config.url = config.url.replace('http://192.168.20.27:8150/', '/192.168.20.27:8150/');
         config.baseURL = '/';
       }
       // if (config.url.indexOf('http://192.168.20.12:8460/') > -1) {
