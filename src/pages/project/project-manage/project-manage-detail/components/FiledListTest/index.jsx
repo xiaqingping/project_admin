@@ -26,6 +26,7 @@ import zhCN from 'antd/es/locale/zh_CN';
 // 自定义
 import api from '@/pages/project/api/disk';
 import api1 from '@/pages/project/api/projectManageDetail';
+import api2 from '@/pages/project/api/file';
 import file from '@/assets/imgs/file.png';
 import docx from '@/assets/imgs/word.png';
 import excel from '@/assets/imgs/excel.png';
@@ -68,6 +69,8 @@ const FiledList = props => {
   const [editModalVis, setEditModalVis] = useState(false);
   // 修改文件数据
   const [editRow, setEditRow] = useState();
+  // 批量选择的id
+  const [selectedRows, setSelectedRows] = useState();
   // 排序状态
   const [isActive, setIsActive] = useState(false);
   // 排序筛选参数
@@ -77,12 +80,8 @@ const FiledList = props => {
 
   // 批量操作
   const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        'selectedRows: ',
-        selectedRows,
-      );
+    onChange: (selectedRowKeys, rows) => {
+      setSelectedRows(rows);
     },
     getCheckboxProps: record => ({
       disabled: record.name === 'Disabled User',
@@ -153,15 +152,58 @@ const FiledList = props => {
       }
       return <FileExclamationOutlined />;
     },
-    /** 删除警告 */
-    showDeleteConfirm: () => {
+
+    /**
+     * 批量删除
+     * @param {string} isMulp 是否是批量删除的标志
+     * @param {Object} row 被删除行或者多行的数据
+     */
+    handleDeleteFiles: (isMulp, row) => {
+      const formatData = {};
+      if (isMulp) {
+        // 批量删除
+        formatData.list = selectedRows.map(item => {
+          return {
+            id: item.id,
+            fileType: item.fileType,
+          };
+        });
+      } else {
+        // 单个删除
+        formatData.list = [row].map(item => {
+          return {
+            id: item.id,
+            fileType: item.fileType,
+          };
+        });
+      }
+      formatData.spaceType = 'project';
+      formatData.spaceCode = props.projectId;
+      setLoading(true);
+      api2
+        .deleteFiles(formatData)
+        .then(() => {
+          message.success('文件删除成功!');
+          setLoading(false);
+          fn.getDateList();
+        })
+        .catch(() => {
+          setLoading(false);
+        });
+    },
+
+    /** 删除警告
+     * @param {string} isMulp 是否是批量删除的标志
+     * @param {Object} row 被删除行或者多行的数据
+     */
+    showDeleteConfirm: (isMulp, row) => {
       confirm({
         title: '删除后将不可恢复，确定删除当前项目吗？',
         icon: <ExclamationCircleOutlined />,
         content: '',
         centered: true,
         onOk() {
-          console.log('OK');
+          fn.handleDeleteFiles(isMulp, row);
         },
       });
     },
@@ -250,7 +292,10 @@ const FiledList = props => {
     setEditModalVis(true);
   };
 
-  const closeEditModal = () => setEditModalVis(false);
+  const closeEditModal = () => {
+    setEditModalVis(false);
+    fn.getDateList();
+  };
 
   // 表结构
   const columns = [
@@ -299,7 +344,7 @@ const FiledList = props => {
       width: 80,
       render: (text, record) => (
         <>
-          <a onClick={() => fn.showDeleteConfirm()}>删除</a>
+          <a onClick={() => fn.showDeleteConfirm(null, record)}>删除</a>
           <a
             style={{ marginLeft: 10 }}
             onClick={() => {
@@ -312,28 +357,6 @@ const FiledList = props => {
       ),
     },
   ];
-
-  const handleDeleteFiles = (isMulp, row) => {
-    const formatData = {};
-    if (isMulp) {
-      // 批量删除
-      formatData.list = selectedRows.map(item => {
-        return {
-          id: item.id,
-          fileType: item.fileType,
-        };
-      });
-    } else {
-      // 单个删除
-      formatData.list = [row].map(item => {
-        return {
-          id: item.id,
-          fileType: item.fileType,
-        };
-      });
-    }
-    api1.deleteFiles(formatData, 'project', '6e761a1aa7934884b11bf57ebf69db51');
-  };
 
   return (
     <ConfigProvider locale={zhCN}>
@@ -354,7 +377,7 @@ const FiledList = props => {
               <DownloadOutlined />
               下载
             </Button>
-            <Button onClick={() => handleDeleteFiles('mulp')}>删除</Button>
+            <Button onClick={() => fn.showDeleteConfirm('mulp')}>删除</Button>
             <br />
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
               <Breadcrumb style={{ cursor: 'pointer' }}>
