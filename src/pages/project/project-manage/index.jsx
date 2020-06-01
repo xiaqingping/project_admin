@@ -10,7 +10,6 @@ import {
   Tag,
   Modal,
   DatePicker,
-  ConfigProvider,
 } from 'antd';
 import {
   PlusOutlined,
@@ -24,7 +23,6 @@ import ProTable from '@ant-design/pro-table';
 import empty from '@/assets/imgs/empty.png';
 import { formatter } from '@/utils/utils';
 import api from '@/pages/project/api/projectManage';
-import zhCN from 'antd/es/locale/zh_CN';
 import style from './index.less';
 
 localStorage.setItem(
@@ -243,6 +241,7 @@ class ProjectManagement extends Component {
         },
       },
       {
+        width: 450,
         title: '标签',
         dataIndex: 'labels',
         hideInSearch: true,
@@ -253,7 +252,7 @@ class ProjectManagement extends Component {
               labels.forEach(i => {
                 if (i.id === item) {
                   arr.push(
-                    <Tag color={i.color} key={i.id}>
+                    <Tag color={i.color} key={i.id} style={{ margin: 5 }}>
                       {i.name} {i.text}
                     </Tag>,
                   );
@@ -265,6 +264,7 @@ class ProjectManagement extends Component {
         },
       },
       {
+        width: 120,
         title: '操作',
         hideInSearch: true,
         render: row => (
@@ -312,76 +312,74 @@ class ProjectManagement extends Component {
   render() {
     const { modelSearchOptions, projectIds, createDate } = this.state;
     return (
-      <ConfigProvider locale={zhCN}>
-        <div>
-          <div style={{ padding: 24, background: '#F0F2F5' }}>
-            <div className={style.manageTitle}>项目列表</div>
-            <ProTable
-              locale={{
-                emptyText: (
-                  <div>
-                    <img alt="" src={empty} />
-                    <p>暂无数据</p>
-                  </div>
-                ),
-              }}
-              actionRef={this.tableSearchFormRef}
-              headerTitle={
-                <Button type="primary" onClick={() => this.handleAdd()}>
-                  <PlusOutlined />
-                  新建
-                </Button>
-              }
-              search={false}
-              rowKey="id"
-              request={params => {
-                return api
-                  .getProjectManage(this.getParamData(params))
-                  .then(res => ({
-                    data: res.results,
-                    total: res.total,
-                    success: true,
-                  }));
-              }}
-              columns={this.columns()}
-              options={false}
-              pagination={{
-                defaultPageSize: 10,
-              }}
-              params={{ projectIds, createDate }}
-              toolBarRender={action => [
-                <Select
-                  placeholder="项目名称"
-                  allowClear
-                  showSearch
-                  showArrow={false}
-                  labelInValue
-                  filterOption={false}
-                  onSearch={this.fetchCodeData}
-                  onChange={this.handleSearchCodeChange}
-                  style={{ width: 200 }}
-                  optionFilterProp="children" // 对子元素--option进行筛选
-                  optionLabelProp="label" // 回填的属性
-                >
-                  {modelSearchOptions.map(d => (
-                    <Option key={d.code} value={d.id} label={d.name}>
-                      {d.code}&nbsp;&nbsp;{d.name}
-                    </Option>
-                  ))}
-                </Select>,
-                <RangePicker onChange={this.dateChange} />,
-                <Button
-                  type="primary"
-                  icon={<SearchOutlined />}
-                  style={{ marginLeft: 8 }}
-                  size="middle"
-                  onClick={() => this.setParamState(action)}
-                />,
-              ]}
-            />
-          </div>
+      <div>
+        <div style={{ background: '#F0F2F5' }}>
+          <div className={style.manageTitle}>项目列表</div>
+          <ProTable
+            locale={{
+              emptyText: (
+                <div>
+                  <img alt="" src={empty} />
+                  <p>暂无数据</p>
+                </div>
+              ),
+            }}
+            actionRef={this.tableSearchFormRef}
+            headerTitle={
+              <Button type="primary" onClick={() => this.handleAdd()}>
+                <PlusOutlined />
+                新建
+              </Button>
+            }
+            search={false}
+            rowKey="id"
+            request={params => {
+              return api
+                .getProjectManage(this.getParamData(params))
+                .then(res => ({
+                  data: res.results,
+                  total: res.total,
+                  success: true,
+                }));
+            }}
+            columns={this.columns()}
+            options={false}
+            pagination={{
+              defaultPageSize: 10,
+            }}
+            params={{ projectIds, createDate }}
+            toolBarRender={action => [
+              <Select
+                placeholder="项目名称"
+                allowClear
+                showSearch
+                showArrow={false}
+                labelInValue
+                filterOption={false}
+                onSearch={this.fetchCodeData}
+                onChange={this.handleSearchCodeChange}
+                style={{ width: 200 }}
+                optionFilterProp="children" // 对子元素--option进行筛选
+                optionLabelProp="label" // 回填的属性
+              >
+                {modelSearchOptions.map(d => (
+                  <Option key={d.code} value={d.id} label={d.name}>
+                    {d.code}&nbsp;&nbsp;{d.name}
+                  </Option>
+                ))}
+              </Select>,
+              <RangePicker onChange={this.dateChange} />,
+              <Button
+                type="primary"
+                icon={<SearchOutlined />}
+                style={{ marginLeft: 8 }}
+                size="middle"
+                onClick={() => this.setParamState(action)}
+              />,
+            ]}
+          />
         </div>
-      </ConfigProvider>
+      </div>
     );
   }
 }
