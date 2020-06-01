@@ -26,7 +26,7 @@ class FileEditModal extends React.Component {
       .then(res => {
         console.log(res);
         this.setState({ loading: false });
-        this.props.changeVis();
+        this.props.changeVis(true);
       })
       .catch(() => {
         this.setState({ loading: false });

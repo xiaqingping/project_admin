@@ -292,9 +292,9 @@ const FiledList = props => {
     setEditModalVis(true);
   };
 
-  const closeEditModal = () => {
+  const closeEditModal = v => {
     setEditModalVis(false);
-    fn.getDateList();
+    if (v) fn.getDateList();
   };
 
   // 表结构
