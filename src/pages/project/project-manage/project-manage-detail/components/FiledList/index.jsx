@@ -115,7 +115,7 @@ const FiledList = props => {
         directoryId: '', // String 可选 目录ID
         searchName: '', // String 可选 搜索名称（文件或目录名称）
         sortType: 1, // Integer 必填 {1, 2, 3}
-        sortWay: 1, // Integer 必填 {1, 2}
+        sortWay: 1 // Integer 必填 {1, 2}
       }
 
       if (parameters) data = {
@@ -197,7 +197,7 @@ const FiledList = props => {
 
       return api.createDirctory(data).then(res => {
         setTableList(res)
-        fn.getDateList(hierarchy)
+        fn.getDateList({directoryId: hierarchy})
         setLoading(false)
       })
     },
