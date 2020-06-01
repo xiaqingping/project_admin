@@ -131,7 +131,6 @@ const FiledList = props => {
       if (!data.directoryId) setBreadcrumbName([]);
 
       setLoading(true);
-
       return api.getFiles(data).then(res => {
         setTableList(res);
         setLoading(false);
@@ -519,7 +518,11 @@ const FiledList = props => {
         </div>
       </Modal>
       {editModalVis && (
-        <FileEditModal fileData={editRow} changeVis={closeEditModal} />
+        <FileEditModal
+          fileData={editRow}
+          changeVis={closeEditModal}
+          spaceCode={props.projectId}
+        />
       )}
     </ConfigProvider>
   );

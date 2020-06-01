@@ -1,6 +1,7 @@
 import React from 'react';
-import { Form, Input, Modal, Button, Spin } from 'antd';
+import { Form, Input, Modal, Button, Spin, message } from 'antd';
 import api from '@/pages/project/api/file';
+import './index.less';
 
 class FileEditModal extends React.Component {
   formRef = React.createRef();
@@ -11,7 +12,19 @@ class FileEditModal extends React.Component {
 
   componentDidMount() {}
 
-  onFinish = () => {
+  onFinish = result => {
+    console.log(result);
+    const patrn = /[`~!@#$%^&*()_\-+=<>?:"{}|,.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘'，。、\s]/im;
+    if (patrn.test(result.name)) {
+      // 如果包含特殊字符返回false
+      return message.error('请勿输入特殊字符');
+    }
+
+    if (patrn.test(result.describe)) {
+      // 如果包含特殊字符返回false
+      return message.error('请勿输入特殊字符');
+    }
+
     this.setState({ loading: true });
     const { fileData } = this.props;
     const formData = this.formRef.current.getFieldsValue();
@@ -19,7 +32,7 @@ class FileEditModal extends React.Component {
       ...fileData,
       ...formData,
       spaceType: 'project',
-      spaceCode: '6e761a1aa7934884b11bf57ebf69db51',
+      spaceCode: this.props.spaceCode,
     };
     api
       .EditFile(formatData)
@@ -31,6 +44,7 @@ class FileEditModal extends React.Component {
       .catch(() => {
         this.setState({ loading: false });
       });
+    return true;
   };
 
   handleCancel = () => {
@@ -63,7 +77,7 @@ class FileEditModal extends React.Component {
               rules={[
                 {
                   required: true,
-                  message: '请输入任务名称',
+                  message: '请输入文件名称',
                 },
                 {
                   max: 100,
@@ -77,31 +91,30 @@ class FileEditModal extends React.Component {
             >
               <Input placeholder="输入名称" />
             </Form.Item>
-            {fileData.fileType * 1 !== 2 && (
-              <Form.Item
-                name="describe"
-                label="描述"
-                rules={[
-                  {
-                    required: true,
-                    message: '请输入任务名称',
-                  },
-                  {
-                    pattern: /^(?![\s]).*(?![\s]).$/,
-                    message: '禁止输入空格',
-                  },
-                ]}
-              >
-                <Input.TextArea />
-              </Form.Item>
-            )}
+            <Form.Item
+              name="describe"
+              label="描述"
+              rules={[
+                {
+                  required: true,
+                  message: '请输入任务名称',
+                },
+                {
+                  pattern: /^(?![\s]).*(?![\s]).$/,
+                  message: '禁止输入空格',
+                },
+              ]}
+            >
+              <Input.TextArea />
+            </Form.Item>
             <div
+              className="project_manage_user_file_test_modal_footer"
               style={{
                 textAlign: 'right',
-                //   borderTop: '1px solid #eee',
                 paddingBottom: 15,
               }}
             >
+              <div className="son" />
               <Button onClick={this.handleCancel} style={{ marginRight: 10 }}>
                 取消
               </Button>
