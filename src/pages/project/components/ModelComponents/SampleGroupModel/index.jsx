@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Table,
-  Button,
-  Modal,
-  AutoComplete,
-  Popover,
-  message,
-  ConfigProvider,
-} from 'antd';
+import { Table, Button, Modal, AutoComplete, Popover, message } from 'antd';
 import {
   UploadOutlined,
   PlusSquareOutlined,
@@ -17,7 +9,6 @@ import { SketchPicker } from 'react-color';
 import { getrandomColor } from '@/utils/utils';
 import { connect } from 'dva';
 import classnames from 'classnames';
-import zhCN from 'antd/es/locale/zh_CN';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import style from './index.less';
 import GroupUpload from '../UploadSequenceFile/index';
@@ -1343,44 +1334,42 @@ class SampleGroup extends React.Component {
       return true;
     });
     return (
-      <ConfigProvider locale={zhCN}>
-        <div className="project_manage_sample_scheme_table_wrap">
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginTop: 10,
-              marginLeft: 16,
-              marginBottom: 10,
-            }}
-          >
-            <div style={{ fontSize: 15, fontWeight: 'bold', marginTop: 5 }}>
-              {paramName}
-            </div>
-            {!disabled && (
-              <Button onClick={this.uploadGroup} type="primary">
-                <UploadOutlined />
-                上传
-              </Button>
-            )}
+      <div className="project_manage_sample_scheme_table_wrap">
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginTop: 10,
+            marginLeft: 16,
+            marginBottom: 10,
+          }}
+        >
+          <div style={{ fontSize: 15, fontWeight: 'bold', marginTop: 5 }}>
+            {paramName}
           </div>
-          <Table
-            columns={columns}
-            dataSource={groupSchemeData}
-            pagination={false}
-            scroll={{ x: tableWidth }}
-            loading={loading}
-            rowKey="sampleId"
-          />
-          {visible && (
-            <GroupUpload
-              closeUpload={this.handleCloseUpload}
-              groupTableData={groupSchemeData}
-              getData={this.getDataFromUpload}
-            />
+          {!disabled && (
+            <Button onClick={this.uploadGroup} type="primary">
+              <UploadOutlined />
+              上传
+            </Button>
           )}
         </div>
-      </ConfigProvider>
+        <Table
+          columns={columns}
+          dataSource={groupSchemeData}
+          pagination={false}
+          scroll={{ x: tableWidth }}
+          loading={loading}
+          rowKey="sampleId"
+        />
+        {visible && (
+          <GroupUpload
+            closeUpload={this.handleCloseUpload}
+            groupTableData={groupSchemeData}
+            getData={this.getDataFromUpload}
+          />
+        )}
+      </div>
     );
   }
 }

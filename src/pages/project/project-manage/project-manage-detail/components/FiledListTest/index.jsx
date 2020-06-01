@@ -158,10 +158,10 @@ const FiledList = props => {
      * @param {Object} row 被删除行或者多行的数据
      */
     handleDeleteFiles: (isMulp, row) => {
-      const formatData = {};
+      let formatData = [];
       if (isMulp) {
         // 批量删除
-        formatData.list = selectedRows.map(item => {
+        formatData = selectedRows.map(item => {
           return {
             id: item.id,
             fileType: item.fileType,
@@ -169,18 +169,16 @@ const FiledList = props => {
         });
       } else {
         // 单个删除
-        formatData.list = [row].map(item => {
+        formatData = [row].map(item => {
           return {
             id: item.id,
             fileType: item.fileType,
           };
         });
       }
-      formatData.spaceType = 'project';
-      formatData.spaceCode = props.projectId;
       setLoading(true);
       api2
-        .deleteFiles(formatData)
+        .deleteFiles(formatData, 'project', props.projectId)
         .then(() => {
           message.success('文件删除成功!');
           setLoading(false);
