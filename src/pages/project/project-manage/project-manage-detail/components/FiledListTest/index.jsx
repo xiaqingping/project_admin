@@ -33,6 +33,8 @@ import excel from '@/assets/imgs/excel.png';
 import pdf from '@/assets/imgs/pdf.png';
 import FileEditModal from './components/fileEditModal';
 import './index.less';
+// 移动 复制 模态框
+import ChooseFileList from './components/chooseFileList';
 
 const { Option } = Select;
 const { confirm } = Modal;
@@ -87,13 +89,16 @@ const FiledList = props => {
   const [sortParameters, setSortParameters] = useState(1);
   // 列表加载状态
   const [isloading, setLoading] = useState(true);
+  // 复制移动文件Model状态
+  const [modelVisible, setModelVisible] = useState(false);
+  // 复制或移动文件类型
+  const [requestType, setRequestType] = useState('');
 
   // 批量操作
   const rowSelection = {
     onChange: (selectedRowKeys, selectRows) => {
-      const selectRows1 = selectRows.filter(item => !!item === true);
-      console.log(selectRows1);
-      setSelectedRows(selectRows1);
+      const newRows = selectRows.filter(item => !!item === true);
+      setSelectedRows(newRows);
     },
     getCheckboxProps: record => ({
       disabled: record.name === 'Disabled User',
@@ -110,7 +115,6 @@ const FiledList = props => {
      * @param {String} value
      */
     handleChange: () => {
-      console.log(isActive);
       // const sortWay = isActive ? 1 : 2;
       const data = {
         sortType: sortParameters,
@@ -175,7 +179,6 @@ const FiledList = props => {
       let formatData = [];
       if (isMulp) {
         // 批量删除
-        console.log(selectedRows);
         formatData = selectedRows.map(item => {
           return {
             id: item.id,
@@ -223,7 +226,7 @@ const FiledList = props => {
       });
       return true;
     },
-    // 查询
+    /** 查询 */
     queryList: e => {
       const value = e.target.value.trim();
       if (value) {
@@ -233,7 +236,7 @@ const FiledList = props => {
         });
       }
     },
-    // 目录查询
+    /** 目录查询 */
     querydirectory: (id, type, name) => {
       if (type === 2) {
         setBreadcrumbName([...BreadcrumbName, { name, id }]);
@@ -241,11 +244,10 @@ const FiledList = props => {
           ...listData,
           directoryId: id,
         });
-
         fn.getDateList({ directoryId: id });
       }
     },
-    // 创建目录
+    /** 创建目录 */
     createDirctory: () => {
       const { projectId } = props;
       const { code } = baseList;
@@ -279,7 +281,7 @@ const FiledList = props => {
           setLoading(false);
         });
     },
-    // 清除创建
+    /** 清除创建 */
     clearParam: () => {
       setVisible(false);
       setProjectParma({
@@ -287,7 +289,7 @@ const FiledList = props => {
         describe: '',
       });
     },
-    // 输入框验证
+    /** 输入框验证 */
     verifyInput: data => {
       const { name } = data;
       // eslint-disable-next-line no-useless-escape
@@ -397,12 +399,31 @@ const FiledList = props => {
     },
   ];
 
+  /**
+   * 复制或移动 文件
+   */
+  const copyOrMovementFilled = type => {
+    if (selectedRows && selectedRows.length) {
+      setModelVisible(true);
+      setRequestType(type);
+      return false;
+    }
+    return message.warning('请选择需要操作的文件或文件夹!');
+  };
+
+  // 关闭文件Model
+  const copyFilledCloseModel = () => {
+    setModelVisible(false);
+    setRequestType('');
+    setSelectedRows([]);
+  };
+
   return (
     <ConfigProvider locale={zhCN}>
       {/* 搜索模块 */}
       <div className="classQuery">
         <Row>
-          <Col span={8}>
+          <Col span={11}>
             <Button
               type="primary"
               onClick={() => {
@@ -417,6 +438,16 @@ const FiledList = props => {
               下载
             </Button>
             <Button onClick={() => fn.showDeleteConfirm('mulp')}>删除</Button>
+            <Button onClick={() => copyOrMovementFilled('copy')}>复制</Button>
+            <Button onClick={() => copyOrMovementFilled('movement')}>
+              移动
+            </Button>
+            <Button onClick={() => copyOrMovementFilled('copyBatch')}>
+              批量复制
+            </Button>
+            <Button onClick={() => copyOrMovementFilled('movementBatch')}>
+              批量移动
+            </Button>
             <br />
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
               <Breadcrumb style={{ cursor: 'pointer' }}>
@@ -462,9 +493,9 @@ const FiledList = props => {
               </Breadcrumb>
             </div>
           </Col>
-          <Col span={8} offset={8}>
+          <Col span={5} offset={6}>
             <Row>
-              <Col span={12}>
+              <Col span={15}>
                 <Input
                   prefix={<SearchOutlined />}
                   placeholder="搜索"
@@ -473,7 +504,7 @@ const FiledList = props => {
                   }}
                 />
               </Col>
-              <Col span={8} offset={4}>
+              <Col span={5} offset={3}>
                 <div
                   onClick={() => {
                     setIsActive(!isActive);
@@ -513,7 +544,6 @@ const FiledList = props => {
                       color: 'rgb(24, 144, 255)',
                     }}
                     onChange={value => {
-                      console.log(value);
                       setSortParameters(value);
                       fn.handleChange(sortParameters);
                     }}
@@ -537,7 +567,7 @@ const FiledList = props => {
       </div>
       <Table
         className="classrow"
-        rowKey="name"
+        rowKey="id"
         rowSelection={rowSelection}
         columns={columns}
         dataSource={tableList.length > 0 ? tableList : []}
@@ -587,6 +617,17 @@ const FiledList = props => {
           fileData={editRow}
           changeVis={closeEditModal}
           spaceCode={props.projectId}
+        />
+      )}
+      {/* 移动 复制 模态框 */}
+      {modelVisible && (
+        <ChooseFileList
+          projectId={props.projectId}
+          selectedRows={selectedRows}
+          onClose={copyFilledCloseModel}
+          visible={modelVisible}
+          requestType={requestType}
+          getData={() => fn.getDateList()}
         />
       )}
     </ConfigProvider>
