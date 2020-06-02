@@ -11,7 +11,6 @@ import {
   Row,
   Col,
   message,
-  DeleteOutlined,
 } from 'antd';
 import {
   FolderOutlined,
@@ -21,6 +20,7 @@ import {
   SwapLeftOutlined,
   SwapRightOutlined,
   ExclamationCircleOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons';
 
 import zhCN from 'antd/es/locale/zh_CN';
