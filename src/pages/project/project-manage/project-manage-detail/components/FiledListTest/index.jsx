@@ -36,6 +36,8 @@ import pdf from '@/assets/imgs/pdf.png';
 import RecycleBin from '../recycleBin';
 import FileEditModal from './components/fileEditModal';
 import './index.less';
+// 移动 复制 模态框
+// import ChooseFileList from './components/chooseFileList';
 
 const { Option } = Select;
 const { confirm } = Modal;
@@ -83,7 +85,7 @@ const FiledList = props => {
   // 修改文件数据
   const [editRow, setEditRow] = useState();
   // 批量选择的id
-  const [selectedRows, setSelectedRows] = useState();
+  const [selectedRows, setSelectedRows] = useState([]);
   // 排序状态
   const [isActive, setIsActive] = useState(false);
   // 排序筛选参数
@@ -95,8 +97,9 @@ const FiledList = props => {
 
   // 批量操作
   const rowSelection = {
-    onChange: (selectedRowKeys, rows) => {
-      setSelectedRows(rows);
+    onChange: (selectedRowKeys, selectRows) => {
+      const newRows = selectRows.filter(item => !!item === true);
+      setSelectedRows(newRows);
     },
     getCheckboxProps: record => ({
       disabled: record.name === 'Disabled User',
@@ -113,17 +116,18 @@ const FiledList = props => {
      * @param {String} value
      */
     handleChange: () => {
-      const sortWay = isActive ? 1 : 2;
+      // const sortWay = isActive ? 1 : 2;
       const data = {
         sortType: sortParameters,
-        sortWay,
+        sortWay: isActive ? 1 : 2,
       };
+
       setListData({
         ...listData,
         ...data,
       });
       setTimeout(() => {
-        fn.getDateList();
+        fn.getDateList(data);
       }, 100);
     },
     /**
@@ -141,10 +145,15 @@ const FiledList = props => {
       if (!data.directoryId) setBreadcrumbName([]);
 
       setLoading(true);
-      return api.getFiles(data).then(res => {
-        setTableList(res);
-        setLoading(false);
-      });
+      return api
+        .getFiles(data)
+        .then(res => {
+          setTableList(res);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
     },
     /**
      * 设置单行文件小图标
@@ -204,6 +213,9 @@ const FiledList = props => {
      * @param {Object} row 被删除行或者多行的数据
      */
     showDeleteConfirm: (isMulp, row) => {
+      if (!row && !selectedRows.length) {
+        return false;
+      }
       confirm({
         title: '删除后将不可恢复，确定删除当前项目吗？',
         icon: <ExclamationCircleOutlined />,
@@ -213,13 +225,19 @@ const FiledList = props => {
           fn.handleDeleteFiles(isMulp, row);
         },
       });
+      return true;
     },
-    // 查询
-    queryList: e =>
-      fn.getDateList({
-        searchName: e.target.value,
-      }),
-    // 目录查询
+    /** 查询 */
+    queryList: e => {
+      const value = e.target.value.trim();
+      if (value) {
+        setListData({ ...listData, searchName: value });
+        fn.getDateList({
+          searchName: value,
+        });
+      }
+    },
+    /** 目录查询 */
     querydirectory: (id, type, name) => {
       if (type === 2) {
         setBreadcrumbName([...BreadcrumbName, { name, id }]);
@@ -230,7 +248,7 @@ const FiledList = props => {
         fn.getDateList({ directoryId: id });
       }
     },
-    // 创建目录
+    /** 创建目录 */
     createDirctory: () => {
       const { projectId } = props;
       const { code } = baseList;
@@ -253,13 +271,18 @@ const FiledList = props => {
 
       setLoading(true);
 
-      return api.createDirctory(data).then(res => {
-        setTableList(res);
-        fn.getDateList();
-        setLoading(false);
-      });
+      return api
+        .createDirctory(data)
+        .then(res => {
+          setTableList(res);
+          fn.getDateList();
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
     },
-    // 清除创建
+    /** 清除创建 */
     clearParam: () => {
       setVisible(false);
       setProjectParma({
@@ -267,7 +290,7 @@ const FiledList = props => {
         describe: '',
       });
     },
-    // 输入框验证
+    /** 输入框验证 */
     verifyInput: data => {
       const { name } = data;
       // eslint-disable-next-line no-useless-escape
@@ -377,6 +400,26 @@ const FiledList = props => {
     },
   ];
 
+  /**
+   * 复制或移动 文件
+   */
+  const copyOrMovementFilled = type => {
+    if (selectedRows && selectedRows.length) {
+      setModelVisible(true);
+      setRequestType(type);
+      return false;
+    }
+    return message.warning('请选择需要操作的文件或文件夹!');
+  };
+
+  // 关闭文件Model
+  // const copyFilledCloseModel = () => {
+  //   setModelVisible(false);
+  //   setRequestType('');
+  //   setSelectedRows([]);
+  // };
+
+  // 关闭回收站模态框
   const onClose = () => {
     setRecycle(false);
   };
@@ -386,7 +429,7 @@ const FiledList = props => {
       {/* 搜索模块 */}
       <div className="classQuery">
         <Row>
-          <Col span={8}>
+          <Col span={11}>
             <Button
               type="primary"
               onClick={() => {
@@ -409,6 +452,18 @@ const FiledList = props => {
               <DeleteOutlined />
               回收站
             </Button>
+            <Button onClick={() => fn.showDeleteConfirm('mulp')}>删除</Button>
+            <Button onClick={() => copyOrMovementFilled('copy')}>复制</Button>
+            <Button onClick={() => copyOrMovementFilled('movement')}>
+              移动
+            </Button>
+            <Button onClick={() => copyOrMovementFilled('copyBatch')}>
+              批量复制
+            </Button>
+            <Button onClick={() => copyOrMovementFilled('movementBatch')}>
+              批量移动
+            </Button>
+            <br />
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
               <Breadcrumb style={{ cursor: 'pointer' }}>
                 <Breadcrumb.Item>
@@ -453,9 +508,9 @@ const FiledList = props => {
               </Breadcrumb>
             </div>
           </Col>
-          <Col span={8} offset={8}>
+          <Col span={5} offset={6}>
             <Row>
-              <Col span={12}>
+              <Col span={15}>
                 <Input
                   prefix={<SearchOutlined />}
                   placeholder="搜索"
@@ -464,7 +519,7 @@ const FiledList = props => {
                   }}
                 />
               </Col>
-              <Col span={8} offset={4}>
+              <Col span={5} offset={3}>
                 <div
                   onClick={() => {
                     setIsActive(!isActive);
@@ -527,7 +582,7 @@ const FiledList = props => {
       </div>
       <Table
         className="classrow"
-        rowKey="name"
+        rowKey="id"
         rowSelection={rowSelection}
         columns={columns}
         dataSource={tableList.length > 0 ? tableList : []}
@@ -579,6 +634,18 @@ const FiledList = props => {
           spaceCode={props.projectId}
         />
       )}
+      {/* 移动 复制 模态框 */}
+      {/* {modelVisible && (
+        <ChooseFileList
+          projectId={props.projectId}
+          selectedRows={selectedRows}
+          onClose={copyFilledCloseModel}
+          visible={modelVisible}
+          requestType={requestType}
+          getData={() => fn.getDateList()}
+        />
+      )} */}
+
       {isRecycle && <RecycleBin onClose={onClose} />}
     </ConfigProvider>
   );

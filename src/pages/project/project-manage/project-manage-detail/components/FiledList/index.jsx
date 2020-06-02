@@ -131,10 +131,15 @@ const FiledList = props => {
       if (!data.directoryId) setBreadcrumbName([]);
 
       setLoading(true);
-      return api.getFiles(data).then(res => {
-        setTableList(res);
-        setLoading(false);
-      });
+      return api
+        .getFiles(data)
+        .then(res => {
+          setTableList(res);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
     },
     /**
      * 设置单行文件小图标
@@ -202,11 +207,16 @@ const FiledList = props => {
 
       setLoading(true);
 
-      return api.createDirctory(data).then(res => {
-        setTableList(res);
-        fn.getDateList();
-        setLoading(false);
-      });
+      return api
+        .createDirctory(data)
+        .then(res => {
+          setTableList(res);
+          fn.getDateList();
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
     },
     /** 清除创建 */
     clearParam: () => {
