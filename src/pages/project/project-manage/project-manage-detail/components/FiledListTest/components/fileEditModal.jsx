@@ -14,20 +14,18 @@ class FileEditModal extends React.Component {
 
   onFinish = result => {
     console.log(result);
-    const patrn = /[`~!@#$%^&*()_\-+=<>?:"{}|,.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘'，。、\s]/im;
+    const patrn = /[`~!@#$%^&*()_\-+=<>?:"{}|,\;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘'，。、\s]/im;
     if (patrn.test(result.name)) {
       // 如果包含特殊字符返回false
       return message.error('请勿输入特殊字符');
     }
-
-    if (patrn.test(result.describe)) {
-      // 如果包含特殊字符返回false
-      return message.error('请勿输入特殊字符');
+    if (result.describe.trim() === '') {
+      return message.error('描述为必须！');
     }
-
     this.setState({ loading: true });
     const { fileData } = this.props;
-    const formData = this.formRef.current.getFieldsValue();
+    const formData = result;
+    formData.describe = formData.describe.trim();
     const formatData = {
       ...fileData,
       ...formData,
@@ -36,8 +34,7 @@ class FileEditModal extends React.Component {
     };
     api
       .EditFile(formatData)
-      .then(res => {
-        console.log(res);
+      .then(() => {
         this.setState({ loading: false });
         this.props.changeVis(true);
       })
@@ -97,11 +94,7 @@ class FileEditModal extends React.Component {
               rules={[
                 {
                   required: true,
-                  message: '请输入任务名称',
-                },
-                {
-                  pattern: /^(?![\s]).*(?![\s]).$/,
-                  message: '禁止输入空格',
+                  message: '请输入描述',
                 },
               ]}
             >

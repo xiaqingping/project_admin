@@ -221,7 +221,9 @@ const FiledList = props => {
         return false;
       }
       confirm({
-        title: '删除后将不可恢复，确定删除当前项目吗？',
+        title: row
+          ? '删除后将不可恢复，确定删除当前文件吗？'
+          : '删除后将不可恢复，确定删除所选文件吗？',
         icon: <ExclamationCircleOutlined />,
         content: '',
         centered: true,
@@ -432,7 +434,7 @@ const FiledList = props => {
       {/* 搜索模块 */}
       <div className="classQuery">
         <Row>
-          <Col span={11}>
+          <Col span={12}>
             <Button
               type="primary"
               onClick={() => {
@@ -510,9 +512,9 @@ const FiledList = props => {
               </Breadcrumb>
             </div>
           </Col>
-          <Col span={5} offset={6}>
+          <Col span={7} offset={4}>
             <Row>
-              <Col span={15}>
+              <Col span={13}>
                 <Input
                   prefix={<SearchOutlined />}
                   placeholder="搜索"
@@ -521,7 +523,7 @@ const FiledList = props => {
                   }}
                 />
               </Col>
-              <Col span={5} offset={3}>
+              <Col span={8} offset={2}>
                 <div
                   onClick={() => {
                     setIsActive(!isActive);
@@ -584,7 +586,7 @@ const FiledList = props => {
       </div>
       <Table
         className="classrow"
-        rowKey="id"
+        rowKey={record => `${record.fileType}_${record.id}`}
         rowSelection={rowSelection}
         columns={columns}
         dataSource={tableList.length > 0 ? tableList : []}
