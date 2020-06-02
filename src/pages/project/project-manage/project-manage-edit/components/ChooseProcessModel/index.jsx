@@ -267,22 +267,17 @@ class ChooseProcessModel extends React.Component {
           visible={this.props.visible}
           onOk={this.handleOk}
           onCancel={this.handleCancel}
-          width={1050}
+          width={1015}
           okText="确认"
           cancelText="取消"
         >
-          <div className="tableList">
-            <TableSearchForm
-              ref={this.tableSearchFormRef}
-              initialValues={this.initialValues}
-              getTableData={this.getTableData}
-              simpleForm={this.simpleForm}
-            />
-          </div>
-          <div
-            style={{ height: '430px', overflow: 'auto', padding: '5px' }}
-            id="contentCenter"
-          >
+          <TableSearchForm
+            ref={this.tableSearchFormRef}
+            initialValues={this.initialValues}
+            getTableData={this.getTableData}
+            simpleForm={this.simpleForm}
+          />
+          <div style={{ height: '430px', overflow: 'auto' }} id="contentCenter">
             <InfiniteScroll
               initialLoad={false} // 不让它进入直接加载
               pageStart={1} // 设置初始化请求的页数
@@ -290,7 +285,7 @@ class ChooseProcessModel extends React.Component {
               hasMore={hasMore} // 是否继续监听滚动事件 true 监听 | false 不再监听
               useWindow={false} // 为true就是窗口滚动，false是dom滚动
             >
-              <Row gutter={[16, 16]} style={{ margin: '0' }}>
+              <Row gutter={[8, 8]} style={{ margin: '0' }}>
                 {processlist.map(item => (
                   <Col
                     // eslint-disable-next-line react/no-array-index-key

@@ -20,7 +20,9 @@ import {
   SwapLeftOutlined,
   SwapRightOutlined,
   ExclamationCircleOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons';
+
 import zhCN from 'antd/es/locale/zh_CN';
 
 // 自定义
@@ -31,6 +33,7 @@ import file from '@/assets/imgs/file.png';
 import docx from '@/assets/imgs/word.png';
 import excel from '@/assets/imgs/excel.png';
 import pdf from '@/assets/imgs/pdf.png';
+import RecycleBin from '../recycleBin';
 import FileEditModal from './components/fileEditModal';
 import './index.less';
 // 移动 复制 模态框
@@ -93,6 +96,8 @@ const FiledList = props => {
   const [modelVisible, setModelVisible] = useState(false);
   // 复制或移动文件类型
   const [requestType, setRequestType] = useState('');
+  // visible 回收站model状态
+  const [isRecycle, setRecycle] = useState(false);
 
   // 批量操作
   const rowSelection = {
@@ -417,6 +422,10 @@ const FiledList = props => {
     setRequestType('');
     setSelectedRows([]);
   };
+  // 关闭回收站模态框
+  const onClose = () => {
+    setRecycle(false);
+  };
 
   return (
     <ConfigProvider locale={zhCN}>
@@ -436,6 +445,15 @@ const FiledList = props => {
             <Button onClick={() => {}}>
               <DownloadOutlined />
               下载
+            </Button>
+            <Button
+              onClick={() => {
+                console.log('打开回收站');
+                setRecycle(true);
+              }}
+            >
+              <DeleteOutlined />
+              回收站
             </Button>
             <Button onClick={() => fn.showDeleteConfirm('mulp')}>删除</Button>
             <Button onClick={() => copyOrMovementFilled('copy')}>复制</Button>
@@ -629,6 +647,9 @@ const FiledList = props => {
           requestType={requestType}
           getData={() => fn.getDateList()}
         />
+      )}
+      {isRecycle && (
+        <RecycleBin onClose={onClose} getData={() => fn.getDateList()} />
       )}
     </ConfigProvider>
   );
