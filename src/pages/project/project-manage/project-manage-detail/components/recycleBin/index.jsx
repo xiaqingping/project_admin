@@ -13,7 +13,7 @@ class recycliBin extends React.Component {
       recycleTableList: [],
       selectedRowList: [], // 已选中的数据集合
       // 列表加载状态
-      // loading :true,
+      loading: false,
     };
   }
 
@@ -27,7 +27,6 @@ class recycliBin extends React.Component {
 
   // 回收站列表
   getDeleteList = parameters => {
-    console.log('获取回收站列表数据');
     let data = {
       spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
       spaceCode: '6e761a1aa7934884b11bf57ebf69db51', // String 必填 空间编号(可以为功能ID/编号...)
@@ -47,7 +46,7 @@ class recycliBin extends React.Component {
       .getRecycleFiles(data)
       .then(res => {
         this.setState({
-          // loading:false,
+          loading: false,
           recycleTableList: res,
         });
       })
@@ -90,17 +89,30 @@ class recycliBin extends React.Component {
           fileType: selectedRowList[0].fileType, // Integer 必填 {1目录, 2文件}
         },
       ];
-      api.deleteRecycleRestore(data, files).then(res => {
-        console.log(res);
-        this.getDeleteList();
-      });
+      api
+        .deleteRecycleRestore(data, files)
+        .then(() => {
+          this.setState({
+            loading: false,
+          });
+          this.getDeleteList();
+        })
+        .catch(err => {
+          console.log(err);
+          this.setState({
+            loading: false,
+          });
+        });
     }
+    return true;
   };
 
   // 批量删除
   deleteAll = () => {
     const { selectedRowList } = this.state;
-    console.log(selectedRowList);
+    this.setState({
+      loading: true,
+    });
 
     if (selectedRowList.length !== 0) {
       const data = {};
@@ -120,11 +132,18 @@ class recycliBin extends React.Component {
       // data.files =files;
       api
         .deleteRecycleRestore(data, files)
-        .then(res => {
-          console.log(res);
+        .then(() => {
+          this.setState({
+            loading: false,
+          });
           this.getDeleteList();
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+          console.log(err);
+          this.setState({
+            loading: false,
+          });
+        });
     }
   };
 
@@ -149,20 +168,30 @@ class recycliBin extends React.Component {
       // data.files=newlist;
       api
         .getRecycleRestore(data, files)
-        .then(res => {
-          console.log(res);
+        .then(() => {
+          this.setState({
+            loading: false,
+          });
           this.getDeleteList();
+          this.props.getData();
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+          console.log(err);
+          this.setState({
+            loading: false,
+          });
+        });
     }
+    return true;
   };
 
   // 批量还原
   reductionAll = () => {
     const { selectedRowList } = this.state;
-    console.log(selectedRowList);
-
     if (selectedRowList.length !== 0) {
+      this.setState({
+        loading: true,
+      });
       const data = {};
       data.spaceType = 'project';
       data.spaceCode = '6e761a1aa7934884b11bf57ebf69db51';
@@ -179,11 +208,19 @@ class recycliBin extends React.Component {
       console.log(data);
       api
         .getRecycleRestore(data, files)
-        .then(res => {
-          console.log(res);
+        .then(() => {
+          this.setState({
+            loading: false,
+          });
           this.getDeleteList();
+          this.props.getData();
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+          console.log(err);
+          this.setState({
+            loading: false,
+          });
+        });
     }
   };
 
@@ -202,8 +239,8 @@ class recycliBin extends React.Component {
   };
 
   render() {
-    // const {loading,recycleTableList} =this.state;
-    const { recycleTableList } = this.state;
+    const { loading, recycleTableList } = this.state;
+    // const { recycleTableList } = this.state;
     // 表结构
     const columns = [
       {
@@ -314,7 +351,7 @@ class recycliBin extends React.Component {
             columns={columns}
             dataSource={recycleTableList.length > 0 ? recycleTableList : []}
             pagination={false}
-            // loading={loading}
+            loading={loading}
           />
         </Modal>
       </div>

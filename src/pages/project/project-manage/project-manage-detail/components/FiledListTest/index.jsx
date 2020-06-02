@@ -37,7 +37,7 @@ import RecycleBin from '../recycleBin';
 import FileEditModal from './components/fileEditModal';
 import './index.less';
 // 移动 复制 模态框
-// import ChooseFileList from './components/chooseFileList';
+import ChooseFileList from './components/chooseFileList';
 
 const { Option } = Select;
 const { confirm } = Modal;
@@ -92,6 +92,10 @@ const FiledList = props => {
   const [sortParameters, setSortParameters] = useState(1);
   // 列表加载状态
   const [isloading, setLoading] = useState(true);
+  // 复制移动文件Model状态
+  const [modelVisible, setModelVisible] = useState(false);
+  // 复制或移动文件类型
+  const [requestType, setRequestType] = useState('');
   // visible 回收站model状态
   const [isRecycle, setRecycle] = useState(false);
 
@@ -413,12 +417,11 @@ const FiledList = props => {
   };
 
   // 关闭文件Model
-  // const copyFilledCloseModel = () => {
-  //   setModelVisible(false);
-  //   setRequestType('');
-  //   setSelectedRows([]);
-  // };
-
+  const copyFilledCloseModel = () => {
+    setModelVisible(false);
+    setRequestType('');
+    setSelectedRows([]);
+  };
   // 关闭回收站模态框
   const onClose = () => {
     setRecycle(false);
@@ -635,7 +638,7 @@ const FiledList = props => {
         />
       )}
       {/* 移动 复制 模态框 */}
-      {/* {modelVisible && (
+      {modelVisible && (
         <ChooseFileList
           projectId={props.projectId}
           selectedRows={selectedRows}
@@ -644,9 +647,10 @@ const FiledList = props => {
           requestType={requestType}
           getData={() => fn.getDateList()}
         />
-      )} */}
-
-      {isRecycle && <RecycleBin onClose={onClose} />}
+      )}
+      {isRecycle && (
+        <RecycleBin onClose={onClose} getData={() => fn.getDateList()} />
+      )}
     </ConfigProvider>
   );
 };
