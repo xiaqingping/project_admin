@@ -14,9 +14,9 @@ export default {
     );
   },
 
-  deleteFiles(data) {
+  deleteFiles(data, spaceType, spaceCode) {
     return request(
-      `${http}disk/v1/${data.spaceType}/${data.spaceCode}/files/fileRecycle`,
+      `${http}disk/v1/${spaceType}/${spaceCode}/files/fileRecycle`,
       {
         method: 'PUT',
         data,

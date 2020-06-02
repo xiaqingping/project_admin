@@ -1,17 +1,9 @@
 import React from 'react';
-import {
-  Table,
-  Popover,
-  Button,
-  Popconfirm,
-  message,
-  ConfigProvider,
-} from 'antd';
+import { Table, Popover, Button, Popconfirm, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { SketchPicker } from 'react-color';
 import { getrandomColor } from '@/utils/utils';
 import { connect } from 'dva';
-import zhCN from 'antd/es/locale/zh_CN';
 import SampleChoose from './components/SampleChoose';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import style from './index.less';
@@ -566,49 +558,47 @@ class SampleSelect extends React.Component {
     const { paramName } = this.props.paramList;
     if (typeof tableData === 'string') return false;
     return (
-      <ConfigProvider locale={zhCN}>
-        <div className="project_manage_sample_select_table_wrap">
-          <div
-            style={{
-              fontSize: 15,
-              color: 'rgba(0,0,0,.65)',
-              fontWeight: 'bold',
-              marginBottom: 18,
-              marginLeft: 16,
-            }}
-          >
-            {paramName}
-          </div>
-          <div className="project_manage_sample_select_table">
-            <Table
-              columns={columns}
-              dataSource={tableData}
-              pagination={false}
-              rowKey="id"
-            />
-          </div>
-          {!disabled && (
-            <Button
-              type="dashed"
-              block
-              onClick={this.chooseSample}
-              style={{ marginTop: 20, position: 'static' }}
-            >
-              <PlusOutlined /> 选择样品
-            </Button>
-          )}
-          {visible && (
-            <SampleChoose
-              disabled={disabled}
-              handleOk={this.handleOk}
-              handleCancel={this.handleCancel}
-              id={sampleId}
-              chooseFileIds={chooseFileIds}
-              sendData={v => this.receiveData(v)}
-            />
-          )}
+      <div className="project_manage_sample_select_table_wrap">
+        <div
+          style={{
+            fontSize: 15,
+            color: 'rgba(0,0,0,.65)',
+            fontWeight: 'bold',
+            marginBottom: 18,
+            marginLeft: 16,
+          }}
+        >
+          {paramName}
         </div>
-      </ConfigProvider>
+        <div className="project_manage_sample_select_table">
+          <Table
+            columns={columns}
+            dataSource={tableData}
+            pagination={false}
+            rowKey="id"
+          />
+        </div>
+        {!disabled && (
+          <Button
+            type="dashed"
+            block
+            onClick={this.chooseSample}
+            style={{ marginTop: 20, position: 'static' }}
+          >
+            <PlusOutlined /> 选择样品
+          </Button>
+        )}
+        {visible && (
+          <SampleChoose
+            disabled={disabled}
+            handleOk={this.handleOk}
+            handleCancel={this.handleCancel}
+            id={sampleId}
+            chooseFileIds={chooseFileIds}
+            sendData={v => this.receiveData(v)}
+          />
+        )}
+      </div>
     );
   }
 }

@@ -25,26 +25,28 @@ class GlobalHeader extends React.Component {
   render() {
     const { user } = this.state;
     return (
-      <Header className={style.globalHeader}>
-        <div className={style.headerContent}>
-          <div className={style.logoImg} onClick={this.goIndex} />
-          <div style={{ position: 'relative' }}>
-            <Avatar
-              size={36}
-              src={user.avatar}
-              style={{
-                position: 'absolute',
-                left: -35,
-                top: 14,
-                cursor: 'pointer',
-              }}
-            />
-            <span className={style.headerUser} style={{ marginLeft: 10 }}>
-              {user.name}
-            </span>
+      <div className={style.globalHeaderWidth}>
+        <Header className={style.globalHeader}>
+          <div className={style.headerContent}>
+            <div className={style.logoImg} onClick={this.goIndex} />
+            <div style={{ position: 'relative' }}>
+              <Avatar
+                size={36}
+                src={user.avatar}
+                style={{
+                  position: 'absolute',
+                  left: -35,
+                  top: 14,
+                  cursor: 'pointer',
+                }}
+              />
+              <span className={style.headerUser} style={{ marginLeft: 10 }}>
+                {user.name}
+              </span>
+            </div>
           </div>
-        </div>
-      </Header>
+        </Header>
+      </div>
     );
   }
 }

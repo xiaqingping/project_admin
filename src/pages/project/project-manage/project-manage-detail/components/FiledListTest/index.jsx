@@ -48,7 +48,7 @@ const FiledList = props => {
   // 面包屑
   const [BreadcrumbName, setBreadcrumbName] = useState([]);
   // 当前层级
-  const [hierarchy, setHierarchy] = useState('1');
+  // const [hierarchy, setHierarchy] = useState('1');
   // 创建文件夹名称
   const [projectParma, setProjectParma] = useState({
     name: '',
@@ -60,6 +60,16 @@ const FiledList = props => {
   const [businessParma, setBusinessParma] = useState({
     businessName: '',
     businessCode: '',
+  });
+
+  // 搜索条件
+  const [listData, setListData] = useState({
+    spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
+    spaceCode: '', // String 必填 空间编号(可以为功能ID/编号...)
+    directoryId: '0', // String 可选 目录ID
+    searchName: '', // String 可选 搜索名称（文件或目录名称）
+    sortType: 1, // Integer 必填 {1, 2, 3}
+    sortWay: 1, // Integer 必填 {1, 2}
   });
 
   /** 状态 */
@@ -100,12 +110,16 @@ const FiledList = props => {
     handleChange: () => {
       const sortWay = isActive ? 1 : 2;
       const data = {
-        directoryId: '1',
-        searchName: '',
         sortType: sortParameters,
         sortWay,
       };
-      fn.getDateList(data);
+      setListData({
+        ...listData,
+        ...data,
+      });
+      setTimeout(() => {
+        fn.getDateList();
+      }, 100);
     },
     /**
      * 获取列表数据
@@ -113,20 +127,11 @@ const FiledList = props => {
      */
     getDateList: parameters => {
       const { projectId } = props;
-      let data = {
-        spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
-        spaceCode: projectId, // String 必填 空间编号(可以为功能ID/编号...)
-        directoryId: '', // String 可选 目录ID
-        searchName: '', // String 可选 搜索名称（文件或目录名称）
-        sortType: 1, // Integer 必填 {1, 2, 3}
-        sortWay: 1, // Integer 必填 {1, 2}
+      const data = {
+        ...listData,
+        spaceCode: projectId,
+        ...parameters,
       };
-
-      if (parameters)
-        data = {
-          ...data,
-          ...parameters,
-        };
 
       if (!data.directoryId) setBreadcrumbName([]);
 
@@ -158,10 +163,10 @@ const FiledList = props => {
      * @param {Object} row 被删除行或者多行的数据
      */
     handleDeleteFiles: (isMulp, row) => {
-      const formatData = {};
+      let formatData = [];
       if (isMulp) {
         // 批量删除
-        formatData.list = selectedRows.map(item => {
+        formatData = selectedRows.map(item => {
           return {
             id: item.id,
             fileType: item.fileType,
@@ -169,18 +174,16 @@ const FiledList = props => {
         });
       } else {
         // 单个删除
-        formatData.list = [row].map(item => {
+        formatData = [row].map(item => {
           return {
             id: item.id,
             fileType: item.fileType,
           };
         });
       }
-      formatData.spaceType = 'project';
-      formatData.spaceCode = props.projectId;
       setLoading(true);
       api2
-        .deleteFiles(formatData)
+        .deleteFiles(formatData, 'project', props.projectId)
         .then(() => {
           message.success('文件删除成功!');
           setLoading(false);
@@ -207,25 +210,29 @@ const FiledList = props => {
       });
     },
     // 查询
-    queryList: e => fn.getDateList({ searchName: e.target.value }),
+    queryList: e =>
+      fn.getDateList({
+        searchName: e.target.value,
+      }),
     // 目录查询
     querydirectory: (id, type, name) => {
       if (type === 2) {
         setBreadcrumbName([...BreadcrumbName, { name, id }]);
-        setHierarchy(id);
-        fn.getDateList({
+        setListData({
+          ...listData,
           directoryId: id,
         });
+        fn.getDateList({ directoryId: id });
       }
     },
     // 创建目录
     createDirctory: () => {
       const { projectId } = props;
       const { code } = baseList;
+      const id = listData.directoryId === '0' ? '3' : listData.directoryId;
       const data = {
         spaceType: 'project',
         sourceCode: code,
-        parentId: hierarchy,
         sourceType: 'project',
         spaceCode: projectId,
         sourceId: projectId,
@@ -233,6 +240,7 @@ const FiledList = props => {
         userCode: '',
         ...businessParma,
         ...projectParma,
+        parentId: id,
       };
       // 校验输入值
       const result = fn.verifyInput(data);
@@ -242,7 +250,7 @@ const FiledList = props => {
 
       return api.createDirctory(data).then(res => {
         setTableList(res);
-        fn.getDateList(hierarchy);
+        fn.getDateList();
         setLoading(false);
       });
     },
@@ -257,12 +265,12 @@ const FiledList = props => {
     // 输入框验证
     verifyInput: data => {
       const { name } = data;
-      const arr = ['&', '\\', '/', '*', '>', '<', '@', '!'];
-      for (let i = 0; i < arr.length; i++) {
-        if (name.indexOf(arr[i]) !== -1 || name.indexOf(arr[i]) !== -1) {
-          message.error('输入字符不合法！');
-          return false;
-        }
+      // eslint-disable-next-line no-useless-escape
+      const reg = new RegExp('[\\u005C/:\\u002A\\u003F"<>\'\\u007C’‘“”：？]');
+      const res = reg.test(name);
+      if (res) {
+        message.error('输入字符不合法！');
+        return false;
       }
       return true;
     },
@@ -277,13 +285,17 @@ const FiledList = props => {
     // 查询项目基础信息及流程列表
     api1.getProjectProcess(props.projectId).then(res => setBaseList(res));
     // 查询成员列表
-    api1.getProjectMember({ projectId: props.projectId }).then(res => {
-      const { code, name } = res[0];
-      setBusinessParma({
-        businessName: name,
-        businessCode: code,
+    api1
+      .getProjectMember({
+        projectId: props.projectId,
+      })
+      .then(res => {
+        const { code, name } = res[0];
+        setBusinessParma({
+          businessName: name,
+          businessCode: code,
+        });
       });
-    });
   }, []);
 
   const editFile = row => {
@@ -306,7 +318,10 @@ const FiledList = props => {
         <div>
           {fn.setImg(record.fileType, record.extendName)}
           <span
-            style={{ marginLeft: 10, cursor: 'pointer' }}
+            style={{
+              marginLeft: 10,
+              cursor: 'pointer',
+            }}
             onClick={() => {
               fn.querydirectory(record.id, record.fileType, record.name);
             }}
@@ -383,7 +398,12 @@ const FiledList = props => {
                 <Breadcrumb.Item>
                   <span
                     onClick={() => {
-                      fn.getDateList();
+                      fn.getDateList({ directoryId: '0' });
+                      setListData({
+                        ...listData,
+                        directoryId: '0',
+                      });
+                      setBreadcrumbName([]);
                     }}
                   >
                     全部文件
@@ -396,7 +416,16 @@ const FiledList = props => {
                         <Breadcrumb.Item key={key}>
                           <span
                             onClick={() => {
-                              fn.getDateList(item.id, 2);
+                              fn.getDateList({
+                                directoryId: item.id,
+                              });
+                              setListData({
+                                ...listData,
+                                directoryId: item.id,
+                              });
+                              setBreadcrumbName(
+                                BreadcrumbName.slice(0, key + 1),
+                              );
                             }}
                           >
                             {item.name}
@@ -423,9 +452,14 @@ const FiledList = props => {
                 <div
                   onClick={() => {
                     setIsActive(!isActive);
-                    fn.handleChange(sortParameters);
+                    setTimeout(() => {
+                      fn.handleChange(sortParameters);
+                    }, 100);
                   }}
-                  style={{ transform: 'translateX(10px)', zIndex: '999' }}
+                  style={{
+                    transform: 'translateX(10px)',
+                    zIndex: '999',
+                  }}
                 >
                   {/* 排序 */}
                   <SwapRightOutlined
@@ -453,10 +487,15 @@ const FiledList = props => {
                       fontSize: '14px',
                       color: 'rgb(24, 144, 255)',
                     }}
-                    onChange={value => setSortParameters(value)}
+                    onChange={value => {
+                      setSortParameters(value);
+                      fn.handleChange(sortParameters);
+                    }}
                     bordered={false}
                     dropdownMatchSelectWidth={120}
-                    dropdownStyle={{ textAlign: 'center' }}
+                    dropdownStyle={{
+                      textAlign: 'center',
+                    }}
                     onClick={e => e.stopPropagation()}
                     showArrow={false}
                   >
