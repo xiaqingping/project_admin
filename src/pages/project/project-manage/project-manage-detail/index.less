@@ -20,10 +20,30 @@
 }
 
 .footer {
-  width: 100%;
+  width: 99.5vw;
   height: 56px;
+  margin: 0 auto;
   margin-top: 24px;
   background: #fff;
+}
+
+@media screen and (max-width: 3000px) {
+  .footer {
+    margin-left: calc((1600px - 100vw) / 2);
+  }
+}
+
+@media screen and (max-width: 1600px) {
+  .footer {
+    margin-left: calc((1152px - 100vw) / 2);
+  }
+}
+
+@media screen and (max-width: 1152px) {
+  .footer {
+    width: 1152px;
+    margin-left: 0;
+  }
 }
 
 .button {

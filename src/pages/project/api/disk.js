@@ -13,6 +13,11 @@ const sourceKeyList = [
   'ngs_sample', // 样品上传序列文件
 ];
 
+let http1 = 'http://192.168.20.6:8150/';
+if (process.env.NODE_ENV !== 'development') {
+  http1 = '';
+}
+
 /**
  * 验证 sourceKey 是否定义，没有定义 sourceKey 的无法直接使用
  * @param {String} sourceKey
@@ -42,7 +47,8 @@ export default {
   // },
   getFiles(params) {
     return request(
-      `http://192.168.20.6:8150/disk/v2/${params.spaceType}/${params.spaceCode}/files`,
+      `${http1}disk/v2/${params.spaceType}/${params.spaceCode}/files`,
+      // (`http://192.168.20.14:8150/disk/v2/${params.spaceType}/${params.spaceCode}/files`,
       {
         params,
       },
@@ -87,7 +93,8 @@ export default {
   // 创建目录
   createDirctory(params) {
     return request(
-      `http://192.168.20.27:8150/disk/v1/${params.spaceType}/${params.spaceCode}/dirctory`,
+      `${http1}disk/v1/${params.spaceType}/${params.spaceCode}/dirctory`,
+      // (`http://192.168.20.27:8150/disk/v1/${params.spaceType}/${params.spaceCode}/dirctory`,
       {
         method: 'POST',
         data: params,
