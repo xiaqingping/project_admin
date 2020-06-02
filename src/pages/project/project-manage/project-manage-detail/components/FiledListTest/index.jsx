@@ -213,7 +213,9 @@ const FiledList = props => {
         return false;
       }
       confirm({
-        title: '删除后将不可恢复，确定删除当前项目吗？',
+        title: row
+          ? '删除后将不可恢复，确定删除当前文件吗？'
+          : '删除后将不可恢复，确定删除所选文件吗？',
         icon: <ExclamationCircleOutlined />,
         content: '',
         centered: true,
@@ -537,7 +539,7 @@ const FiledList = props => {
       </div>
       <Table
         className="classrow"
-        rowKey="name"
+        rowKey={record => `${record.fileType}_${record.id}`}
         rowSelection={rowSelection}
         columns={columns}
         dataSource={tableList.length > 0 ? tableList : []}

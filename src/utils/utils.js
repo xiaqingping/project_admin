@@ -388,3 +388,20 @@ export const arrChangeObject = value => {
   }
   return arr;
 };
+
+/**
+ * 获取cookie中存的值
+ * @param {string} name 要获取的cookie名字
+ */
+export const getCookie2 = name => {
+  const strcookie = document.cookie;
+  const arrcookie = strcookie.split(';');
+
+  for (let i = 0; i < arrcookie.length; i++) {
+    const arr = arrcookie[i].split('=');
+    if (arr[0] === name) {
+      return arr[1];
+    }
+  }
+  return '';
+};

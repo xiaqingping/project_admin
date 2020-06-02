@@ -3,7 +3,7 @@
  */
 import request from '@/utils/request';
 
-const http = 'http://192.168.20.14:8150/';
+const http = 'http://192.168.20.6:8150/';
 export default {
   getFiles(params) {
     return request(
