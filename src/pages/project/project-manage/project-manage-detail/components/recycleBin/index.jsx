@@ -1,6 +1,6 @@
 // 点击选择流程模型的模态框
 import React from 'react';
-import { Modal, Table, Popconfirm, Button, message, Divider } from 'antd';
+import { Modal, Table, Popconfirm, Button, Divider } from 'antd';
 import { FileExclamationOutlined } from '@ant-design/icons';
 import { connect } from 'dva';
 import api from '@/pages/project/api/recy';
@@ -71,40 +71,29 @@ class recycliBin extends React.Component {
 
   // 单个删除数据
   deleteRow = row => {
-    const { selectedRowList } = this.state;
-    console.log(selectedRowList);
-    if (selectedRowList.length === 0)
-      return message.error('请选中一条数据删除');
-    if (selectedRowList.length > 1) return message.error('请选择批量删除');
-    if (row.id !== selectedRowList[0].id)
-      return message.error('请删除选中的数据');
-
-    if (row.id === selectedRowList[0].id) {
-      const data = {};
-      data.spaceType = 'project'; // String 必填 空间类型（来源可以为服务名称...）
-      data.spaceCode = '6e761a1aa7934884b11bf57ebf69db51'; // String 必填 空间编号(可以为功能ID/编号...)
-      const files = [
-        {
-          id: selectedRowList[0].id, // String 可选 文件或文件夹的ID
-          fileType: selectedRowList[0].fileType, // Integer 必填 {1目录, 2文件}
-        },
-      ];
-      api
-        .deleteRecycleRestore(data, files)
-        .then(() => {
-          this.setState({
-            loading: false,
-          });
-          this.getDeleteList();
-        })
-        .catch(err => {
-          console.log(err);
-          this.setState({
-            loading: false,
-          });
+    const data = {};
+    data.spaceType = 'project'; // String 必填 空间类型（来源可以为服务名称...）
+    data.spaceCode = '6e761a1aa7934884b11bf57ebf69db51'; // String 必填 空间编号(可以为功能ID/编号...)
+    const files = [
+      {
+        id: row.id, // String 可选 文件或文件夹的ID
+        fileType: row.fileType, // Integer 必填 {1目录, 2文件}
+      },
+    ];
+    api
+      .deleteRecycleRestore(data, files)
+      .then(() => {
+        this.setState({
+          loading: false,
         });
-    }
-    return true;
+        this.getDeleteList();
+      })
+      .catch(err => {
+        console.log(err);
+        this.setState({
+          loading: false,
+        });
+      });
   };
 
   // 批量删除
@@ -149,40 +138,31 @@ class recycliBin extends React.Component {
 
   // 单个数据还原
   restore = row => {
-    const { selectedRowList } = this.state;
-    if (selectedRowList.length === 0)
-      return message.error('请选中一条数据还原');
-    if (selectedRowList.length > 1) return message.error('请选择批量还原');
-    if (row.id !== selectedRowList[0].id)
-      return message.error('请还原选中的数据');
-    if (row.id === selectedRowList[0].id) {
-      const data = {};
-      data.spaceType = 'project';
-      data.spaceCode = '6e761a1aa7934884b11bf57ebf69db51';
-      const files = [
-        {
-          id: selectedRowList[0].id,
-          fileType: selectedRowList[0].fileType,
-        }, // String id可选 文件或文件夹的ID, Integer fileType必填 {1目录, 2文件}
-      ];
-      // data.files=newlist;
-      api
-        .getRecycleRestore(data, files)
-        .then(() => {
-          this.setState({
-            loading: false,
-          });
-          this.getDeleteList();
-          this.props.getData();
-        })
-        .catch(err => {
-          console.log(err);
-          this.setState({
-            loading: false,
-          });
+    const data = {};
+    data.spaceType = 'project';
+    data.spaceCode = '6e761a1aa7934884b11bf57ebf69db51';
+    const files = [
+      {
+        id: row.id,
+        fileType: row.fileType,
+      }, // String id可选 文件或文件夹的ID, Integer fileType必填 {1目录, 2文件}
+    ];
+    // data.files=newlist;
+    api
+      .getRecycleRestore(data, files)
+      .then(() => {
+        this.setState({
+          loading: false,
         });
-    }
-    return true;
+        this.getDeleteList();
+        this.props.getData();
+      })
+      .catch(err => {
+        console.log(err);
+        this.setState({
+          loading: false,
+        });
+      });
   };
 
   // 批量还原
