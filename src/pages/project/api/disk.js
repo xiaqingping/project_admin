@@ -38,13 +38,6 @@ export default {
   //   });
   // },
 
-  // getFiles(params) {
-  //   return request
-  //   (`http://192.168.20.14:8150/disk/v2/${params.spaceType}/${params.spaceCode}/files`,
-  //   {
-  //     params,
-  //   });
-  // },
   getFiles(params) {
     return request(
       `${http1}disk/v2/${params.spaceType}/${params.spaceCode}/files`,

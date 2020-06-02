@@ -116,6 +116,7 @@ class recycliBin extends React.Component {
         files.push(newlist);
       });
       console.log(files);
+      console.log(data);
       // data.files =files;
       api
         .deleteRecycleRestore(data, files)
