@@ -46,7 +46,7 @@ const FiledList = props => {
   // 面包屑
   const [BreadcrumbName, setBreadcrumbName] = useState([])
   // 当前层级
-  const [hierarchy, setHierarchy] = useState('1')
+  // const [hierarchy, setHierarchy] = useState('1')
   // 创建文件夹名称
   const [projectParma, setProjectParma] = useState({
     "name": '',
@@ -59,6 +59,17 @@ const FiledList = props => {
     "businessName": "",
     "businessCode": "",
   })
+  // 搜索条件
+  const [listData, setListData] = useState(
+    {
+      spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
+      spaceCode: '', // String 必填 空间编号(可以为功能ID/编号...)
+      directoryId: '0', // String 可选 目录ID
+      searchName: '', // String 可选 搜索名称（文件或目录名称）
+      sortType: 1, // Integer 必填 {1, 2, 3}
+      sortWay: 1 // Integer 必填 {1, 2}
+    }
+  )
 
   /** 状态 */
   // 新建文件夹Model状态
@@ -96,12 +107,14 @@ const FiledList = props => {
     handleChange: () => {
       const sortWay = isActive ? 1 : 2
       const data = {
-        directoryId: '1',
-        searchName: '',
         sortType: sortParameters,
         sortWay,
       }
-      fn.getDateList(data)
+      setListData({
+        ...listData,
+        ...data
+      })
+      setTimeout(() => { fn.getDateList() }, 100)
     },
     /**
      * 获取列表数据
@@ -109,24 +122,15 @@ const FiledList = props => {
      */
     getDateList: parameters => {
       const { projectId } = props
-      let data = {
-        spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
-        spaceCode: projectId, // String 必填 空间编号(可以为功能ID/编号...)
-        directoryId: '', // String 可选 目录ID
-        searchName: '', // String 可选 搜索名称（文件或目录名称）
-        sortType: 1, // Integer 必填 {1, 2, 3}
-        sortWay: 1, // Integer 必填 {1, 2}
-      }
-
-      if (parameters) data = {
-        ...data,
-        ...parameters
+      const data = {
+        ...listData,
+        spaceCode: projectId,
+        ...parameters,
       }
 
       if (!data.directoryId) setBreadcrumbName([])
 
       setLoading(true)
-
       return api.getFiles(data).then(res => {
         setTableList(res)
         setLoading(false)
@@ -158,29 +162,32 @@ const FiledList = props => {
         },
       })
     },
-    // 查询
-    queryList: e => fn.getDateList({ 'searchName': e.target.value }),
-    // 目录查询
+    /** 查询 */
+    queryList: e => fn.getDateList({
+      'searchName': e.target.value
+    }),
+    /** 目录查询 */
     querydirectory: (id, type, name) => {
       if (type === 2) {
         setBreadcrumbName([
           ...BreadcrumbName,
           { name, id }
         ])
-        setHierarchy(id)
-        fn.getDateList({
+        setListData({
+          ...listData,
           directoryId: id
         })
+        fn.getDateList({ directoryId: id })
       }
     },
-    // 创建目录
+    /** 创建目录 */
     createDirctory: () => {
       const { projectId } = props
       const { code } = baseList
+      const id = listData.directoryId === '0' ? '3' : listData.directoryId
       const data = {
         "spaceType": "project",
         "sourceCode": code,
-        "parentId": hierarchy,
         "sourceType": "project",
         "spaceCode": projectId,
         "sourceId": projectId,
@@ -188,6 +195,7 @@ const FiledList = props => {
         "userCode": "",
         ...businessParma,
         ...projectParma,
+        "parentId": id,
       }
       // 校验输入值
       const result = fn.verifyInput(data)
@@ -197,11 +205,11 @@ const FiledList = props => {
 
       return api.createDirctory(data).then(res => {
         setTableList(res)
-        fn.getDateList(hierarchy)
+        fn.getDateList()
         setLoading(false)
       })
     },
-    // 清除创建
+    /** 清除创建 */
     clearParam: () => {
       setVisible(false)
       setProjectParma({
@@ -209,15 +217,15 @@ const FiledList = props => {
         describe: ''
       })
     },
-    // 输入框验证
+    /** 输入框验证 */
     verifyInput: data => {
       const { name } = data
-      const arr = ["&", "\\", "/", "*", ">", "<", "@", "!"]
-      for (let i = 0; i < arr.length; i++) {
-        if (name.indexOf(arr[i]) !== -1 || name.indexOf(arr[i]) !== -1) {
-          message.error('输入字符不合法！')
-          return false
-        }
+      // eslint-disable-next-line no-useless-escape
+      const reg = new RegExp('[\\u005C/:\\u002A\\u003F\"<>\'\\u007C’‘“”：？]')
+      const res = reg.test(name)
+      if (res) {
+        message.error('输入字符不合法！')
+        return false
       }
       return true
     }
@@ -301,7 +309,9 @@ const FiledList = props => {
       <div className="classQuery">
         <Row>
           <Col span={8}>
-            <Button type="primary" onClick={() => { setVisible(true) }}>
+            <Button type="primary" onClick={() => {
+              setVisible(true)
+            }}>
               <FolderOutlined />新建文件夹
             </Button>
             <Button onClick={() => { }}>
@@ -310,7 +320,14 @@ const FiledList = props => {
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
               <Breadcrumb style={{ cursor: 'pointer' }}>
                 <Breadcrumb.Item>
-                  <span onClick={() => { fn.getDateList() }}>全部文件</span>
+                  <span onClick={() => {
+                    fn.getDateList({ directoryId: '0' })
+                    setListData({
+                      ...listData,
+                      directoryId: '0'
+                    })
+                    setBreadcrumbName([])
+                  }}>全部文件</span>
                 </Breadcrumb.Item>
                 {
                   BreadcrumbName && BreadcrumbName.length > 0 ?
@@ -318,7 +335,14 @@ const FiledList = props => {
                       const key = index
                       return <Breadcrumb.Item key={key}>
                         <span onClick={() => {
-                          fn.getDateList(item.id, 2)
+                          fn.getDateList({
+                            directoryId: item.id
+                          })
+                          setListData({
+                            ...listData,
+                            directoryId: item.id
+                          })
+                          setBreadcrumbName(BreadcrumbName.slice(0, key + 1))
                         }}>{item.name}</span>
                       </Breadcrumb.Item>
                     }) : ''
@@ -339,7 +363,7 @@ const FiledList = props => {
                 <div
                   onClick={() => {
                     setIsActive(!isActive)
-                    fn.handleChange(sortParameters)
+                    setTimeout(() => { fn.handleChange(sortParameters) }, 100)
                   }}
                   style={{ transform: 'translateX(10px)', zIndex: '999' }}
                 >
@@ -365,7 +389,10 @@ const FiledList = props => {
                     style={{
                       width: 100, textAlign: 'center', fontSize: '14px', color: 'rgb(24, 144, 255)'
                     }}
-                    onChange={value => setSortParameters(value)}
+                    onChange={value => {
+                      setSortParameters(value)
+                      fn.handleChange(sortParameters)
+                    }}
                     bordered={false}
                     dropdownMatchSelectWidth={120}
                     dropdownStyle={{ textAlign: 'center' }}

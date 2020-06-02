@@ -4332,6 +4332,13 @@ brorand@^1.0.1:
   resolved "http://maven.sangon.com:88/repository/npm-group/brorand/-/brorand-1.1.0.tgz#12c25efe40a45e3c323eb8675a0a0ce57b22371f"
   integrity sha1-EsJe/kCkXjwyPrhnWgoM5XsiNx8=
 
+browser-md5-file@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/browser-md5-file/-/browser-md5-file-1.1.1.tgz#247d63527f662d9667adecbe61808b4961b90dc6"
+  integrity sha512-9h2UViTtZPhBa7oHvp5mb7MvJaX5OKEPUsplDwJ800OIV+In7BOR3RXOMB78obn2iQVIiS3WkVLhG7Zu1EMwbw==
+  dependencies:
+    spark-md5 "^2.0.2"
+
 browser-process-hrtime@^1.0.0:
   version "1.0.0"
   resolved "http://maven.sangon.com:88/repository/npm-group/browser-process-hrtime/-/browser-process-hrtime-1.0.0.tgz#3c9b4b7d782c8121e56f10106d84c0d0ffc94626"
@@ -15019,6 +15026,11 @@ source-map@^0.7.3:
   version "0.7.3"
   resolved "http://maven.sangon.com:88/repository/npm-group/source-map/-/source-map-0.7.3.tgz#5302f8169031735226544092e64981f751750383"
   integrity sha1-UwL4FpAxc1ImVECS5kmB91F1A4M=
+
+spark-md5@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/spark-md5/-/spark-md5-2.0.2.tgz#37b763847763ae7e7acef2ca5233d01e649a78b7"
+  integrity sha1-N7djhHdjrn56zvLKUjPQHmSaeLc=
 
 spdx-correct@^3.0.0:
   version "3.1.0"
