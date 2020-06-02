@@ -33,12 +33,20 @@ export default {
   //   });
   // },
 
+  // getFiles(params) {
+  //   return request
+  //   (`http://192.168.20.14:8150/disk/v2/${params.spaceType}/${params.spaceCode}/files`,
+  //   {
+  //     params,
+  //   });
+  // },
   getFiles(params) {
-    return request
-    (`http://192.168.20.14:8150/disk/v2/${params.spaceType}/${params.spaceCode}/files`,
-    {
-      params,
-    });
+    return request(
+      `http://192.168.20.6:8150/disk/v2/${params.spaceType}/${params.spaceCode}/files`,
+      {
+        params,
+      },
+    );
   },
   // 删除文件
   deleteFiles(id) {
@@ -78,11 +86,12 @@ export default {
   },
   // 创建目录
   createDirctory(params) {
-    return request
-    (`http://192.168.20.27:8150/disk/v1/${params.spaceType}/${params.spaceCode}/dirctory`,
-    {
-      method: 'POST',
-      data: params,
-    });
+    return request(
+      `http://192.168.20.27:8150/disk/v1/${params.spaceType}/${params.spaceCode}/dirctory`,
+      {
+        method: 'POST',
+        data: params,
+      },
+    );
   },
 };

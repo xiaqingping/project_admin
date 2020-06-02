@@ -35,7 +35,7 @@ const service = axios.create({
 //
 // }
 
-const requestErr = (data) => {
+const requestErr = data => {
   let errMsg = ['系统异常,请与系统管理员联系!'];
 
   if (data) {
@@ -78,7 +78,7 @@ const requestErr = (data) => {
   });
 };
 
-const err = (error) => {
+const err = error => {
   const { response = {} } = error;
   const { data } = response;
   requestErr(data);
@@ -87,7 +87,7 @@ const err = (error) => {
 
 /* eslint-disable no-param-reassign */
 // 请求拦截
-service.interceptors.request.use((config) => {
+service.interceptors.request.use(config => {
   // window.location.href = 'http://www.baidu.com';
   // window.open('http://www.baidu.com');
   const token = localStorage.getItem('token');
@@ -113,10 +113,17 @@ service.interceptors.request.use((config) => {
       config.headers.usercode = '123';
       config.headers.username = '123';
       // 项目管理开发
-      if (config.url.indexOf('http://192.168.20.14:8150/') > -1) {
+      // if (config.url.indexOf('http://192.168.20.14:8150/') > -1) {
+      //   config.url = config.url.replace(
+      //     'http://192.168.20.14:8150/',
+      //     '/192.168.20.14:8150/',
+      //   );
+      //   config.baseURL = '/';
+      // }
+      if (config.url.indexOf('http://192.168.20.6:8150/') > -1) {
         config.url = config.url.replace(
-          'http://192.168.20.14:8150/',
-          '/192.168.20.14:8150/',
+          'http://192.168.20.6:8150/',
+          '/192.168.20.6:8150/',
         );
         config.baseURL = '/';
       }
@@ -180,7 +187,7 @@ service.interceptors.request.use((config) => {
 /* eslint-enable no-param-reassign */
 
 // 响应拦截
-service.interceptors.response.use((response) => response.data, err);
+service.interceptors.response.use(response => response.data, err);
 
 export default service;
 export { baseURL, requestErr };
