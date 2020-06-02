@@ -80,7 +80,7 @@ const FiledList = props => {
   // 修改文件数据
   const [editRow, setEditRow] = useState();
   // 批量选择的id
-  const [selectedRows, setSelectedRows] = useState();
+  const [selectedRows, setSelectedRows] = useState([]);
   // 排序状态
   const [isActive, setIsActive] = useState(false);
   // 排序筛选参数
@@ -90,8 +90,10 @@ const FiledList = props => {
 
   // 批量操作
   const rowSelection = {
-    onChange: (selectedRowKeys, rows) => {
-      setSelectedRows(rows);
+    onChange: (selectedRowKeys, selectRows) => {
+      const selectRows1 = selectRows.filter(item => !!item === true);
+      console.log(selectRows1);
+      setSelectedRows(selectRows1);
     },
     getCheckboxProps: record => ({
       disabled: record.name === 'Disabled User',
@@ -108,17 +110,19 @@ const FiledList = props => {
      * @param {String} value
      */
     handleChange: () => {
-      const sortWay = isActive ? 1 : 2;
+      console.log(isActive);
+      // const sortWay = isActive ? 1 : 2;
       const data = {
         sortType: sortParameters,
-        sortWay,
+        sortWay: isActive ? 1 : 2,
       };
+
       setListData({
         ...listData,
         ...data,
       });
       setTimeout(() => {
-        fn.getDateList();
+        fn.getDateList(data);
       }, 100);
     },
     /**
@@ -136,10 +140,15 @@ const FiledList = props => {
       if (!data.directoryId) setBreadcrumbName([]);
 
       setLoading(true);
-      return api.getFiles(data).then(res => {
-        setTableList(res);
-        setLoading(false);
-      });
+      return api
+        .getFiles(data)
+        .then(res => {
+          setTableList(res);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
     },
     /**
      * 设置单行文件小图标
@@ -166,6 +175,7 @@ const FiledList = props => {
       let formatData = [];
       if (isMulp) {
         // 批量删除
+        console.log(selectedRows);
         formatData = selectedRows.map(item => {
           return {
             id: item.id,
@@ -199,6 +209,9 @@ const FiledList = props => {
      * @param {Object} row 被删除行或者多行的数据
      */
     showDeleteConfirm: (isMulp, row) => {
+      if (!row && !selectedRows.length) {
+        return false;
+      }
       confirm({
         title: '删除后将不可恢复，确定删除当前项目吗？',
         icon: <ExclamationCircleOutlined />,
@@ -208,12 +221,18 @@ const FiledList = props => {
           fn.handleDeleteFiles(isMulp, row);
         },
       });
+      return true;
     },
     // 查询
-    queryList: e =>
-      fn.getDateList({
-        searchName: e.target.value,
-      }),
+    queryList: e => {
+      const value = e.target.value.trim();
+      if (value) {
+        setListData({ ...listData, searchName: value });
+        fn.getDateList({
+          searchName: value,
+        });
+      }
+    },
     // 目录查询
     querydirectory: (id, type, name) => {
       if (type === 2) {
@@ -222,6 +241,7 @@ const FiledList = props => {
           ...listData,
           directoryId: id,
         });
+
         fn.getDateList({ directoryId: id });
       }
     },
@@ -248,11 +268,16 @@ const FiledList = props => {
 
       setLoading(true);
 
-      return api.createDirctory(data).then(res => {
-        setTableList(res);
-        fn.getDateList();
-        setLoading(false);
-      });
+      return api
+        .createDirctory(data)
+        .then(res => {
+          setTableList(res);
+          fn.getDateList();
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
     },
     // 清除创建
     clearParam: () => {
@@ -488,6 +513,7 @@ const FiledList = props => {
                       color: 'rgb(24, 144, 255)',
                     }}
                     onChange={value => {
+                      console.log(value);
                       setSortParameters(value);
                       fn.handleChange(sortParameters);
                     }}
