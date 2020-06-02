@@ -434,7 +434,7 @@ const FiledList = props => {
       {/* 搜索模块 */}
       <div className="classQuery">
         <Row>
-          <Col span={11}>
+          <Col span={12}>
             <Button
               type="primary"
               onClick={() => {
@@ -513,9 +513,9 @@ const FiledList = props => {
               </Breadcrumb>
             </div>
           </Col>
-          <Col span={5} offset={6}>
+          <Col span={7} offset={4}>
             <Row>
-              <Col span={15}>
+              <Col span={13}>
                 <Input
                   prefix={<SearchOutlined />}
                   placeholder="搜索"
@@ -524,7 +524,7 @@ const FiledList = props => {
                   }}
                 />
               </Col>
-              <Col span={5} offset={3}>
+              <Col span={8} offset={2}>
                 <div
                   onClick={() => {
                     setIsActive(!isActive);
