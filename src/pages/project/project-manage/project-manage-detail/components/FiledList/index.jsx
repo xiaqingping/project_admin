@@ -45,8 +45,6 @@ const FiledList = props => {
   const [tableList, setTableList] = useState({});
   // 面包屑
   const [BreadcrumbName, setBreadcrumbName] = useState([])
-  // 当前层级
-  // const [hierarchy, setHierarchy] = useState('1')
   // 创建文件夹名称
   const [projectParma, setProjectParma] = useState({
     "name": '',
@@ -114,7 +112,8 @@ const FiledList = props => {
         ...listData,
         ...data
       })
-      setTimeout(() => { fn.getDateList() }, 100)
+      console.log(data)
+      fn.getDateList(data)
     },
     /**
      * 获取列表数据
@@ -134,6 +133,9 @@ const FiledList = props => {
       return api.getFiles(data).then(res => {
         setTableList(res)
         setLoading(false)
+      }).catch(() => {
+        setLoading(false)
+        message.error('查询列表失败！')
       })
     },
     /**
@@ -207,6 +209,9 @@ const FiledList = props => {
         setTableList(res)
         fn.getDateList()
         setLoading(false)
+      }).catch(() => {
+        setLoading(false)
+        message.error('创建文件夹失败！')
       })
     },
     /** 清除创建 */
@@ -258,7 +263,7 @@ const FiledList = props => {
       dataIndex: 'name',
       width: 150,
       render: (value, record) => (
-        <div>
+        <div className='classProjectName'>
           {fn.setImg(record.fileType, record.extendName)}
           <span
             style={{ marginLeft: 10, cursor: 'pointer' }}
@@ -365,7 +370,7 @@ const FiledList = props => {
                     setIsActive(!isActive)
                     setTimeout(() => { fn.handleChange(sortParameters) }, 100)
                   }}
-                  style={{ transform: 'translateX(10px)', zIndex: '999' }}
+                  style={{width: '150px', transform: 'translateX(10px)', zIndex: '999' }}
                 >
 
                   {/* 排序 */}
@@ -404,7 +409,8 @@ const FiledList = props => {
                     <Option value={2}>大小</Option>
                     <Option value={3}>修改日期</Option>
                   </Select>
-                </div></Col>
+                </div>
+              </Col>
             </Row>
           </Col>
         </Row>

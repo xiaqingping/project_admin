@@ -32,12 +32,6 @@ function verifySourceKey(sourceKey) {
 
 export default {
   // 查询文件
-  // getFiles(params) {
-  //   return request('/zuul/api/disk/v1/files', {
-  //     params,
-  //   });
-  // },
-
   getFiles(params) {
     return request
     (`${http1}disk/v2/${params.spaceType}/${params.spaceCode}/files`,
