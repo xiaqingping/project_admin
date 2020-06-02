@@ -422,7 +422,7 @@ const FiledList = props => {
   const copyFilledCloseModel = () => {
     setModelVisible(false);
     setRequestType('');
-    setSelectedRows([]);
+    // setSelectedRows([]);
   };
   // 关闭回收站模态框
   const onClose = () => {
@@ -450,7 +450,6 @@ const FiledList = props => {
             </Button>
             <Button
               onClick={() => {
-                console.log('打开回收站');
                 setRecycle(true);
               }}
             >
@@ -650,6 +649,7 @@ const FiledList = props => {
           getData={() => fn.getDateList()}
         />
       )}
+      {/* 回收站的模态框 */}
       {isRecycle && (
         <RecycleBin onClose={onClose} getData={() => fn.getDateList()} />
       )}
