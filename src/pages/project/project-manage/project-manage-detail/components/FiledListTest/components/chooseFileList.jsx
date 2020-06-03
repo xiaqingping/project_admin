@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Tree, Modal, Button } from 'antd';
+import { Tree, Modal, Button, message } from 'antd';
 import api from '@/pages/project/api/file';
 
 class ChooseFileList extends Component {
@@ -172,6 +172,10 @@ class ChooseFileList extends Component {
    */
   handleOk = type => {
     const { requestData, requestType } = this.state;
+
+    if (JSON.stringify(requestData) === '{}') {
+      return message.warning('请选中一个文件夹！');
+    }
 
     // 批量操作
     if (requestType === 'copyBatch' || requestType === 'movementBatch') {

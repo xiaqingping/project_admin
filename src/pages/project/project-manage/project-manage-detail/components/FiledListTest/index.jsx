@@ -410,11 +410,29 @@ const FiledList = props => {
    * 复制或移动 文件
    */
   const copyOrMovementFilled = type => {
-    if (selectedRows && selectedRows.length) {
-      setModelVisible(true);
-      setRequestType(type);
-      return false;
+    // 单个操作
+    if (type === 'copy' || type === 'movement') {
+      // 单个文件操作时多条数据不执行
+      if (selectedRows && selectedRows.length > 1) {
+        return message.warning('只可选择一个文件或文件夹!');
+      }
+      // 选中数据并只有一条
+      if (selectedRows && selectedRows.length === 1) {
+        setModelVisible(true);
+        setRequestType(type);
+        return false;
+      }
     }
+
+    // 批量操作
+    if (type === 'copyBatch' || type === 'movementBatch') {
+      if (selectedRows && selectedRows.length) {
+        setModelVisible(true);
+        setRequestType(type);
+        return false;
+      }
+    }
+
     return message.warning('请选择需要操作的文件或文件夹!');
   };
 
@@ -422,7 +440,6 @@ const FiledList = props => {
   const copyFilledCloseModel = () => {
     setModelVisible(false);
     setRequestType('');
-    // setSelectedRows([]);
   };
   // 关闭回收站模态框
   const onClose = () => {
