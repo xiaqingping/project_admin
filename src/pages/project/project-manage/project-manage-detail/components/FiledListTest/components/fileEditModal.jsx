@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import React from 'react';
 import { Form, Input, Modal, Button, Spin, message } from 'antd';
 import api from '@/pages/project/api/file';
@@ -13,12 +14,6 @@ class FileEditModal extends React.Component {
   componentDidMount() {}
 
   onFinish = result => {
-    console.log(result);
-    const patrn = /[`~!@#$%^&*()_\-+=<>?:"{}|,\;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘'，。、\s]/im;
-    if (patrn.test(result.name)) {
-      // 如果包含特殊字符返回false
-      return message.error('请勿输入特殊字符');
-    }
     if (result.describe.trim() === '') {
       return message.error('描述为必须！');
     }
@@ -80,9 +75,11 @@ class FileEditModal extends React.Component {
                   max: 100,
                   message: '最多输入100个字符',
                 },
+
                 {
-                  pattern: /^(?![\s]).*(?![\s]).$/,
-                  message: '禁止输入空格',
+                  // eslint-disable-next-line max-len
+                  pattern: /^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?![\s\.]).?$/,
+                  message: '禁止输入特殊字符',
                 },
               ]}
             >
