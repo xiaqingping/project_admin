@@ -4334,8 +4334,8 @@ brorand@^1.0.1:
 
 browser-md5-file@^1.1.1:
   version "1.1.1"
-  resolved "https://registry.yarnpkg.com/browser-md5-file/-/browser-md5-file-1.1.1.tgz#247d63527f662d9667adecbe61808b4961b90dc6"
-  integrity sha512-9h2UViTtZPhBa7oHvp5mb7MvJaX5OKEPUsplDwJ800OIV+In7BOR3RXOMB78obn2iQVIiS3WkVLhG7Zu1EMwbw==
+  resolved "https://registry.npm.taobao.org/browser-md5-file/download/browser-md5-file-1.1.1.tgz#247d63527f662d9667adecbe61808b4961b90dc6"
+  integrity sha1-JH1jUn9mLZZnrey+YYCLSWG5DcY=
   dependencies:
     spark-md5 "^2.0.2"
 
