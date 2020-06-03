@@ -11,6 +11,7 @@ import {
   Row,
   Col,
   message,
+  Spin,
 } from 'antd';
 import {
   FolderOutlined,
@@ -98,6 +99,8 @@ const FiledList = props => {
   const [requestType, setRequestType] = useState('');
   // visible 回收站model状态
   const [isRecycle, setRecycle] = useState(false);
+  // 新建文件夹弹框得loading
+  const [addLoading, setAddLoading] = useState(false);
 
   // 批量操作
   const rowSelection = {
@@ -274,18 +277,20 @@ const FiledList = props => {
       // 校验输入值
       const result = fn.verifyInput(data);
       if (!result) return false;
-
-      setLoading(true);
-
+      // setLoading(true);
+      setAddLoading(true);
       return api
         .createDirctory(data)
         .then(res => {
+          setAddLoading(false);
+          fn.clearParam();
           setTableList(res);
           fn.getDateList();
-          setLoading(false);
+          // setLoading(false);
         })
         .catch(() => {
-          setLoading(false);
+          // setLoading(false);
+          setAddLoading(false);
         });
     },
     /** 清除创建 */
@@ -300,8 +305,8 @@ const FiledList = props => {
     verifyInput: data => {
       const { name } = data;
       // eslint-disable-next-line no-useless-escape
-      const reg = new RegExp('[\\u005C/:\\u002A\\u003F"<>\'\\u007C’‘“”：？]');
-      const res = reg.test(name);
+      const reg = /^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?![\s\.]).?$/;
+      const res = !reg.test(name);
       if (res) {
         message.error('输入字符不合法！');
         return false;
@@ -617,36 +622,37 @@ const FiledList = props => {
         centered
         onOk={() => {
           fn.createDirctory();
-          fn.clearParam();
         }}
         onCancel={() => fn.clearParam()}
       >
-        <div>
-          文件夹名称：{' '}
-          <Input
-            placeholder="输入文件夹名称"
-            value={projectParma.name}
-            onChange={e => {
-              setProjectParma({
-                ...projectParma,
-                name: e.target.value.trim(),
-              });
-            }}
-          />
-        </div>
-        <div>
-          描述：{' '}
-          <Input
-            placeholder="输入描述"
-            value={projectParma.describe}
-            onChange={e => {
-              setProjectParma({
-                ...projectParma,
-                describe: e.target.value.trim(),
-              });
-            }}
-          />
-        </div>
+        <Spin spinning={addLoading}>
+          <div>
+            文件夹名称：{' '}
+            <Input
+              placeholder="输入文件夹名称"
+              value={projectParma.name}
+              onChange={e => {
+                setProjectParma({
+                  ...projectParma,
+                  name: e.target.value.trim(),
+                });
+              }}
+            />
+          </div>
+          <div>
+            描述：{' '}
+            <Input.TextArea
+              placeholder="输入描述"
+              value={projectParma.describe}
+              onChange={e => {
+                setProjectParma({
+                  ...projectParma,
+                  describe: e.target.value.trim(),
+                });
+              }}
+            />
+          </div>
+        </Spin>
       </Modal>
       {editModalVis && (
         <FileEditModal
