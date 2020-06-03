@@ -297,6 +297,7 @@ class ChooseProcessModel extends React.Component {
                         height: '170px',
                         padding: '0',
                         paddingLeft: '24px',
+                        borderRadius: '2px',
                       }}
                       onClick={() => this.clickSelect(item)}
                       className={classNames({
