@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import React from 'react';
 import { Form, Input, Modal, Button, Spin, message } from 'antd';
 import api from '@/pages/project/api/file';
@@ -13,21 +14,13 @@ class FileEditModal extends React.Component {
   componentDidMount() {}
 
   onFinish = result => {
-    console.log(result);
-    const patrn = /[`~!@#$%^&*()_\-+=<>?:"{}|,.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘'，。、\s]/im;
-    if (patrn.test(result.name)) {
-      // 如果包含特殊字符返回false
-      return message.error('请勿输入特殊字符');
+    if (result.describe.trim() === '') {
+      return message.error('描述为必须！');
     }
-
-    if (patrn.test(result.describe)) {
-      // 如果包含特殊字符返回false
-      return message.error('请勿输入特殊字符');
-    }
-
     this.setState({ loading: true });
     const { fileData } = this.props;
-    const formData = this.formRef.current.getFieldsValue();
+    const formData = result;
+    formData.describe = formData.describe.trim();
     const formatData = {
       ...fileData,
       ...formData,
@@ -36,8 +29,7 @@ class FileEditModal extends React.Component {
     };
     api
       .EditFile(formatData)
-      .then(res => {
-        console.log(res);
+      .then(() => {
         this.setState({ loading: false });
         this.props.changeVis(true);
       })
@@ -66,6 +58,7 @@ class FileEditModal extends React.Component {
       >
         <Spin spinning={loading}>
           <Form
+            hideRequiredMark
             name="basic"
             ref={this.formRef}
             initialValues={fileData}
@@ -79,13 +72,15 @@ class FileEditModal extends React.Component {
                   required: true,
                   message: '请输入文件名称',
                 },
+                // {
+                //   max: 100,
+                //   message: '最多输入100个字符',
+                // },
+
                 {
-                  max: 100,
-                  message: '最多输入100个字符',
-                },
-                {
-                  pattern: /^(?![\s]).*(?![\s]).$/,
-                  message: '禁止输入空格',
+                  // eslint-disable-next-line max-len
+                  pattern: /^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?<![\s\.])$/,
+                  message: '禁止输入特殊字符',
                 },
               ]}
             >
@@ -97,11 +92,7 @@ class FileEditModal extends React.Component {
               rules={[
                 {
                   required: true,
-                  message: '请输入任务名称',
-                },
-                {
-                  pattern: /^(?![\s]).*(?![\s]).$/,
-                  message: '禁止输入空格',
+                  message: '请输入描述',
                 },
               ]}
             >

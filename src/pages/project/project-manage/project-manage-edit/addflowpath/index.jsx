@@ -516,14 +516,14 @@ class Test extends Component {
           <div
             style={{
               height: '56px',
-              width: '100%',
+              // width: '100%',
               lineHeight: '56px',
               textAlign: 'right',
               background: '#FFFFFF',
             }}
-            className="classPageHeaderWrapperFooter"
+            className="footer"
           >
-            <div style={{ margin: '0 24px 24px 24px' }}>
+            <div className="footerCenter">
               <Button
                 type="default"
                 onClick={() => this.goBack(true)}

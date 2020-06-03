@@ -99,16 +99,18 @@ class recycliBin extends React.Component {
   // 批量删除
   deleteAll = () => {
     const { selectedRowList } = this.state;
-    this.setState({
-      loading: true,
-    });
 
     if (selectedRowList.length !== 0) {
+      console.log(selectedRowList);
+      this.setState({
+        loading: true,
+      });
       const data = {};
       data.spaceType = 'project';
       data.spaceCode = '6e761a1aa7934884b11bf57ebf69db51';
       const files = [];
       selectedRowList.forEach(item => {
+        console.log(item);
         let newlist = {};
         newlist = {
           id: item.id, // String 可选 文件或文件夹的ID
@@ -118,12 +120,13 @@ class recycliBin extends React.Component {
       });
       console.log(files);
       console.log(data);
-      // data.files =files;
+      data.files = files;
       api
         .deleteRecycleRestore(data, files)
         .then(() => {
           this.setState({
             loading: false,
+            selectedRowList: [],
           });
           this.getDeleteList();
         })
@@ -191,6 +194,7 @@ class recycliBin extends React.Component {
         .then(() => {
           this.setState({
             loading: false,
+            selectedRowList: [],
           });
           this.getDeleteList();
           this.props.getData();
@@ -281,8 +285,10 @@ class recycliBin extends React.Component {
           'selectedRows: ',
           selectedRows,
         );
+        const newRows = selectedRows.filter(item => !!item === true);
+        console.log(newRows);
         this.setState({
-          selectedRowList: selectedRows,
+          selectedRowList: newRows,
         });
       },
       getCheckboxProps: record => ({

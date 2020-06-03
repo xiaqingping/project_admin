@@ -50,7 +50,10 @@ export default {
   fileCopy(data) {
     return request(
       `${http}/disk/v1/${data.spaceType}/${data.spaceCode}/fileCopy`,
-      { method: 'POST', data },
+      {
+        method: 'POST',
+        data,
+      },
     );
   },
 
@@ -58,7 +61,10 @@ export default {
   fileMovement(data) {
     return request(
       `${http}/disk/v1/${data.spaceType}/${data.spaceCode}/fileMovement`,
-      { method: 'POST', data },
+      {
+        method: 'POST',
+        data,
+      },
     );
   },
 
@@ -66,7 +72,10 @@ export default {
   fileBatchCopy(data) {
     return request(
       `${http}/disk/v1/${data.spaceType}/${data.spaceCode}/fileBatchCopy`,
-      { method: 'PUT', data },
+      {
+        method: 'PUT',
+        data,
+      },
     );
   },
 
@@ -74,7 +83,10 @@ export default {
   fileBatchMovement(data) {
     return request(
       `${http}/disk/v1/${data.spaceType}/${data.spaceCode}/fileBatchMovement`,
-      { method: 'PUT', data },
+      {
+        method: 'PUT',
+        data,
+      },
     );
   },
 };

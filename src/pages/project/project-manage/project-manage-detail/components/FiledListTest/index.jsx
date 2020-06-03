@@ -11,6 +11,7 @@ import {
   Row,
   Col,
   message,
+  Spin,
 } from 'antd';
 import {
   FolderOutlined,
@@ -98,6 +99,8 @@ const FiledList = props => {
   const [requestType, setRequestType] = useState('');
   // visible 回收站model状态
   const [isRecycle, setRecycle] = useState(false);
+  // 新建文件夹弹框得loading
+  const [addLoading, setAddLoading] = useState(false);
 
   // 批量操作
   const rowSelection = {
@@ -221,7 +224,9 @@ const FiledList = props => {
         return false;
       }
       confirm({
-        title: '删除后将不可恢复，确定删除当前项目吗？',
+        title: row
+          ? '删除后将不可恢复，确定删除当前文件吗？'
+          : '删除后将不可恢复，确定删除所选文件吗？',
         icon: <ExclamationCircleOutlined />,
         content: '',
         centered: true,
@@ -272,18 +277,20 @@ const FiledList = props => {
       // 校验输入值
       const result = fn.verifyInput(data);
       if (!result) return false;
-
-      setLoading(true);
-
+      // setLoading(true);
+      setAddLoading(true);
       return api
         .createDirctory(data)
         .then(res => {
+          setAddLoading(false);
+          fn.clearParam();
           setTableList(res);
           fn.getDateList();
-          setLoading(false);
+          // setLoading(false);
         })
         .catch(() => {
-          setLoading(false);
+          // setLoading(false);
+          setAddLoading(false);
         });
     },
     /** 清除创建 */
@@ -298,8 +305,8 @@ const FiledList = props => {
     verifyInput: data => {
       const { name } = data;
       // eslint-disable-next-line no-useless-escape
-      const reg = new RegExp('[\\u005C/:\\u002A\\u003F"<>\'\\u007C’‘“”：？]');
-      const res = reg.test(name);
+      const reg = /^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?![\s\.]).?$/;
+      const res = !reg.test(name);
       if (res) {
         message.error('输入字符不合法！');
         return false;
@@ -408,11 +415,29 @@ const FiledList = props => {
    * 复制或移动 文件
    */
   const copyOrMovementFilled = type => {
-    if (selectedRows && selectedRows.length) {
-      setModelVisible(true);
-      setRequestType(type);
-      return false;
+    // 单个操作
+    if (type === 'copy' || type === 'movement') {
+      // 单个文件操作时多条数据不执行
+      if (selectedRows && selectedRows.length > 1) {
+        return message.warning('只可选择一个文件或文件夹!');
+      }
+      // 选中数据并只有一条
+      if (selectedRows && selectedRows.length === 1) {
+        setModelVisible(true);
+        setRequestType(type);
+        return false;
+      }
     }
+
+    // 批量操作
+    if (type === 'copyBatch' || type === 'movementBatch') {
+      if (selectedRows && selectedRows.length) {
+        setModelVisible(true);
+        setRequestType(type);
+        return false;
+      }
+    }
+
     return message.warning('请选择需要操作的文件或文件夹!');
   };
 
@@ -420,7 +445,6 @@ const FiledList = props => {
   const copyFilledCloseModel = () => {
     setModelVisible(false);
     setRequestType('');
-    setSelectedRows([]);
   };
   // 关闭回收站模态框
   const onClose = () => {
@@ -432,7 +456,7 @@ const FiledList = props => {
       {/* 搜索模块 */}
       <div className="classQuery">
         <Row>
-          <Col span={11}>
+          <Col span={12}>
             <Button
               type="primary"
               onClick={() => {
@@ -448,7 +472,6 @@ const FiledList = props => {
             </Button>
             <Button
               onClick={() => {
-                console.log('打开回收站');
                 setRecycle(true);
               }}
             >
@@ -511,9 +534,9 @@ const FiledList = props => {
               </Breadcrumb>
             </div>
           </Col>
-          <Col span={5} offset={6}>
+          <Col span={7} offset={5}>
             <Row>
-              <Col span={15}>
+              <Col span={13}>
                 <Input
                   prefix={<SearchOutlined />}
                   placeholder="搜索"
@@ -522,7 +545,7 @@ const FiledList = props => {
                   }}
                 />
               </Col>
-              <Col span={5} offset={3}>
+              <Col span={8} offset={2}>
                 <div
                   onClick={() => {
                     setIsActive(!isActive);
@@ -585,7 +608,7 @@ const FiledList = props => {
       </div>
       <Table
         className="classrow"
-        rowKey="id"
+        rowKey={record => `${record.fileType}_${record.id}`}
         rowSelection={rowSelection}
         columns={columns}
         dataSource={tableList.length > 0 ? tableList : []}
@@ -599,36 +622,37 @@ const FiledList = props => {
         centered
         onOk={() => {
           fn.createDirctory();
-          fn.clearParam();
         }}
         onCancel={() => fn.clearParam()}
       >
-        <div>
-          文件夹名称：{' '}
-          <Input
-            placeholder="输入文件夹名称"
-            value={projectParma.name}
-            onChange={e => {
-              setProjectParma({
-                ...projectParma,
-                name: e.target.value.trim(),
-              });
-            }}
-          />
-        </div>
-        <div>
-          描述：{' '}
-          <Input
-            placeholder="输入描述"
-            value={projectParma.describe}
-            onChange={e => {
-              setProjectParma({
-                ...projectParma,
-                describe: e.target.value.trim(),
-              });
-            }}
-          />
-        </div>
+        <Spin spinning={addLoading}>
+          <div>
+            文件夹名称：{' '}
+            <Input
+              placeholder="输入文件夹名称"
+              value={projectParma.name}
+              onChange={e => {
+                setProjectParma({
+                  ...projectParma,
+                  name: e.target.value.trim(),
+                });
+              }}
+            />
+          </div>
+          <div>
+            描述：{' '}
+            <Input.TextArea
+              placeholder="输入描述"
+              value={projectParma.describe}
+              onChange={e => {
+                setProjectParma({
+                  ...projectParma,
+                  describe: e.target.value.trim(),
+                });
+              }}
+            />
+          </div>
+        </Spin>
       </Modal>
       {editModalVis && (
         <FileEditModal
@@ -648,6 +672,7 @@ const FiledList = props => {
           getData={() => fn.getDateList()}
         />
       )}
+      {/* 回收站的模态框 */}
       {isRecycle && (
         <RecycleBin onClose={onClose} getData={() => fn.getDateList()} />
       )}

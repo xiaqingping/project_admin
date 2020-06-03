@@ -23,6 +23,7 @@ import ProTable from '@ant-design/pro-table';
 import empty from '@/assets/imgs/empty.png';
 import { formatter } from '@/utils/utils';
 import api from '@/pages/project/api/projectManage';
+import { cutString } from '@/utils/utils.js';
 import style from './index.less';
 
 localStorage.setItem(
@@ -191,12 +192,14 @@ class ProjectManagement extends Component {
     return [
       {
         title: '项目',
+        width: 250,
         dataIndex: 'code',
         hideInSearch: true,
+        ellipsis: true,
         render: (value, row) => (
           <>
-            <div style={{ float: 'left', marginLeft: '10px' }}>
-              <div>{row.name}</div>
+            <div style={{ float: 'left' }}>
+              <div title={row.name}>{cutString(row.name, 30)}</div>
               <div>
                 <a onClick={() => this.searchDetails(row)}>{value}</a>
               </div>
@@ -215,7 +218,7 @@ class ProjectManagement extends Component {
       {
         title: '状态',
         dataIndex: 'status',
-        // width: 200,
+        width: 200,
         filters: status,
         hideInSearch: true,
         render: (value, row) => {
@@ -264,7 +267,7 @@ class ProjectManagement extends Component {
         },
       },
       {
-        width: 120,
+        width: 140,
         title: '操作',
         hideInSearch: true,
         render: row => (
