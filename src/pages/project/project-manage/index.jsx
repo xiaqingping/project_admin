@@ -312,7 +312,7 @@ class ProjectManagement extends Component {
   render() {
     const { modelSearchOptions, projectIds, createDate } = this.state;
     return (
-      <div>
+      <div style={{ marginTop: 24 }}>
         <div style={{ background: '#F0F2F5' }}>
           <div className={style.manageTitle}>项目列表</div>
           <ProTable

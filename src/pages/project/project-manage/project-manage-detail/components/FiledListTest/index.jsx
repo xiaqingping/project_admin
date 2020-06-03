@@ -20,7 +20,9 @@ import {
   SwapLeftOutlined,
   SwapRightOutlined,
   ExclamationCircleOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons';
+
 import zhCN from 'antd/es/locale/zh_CN';
 
 // 自定义
@@ -31,8 +33,11 @@ import file from '@/assets/imgs/file.png';
 import docx from '@/assets/imgs/word.png';
 import excel from '@/assets/imgs/excel.png';
 import pdf from '@/assets/imgs/pdf.png';
+import RecycleBin from '../recycleBin';
 import FileEditModal from './components/fileEditModal';
 import './index.less';
+// 移动 复制 模态框
+import ChooseFileList from './components/chooseFileList';
 
 const { Option } = Select;
 const { confirm } = Modal;
@@ -48,7 +53,7 @@ const FiledList = props => {
   // 面包屑
   const [BreadcrumbName, setBreadcrumbName] = useState([]);
   // 当前层级
-  const [hierarchy, setHierarchy] = useState('1');
+  // const [hierarchy, setHierarchy] = useState('1');
   // 创建文件夹名称
   const [projectParma, setProjectParma] = useState({
     name: '',
@@ -62,6 +67,16 @@ const FiledList = props => {
     businessCode: '',
   });
 
+  // 搜索条件
+  const [listData, setListData] = useState({
+    spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
+    spaceCode: '', // String 必填 空间编号(可以为功能ID/编号...)
+    directoryId: '0', // String 可选 目录ID
+    searchName: '', // String 可选 搜索名称（文件或目录名称）
+    sortType: 1, // Integer 必填 {1, 2, 3}
+    sortWay: 1, // Integer 必填 {1, 2}
+  });
+
   /** 状态 */
   // 新建文件夹Model状态
   const [isVisible, setVisible] = useState(false);
@@ -70,18 +85,25 @@ const FiledList = props => {
   // 修改文件数据
   const [editRow, setEditRow] = useState();
   // 批量选择的id
-  const [selectedRows, setSelectedRows] = useState();
+  const [selectedRows, setSelectedRows] = useState([]);
   // 排序状态
   const [isActive, setIsActive] = useState(false);
   // 排序筛选参数
   const [sortParameters, setSortParameters] = useState(1);
   // 列表加载状态
   const [isloading, setLoading] = useState(true);
+  // 复制移动文件Model状态
+  const [modelVisible, setModelVisible] = useState(false);
+  // 复制或移动文件类型
+  const [requestType, setRequestType] = useState('');
+  // visible 回收站model状态
+  const [isRecycle, setRecycle] = useState(false);
 
   // 批量操作
   const rowSelection = {
-    onChange: (selectedRowKeys, rows) => {
-      setSelectedRows(rows);
+    onChange: (selectedRowKeys, selectRows) => {
+      const newRows = selectRows.filter(item => !!item === true);
+      setSelectedRows(newRows);
     },
     getCheckboxProps: record => ({
       disabled: record.name === 'Disabled User',
@@ -98,14 +120,19 @@ const FiledList = props => {
      * @param {String} value
      */
     handleChange: () => {
-      const sortWay = isActive ? 1 : 2;
+      // const sortWay = isActive ? 1 : 2;
       const data = {
-        directoryId: '1',
-        searchName: '',
         sortType: sortParameters,
-        sortWay,
+        sortWay: isActive ? 1 : 2,
       };
-      fn.getDateList(data);
+
+      setListData({
+        ...listData,
+        ...data,
+      });
+      setTimeout(() => {
+        fn.getDateList(data);
+      }, 100);
     },
     /**
      * 获取列表数据
@@ -113,28 +140,24 @@ const FiledList = props => {
      */
     getDateList: parameters => {
       const { projectId } = props;
-      let data = {
-        spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
-        spaceCode: projectId, // String 必填 空间编号(可以为功能ID/编号...)
-        directoryId: '', // String 可选 目录ID
-        searchName: '', // String 可选 搜索名称（文件或目录名称）
-        sortType: 1, // Integer 必填 {1, 2, 3}
-        sortWay: 1, // Integer 必填 {1, 2}
+      const data = {
+        ...listData,
+        spaceCode: projectId,
+        ...parameters,
       };
-
-      if (parameters)
-        data = {
-          ...data,
-          ...parameters,
-        };
 
       if (!data.directoryId) setBreadcrumbName([]);
 
       setLoading(true);
-      return api.getFiles(data).then(res => {
-        setTableList(res);
-        setLoading(false);
-      });
+      return api
+        .getFiles(data)
+        .then(res => {
+          setTableList(res);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
     },
     /**
      * 设置单行文件小图标
@@ -158,10 +181,10 @@ const FiledList = props => {
      * @param {Object} row 被删除行或者多行的数据
      */
     handleDeleteFiles: (isMulp, row) => {
-      const formatData = {};
+      let formatData = [];
       if (isMulp) {
         // 批量删除
-        formatData.list = selectedRows.map(item => {
+        formatData = selectedRows.map(item => {
           return {
             id: item.id,
             fileType: item.fileType,
@@ -169,18 +192,16 @@ const FiledList = props => {
         });
       } else {
         // 单个删除
-        formatData.list = [row].map(item => {
+        formatData = [row].map(item => {
           return {
             id: item.id,
             fileType: item.fileType,
           };
         });
       }
-      formatData.spaceType = 'project';
-      formatData.spaceCode = props.projectId;
       setLoading(true);
       api2
-        .deleteFiles(formatData)
+        .deleteFiles(formatData, 'project', props.projectId)
         .then(() => {
           message.success('文件删除成功!');
           setLoading(false);
@@ -196,6 +217,9 @@ const FiledList = props => {
      * @param {Object} row 被删除行或者多行的数据
      */
     showDeleteConfirm: (isMulp, row) => {
+      if (!row && !selectedRows.length) {
+        return false;
+      }
       confirm({
         title: '删除后将不可恢复，确定删除当前项目吗？',
         icon: <ExclamationCircleOutlined />,
@@ -205,27 +229,37 @@ const FiledList = props => {
           fn.handleDeleteFiles(isMulp, row);
         },
       });
+      return true;
     },
-    // 查询
-    queryList: e => fn.getDateList({ searchName: e.target.value }),
-    // 目录查询
-    querydirectory: (id, type, name) => {
-      if (type === 2) {
-        setBreadcrumbName([...BreadcrumbName, { name, id }]);
-        setHierarchy(id);
+    /** 查询 */
+    queryList: e => {
+      const value = e.target.value.trim();
+      if (value) {
+        setListData({ ...listData, searchName: value });
         fn.getDateList({
-          directoryId: id,
+          searchName: value,
         });
       }
     },
-    // 创建目录
+    /** 目录查询 */
+    querydirectory: (id, type, name) => {
+      if (type === 2) {
+        setBreadcrumbName([...BreadcrumbName, { name, id }]);
+        setListData({
+          ...listData,
+          directoryId: id,
+        });
+        fn.getDateList({ directoryId: id });
+      }
+    },
+    /** 创建目录 */
     createDirctory: () => {
       const { projectId } = props;
       const { code } = baseList;
+      const id = listData.directoryId === '0' ? '3' : listData.directoryId;
       const data = {
         spaceType: 'project',
         sourceCode: code,
-        parentId: hierarchy,
         sourceType: 'project',
         spaceCode: projectId,
         sourceId: projectId,
@@ -233,6 +267,7 @@ const FiledList = props => {
         userCode: '',
         ...businessParma,
         ...projectParma,
+        parentId: id,
       };
       // 校验输入值
       const result = fn.verifyInput(data);
@@ -240,13 +275,18 @@ const FiledList = props => {
 
       setLoading(true);
 
-      return api.createDirctory(data).then(res => {
-        setTableList(res);
-        fn.getDateList(hierarchy);
-        setLoading(false);
-      });
+      return api
+        .createDirctory(data)
+        .then(res => {
+          setTableList(res);
+          fn.getDateList();
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
     },
-    // 清除创建
+    /** 清除创建 */
     clearParam: () => {
       setVisible(false);
       setProjectParma({
@@ -254,15 +294,15 @@ const FiledList = props => {
         describe: '',
       });
     },
-    // 输入框验证
+    /** 输入框验证 */
     verifyInput: data => {
       const { name } = data;
-      const arr = ['&', '\\', '/', '*', '>', '<', '@', '!'];
-      for (let i = 0; i < arr.length; i++) {
-        if (name.indexOf(arr[i]) !== -1 || name.indexOf(arr[i]) !== -1) {
-          message.error('输入字符不合法！');
-          return false;
-        }
+      // eslint-disable-next-line no-useless-escape
+      const reg = new RegExp('[\\u005C/:\\u002A\\u003F"<>\'\\u007C’‘“”：？]');
+      const res = reg.test(name);
+      if (res) {
+        message.error('输入字符不合法！');
+        return false;
       }
       return true;
     },
@@ -277,13 +317,17 @@ const FiledList = props => {
     // 查询项目基础信息及流程列表
     api1.getProjectProcess(props.projectId).then(res => setBaseList(res));
     // 查询成员列表
-    api1.getProjectMember({ projectId: props.projectId }).then(res => {
-      const { code, name } = res[0];
-      setBusinessParma({
-        businessName: name,
-        businessCode: code,
+    api1
+      .getProjectMember({
+        projectId: props.projectId,
+      })
+      .then(res => {
+        const { code, name } = res[0];
+        setBusinessParma({
+          businessName: name,
+          businessCode: code,
+        });
       });
-    });
   }, []);
 
   const editFile = row => {
@@ -306,7 +350,10 @@ const FiledList = props => {
         <div>
           {fn.setImg(record.fileType, record.extendName)}
           <span
-            style={{ marginLeft: 10, cursor: 'pointer' }}
+            style={{
+              marginLeft: 10,
+              cursor: 'pointer',
+            }}
             onClick={() => {
               fn.querydirectory(record.id, record.fileType, record.name);
             }}
@@ -357,12 +404,35 @@ const FiledList = props => {
     },
   ];
 
+  /**
+   * 复制或移动 文件
+   */
+  const copyOrMovementFilled = type => {
+    if (selectedRows && selectedRows.length) {
+      setModelVisible(true);
+      setRequestType(type);
+      return false;
+    }
+    return message.warning('请选择需要操作的文件或文件夹!');
+  };
+
+  // 关闭文件Model
+  const copyFilledCloseModel = () => {
+    setModelVisible(false);
+    setRequestType('');
+    setSelectedRows([]);
+  };
+  // 关闭回收站模态框
+  const onClose = () => {
+    setRecycle(false);
+  };
+
   return (
     <ConfigProvider locale={zhCN}>
       {/* 搜索模块 */}
       <div className="classQuery">
         <Row>
-          <Col span={8}>
+          <Col span={11}>
             <Button
               type="primary"
               onClick={() => {
@@ -376,14 +446,38 @@ const FiledList = props => {
               <DownloadOutlined />
               下载
             </Button>
+            <Button
+              onClick={() => {
+                console.log('打开回收站');
+                setRecycle(true);
+              }}
+            >
+              <DeleteOutlined />
+              回收站
+            </Button>
             <Button onClick={() => fn.showDeleteConfirm('mulp')}>删除</Button>
+            <Button onClick={() => copyOrMovementFilled('copy')}>复制</Button>
+            <Button onClick={() => copyOrMovementFilled('movement')}>
+              移动
+            </Button>
+            <Button onClick={() => copyOrMovementFilled('copyBatch')}>
+              批量复制
+            </Button>
+            <Button onClick={() => copyOrMovementFilled('movementBatch')}>
+              批量移动
+            </Button>
             <br />
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
               <Breadcrumb style={{ cursor: 'pointer' }}>
                 <Breadcrumb.Item>
                   <span
                     onClick={() => {
-                      fn.getDateList();
+                      fn.getDateList({ directoryId: '0' });
+                      setListData({
+                        ...listData,
+                        directoryId: '0',
+                      });
+                      setBreadcrumbName([]);
                     }}
                   >
                     全部文件
@@ -396,7 +490,16 @@ const FiledList = props => {
                         <Breadcrumb.Item key={key}>
                           <span
                             onClick={() => {
-                              fn.getDateList(item.id, 2);
+                              fn.getDateList({
+                                directoryId: item.id,
+                              });
+                              setListData({
+                                ...listData,
+                                directoryId: item.id,
+                              });
+                              setBreadcrumbName(
+                                BreadcrumbName.slice(0, key + 1),
+                              );
                             }}
                           >
                             {item.name}
@@ -408,9 +511,9 @@ const FiledList = props => {
               </Breadcrumb>
             </div>
           </Col>
-          <Col span={8} offset={8}>
+          <Col span={5} offset={6}>
             <Row>
-              <Col span={12}>
+              <Col span={15}>
                 <Input
                   prefix={<SearchOutlined />}
                   placeholder="搜索"
@@ -419,13 +522,18 @@ const FiledList = props => {
                   }}
                 />
               </Col>
-              <Col span={8} offset={4}>
+              <Col span={5} offset={3}>
                 <div
                   onClick={() => {
                     setIsActive(!isActive);
-                    fn.handleChange(sortParameters);
+                    setTimeout(() => {
+                      fn.handleChange(sortParameters);
+                    }, 100);
                   }}
-                  style={{ transform: 'translateX(10px)', zIndex: '999' }}
+                  style={{
+                    transform: 'translateX(10px)',
+                    zIndex: '999',
+                  }}
                 >
                   {/* 排序 */}
                   <SwapRightOutlined
@@ -453,10 +561,15 @@ const FiledList = props => {
                       fontSize: '14px',
                       color: 'rgb(24, 144, 255)',
                     }}
-                    onChange={value => setSortParameters(value)}
+                    onChange={value => {
+                      setSortParameters(value);
+                      fn.handleChange(sortParameters);
+                    }}
                     bordered={false}
                     dropdownMatchSelectWidth={120}
-                    dropdownStyle={{ textAlign: 'center' }}
+                    dropdownStyle={{
+                      textAlign: 'center',
+                    }}
                     onClick={e => e.stopPropagation()}
                     showArrow={false}
                   >
@@ -472,7 +585,7 @@ const FiledList = props => {
       </div>
       <Table
         className="classrow"
-        rowKey="name"
+        rowKey="id"
         rowSelection={rowSelection}
         columns={columns}
         dataSource={tableList.length > 0 ? tableList : []}
@@ -523,6 +636,20 @@ const FiledList = props => {
           changeVis={closeEditModal}
           spaceCode={props.projectId}
         />
+      )}
+      {/* 移动 复制 模态框 */}
+      {modelVisible && (
+        <ChooseFileList
+          projectId={props.projectId}
+          selectedRows={selectedRows}
+          onClose={copyFilledCloseModel}
+          visible={modelVisible}
+          requestType={requestType}
+          getData={() => fn.getDateList()}
+        />
+      )}
+      {isRecycle && (
+        <RecycleBin onClose={onClose} getData={() => fn.getDateList()} />
       )}
     </ConfigProvider>
   );

@@ -506,7 +506,7 @@ class Test extends Component {
                 style={{
                   width: '98%',
                   height: '30px',
-                  margin: '24px 0 24px 8px ',
+                  margin: '24px 0 24px 12px ',
                 }}
               >
                 选择流程模型
@@ -523,7 +523,7 @@ class Test extends Component {
             }}
             className="classPageHeaderWrapperFooter"
           >
-            <div style={{ margin: '0 150px 24px 150px' }}>
+            <div style={{ margin: '0 24px 24px 24px' }}>
               <Button
                 type="default"
                 onClick={() => this.goBack(true)}

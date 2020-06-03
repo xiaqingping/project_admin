@@ -33,12 +33,14 @@ function verifySourceKey(sourceKey) {
 export default {
   // 查询文件
   getFiles(params) {
-    return request
-    (`${http1}disk/v2/${params.spaceType}/${params.spaceCode}/files`,
-    // (`http://192.168.20.14:8150/disk/v2/${params.spaceType}/${params.spaceCode}/files`,
-    {
-      params,
-    });
+    // http1 = 'http://192.168.20.27:8150/'
+    // http1 = 'http://192.168.20.14:8150/';
+    return request(
+      `${http1}disk/v2/${params.spaceType}/${params.spaceCode}/files`,
+      {
+        params,
+      },
+    );
   },
   // 删除文件
   deleteFiles(id) {
@@ -65,10 +67,28 @@ export default {
     });
   },
   // 批量上传文件
-  uploadMoreFiles(sourceKey, sourceCode) {
-    if (!verifySourceKey(sourceKey)) return false;
-    const { origin } = new URL(baseURL);
-    return `${origin}/zuul/api/disk/v1/files/upload_more/${sourceKey}/${sourceCode}`;
+  // uploadMoreFiles(sourceKey, sourceCode) {
+  //   if (!verifySourceKey(sourceKey)) return false;
+  //   const { origin } = new URL(baseURL);
+  //   return `${origin}/zuul/api/disk/v1/files/upload_more/${sourceKey}/${sourceCode}`;
+  // },
+  // 批量上传第一接口
+  uploadMoreFiles1(params) {
+    // http1 = 'http://192.168.20.27:8150/'
+    return request(`${http1}disk/v1/${params.spaceType}/${params.spaceCode}/files/multiPart`, {
+      method: 'POST',
+      data: params,
+    })
+  },
+   // 批量上传第二接口
+   uploadMoreFiles2(params, formData) {
+    // http1 = 'http://192.168.20.27:8150/'
+    return request(`${http1}disk/v1/${params.spaceType}/${params.spaceCode}/files/multiPartUpload`,
+    {
+      method: 'POST',
+      dataType: 'JSON',
+      data: formData,
+    })
   },
   // 单个上传文件
   uploadFiles(sourceKey, sourceCode) {
@@ -78,12 +98,14 @@ export default {
   },
   // 创建目录
   createDirctory(params) {
-    return request
-    (`${http1}disk/v1/${params.spaceType}/${params.spaceCode}/dirctory`,
-    // (`http://192.168.20.27:8150/disk/v1/${params.spaceType}/${params.spaceCode}/dirctory`,
-    {
-      method: 'POST',
-      data: params,
-    });
+    // http1 = 'http://192.168.20.27:8150/'
+    return request(
+      `${http1}disk/v1/${params.spaceType}/${params.spaceCode}/dirctory`,
+      // (`http://192.168.20.27:8150/disk/v1/${params.spaceType}/${params.spaceCode}/dirctory`,
+      {
+        method: 'POST',
+        data: params,
+      },
+    );
   },
 };

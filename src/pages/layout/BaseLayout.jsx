@@ -12,7 +12,7 @@ const BaseLayout = props => {
     <ConfigProvider locale={zhCN}>
       <div style={{ display: 'flex', flexFlow: 'column', minHeight: '100vh' }}>
         <GlobalHeader />
-        <div className={style.setWidth} style={{ flex: 1 }}>
+        <div style={{ flex: 1 }} className={style.setWidth}>
           {children}
         </div>
         <GlobalFooter />
