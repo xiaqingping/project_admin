@@ -22,15 +22,17 @@ import {
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import zhCN from 'antd/es/locale/zh_CN';
+import Qs from 'qs';
 
 // 自定义
-import api from '@/pages/project/api/disk';
+// import api from '@/pages/project/api/disk';
+import api from '@/pages/project/api/file';
 import api1 from '@/pages/project/api/projectManageDetail';
 import file from '@/assets/imgs/file.png';
 import docx from '@/assets/imgs/word.png';
 import excel from '@/assets/imgs/excel.png';
 import pdf from '@/assets/imgs/pdf.png';
-import FileUpload from './components/UpLoad'
+import FileUpload from './components/UpLoad';
 import './index.less';
 
 const { Option } = Select;
@@ -45,7 +47,7 @@ const FiledList = props => {
   // 列表数据
   const [tableList, setTableList] = useState({});
   // 面包屑
-  const [BreadcrumbName, setBreadcrumbName] = useState([])
+  const [BreadcrumbName, setBreadcrumbName] = useState([]);
   // 创建文件夹名称
   const [projectParma, setProjectParma] = useState({
     name: '',
@@ -77,15 +79,14 @@ const FiledList = props => {
   const [sortParameters, setSortParameters] = useState(1);
   // 列表加载状态
   const [isloading, setLoading] = useState(true);
+  // 批量选择的id
+  const [selectedRows, setSelectedRows] = useState([]);
 
   // 批量操作
   const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        'selectedRows: ',
-        selectedRows,
-      );
+    onChange: (selectedRowKeys, selectRows) => {
+      const newRows = selectRows.filter(item => !!item === true);
+      setSelectedRows(newRows);
     },
     getCheckboxProps: record => ({
       disabled: record.name === 'Disabled User',
@@ -109,10 +110,10 @@ const FiledList = props => {
       };
       setListData({
         ...listData,
-        ...data
-      })
-      console.log(data)
-      fn.getDateList(data)
+        ...data,
+      });
+      console.log(data);
+      fn.getDateList(data);
     },
     /**
      * 获取列表数据
@@ -128,14 +129,17 @@ const FiledList = props => {
 
       if (!data.directoryId) setBreadcrumbName([]);
 
-      setLoading(true)
-      return api.getFiles(data).then(res => {
-        setTableList(res)
-        setLoading(false)
-      }).catch(() => {
-        setLoading(false)
-        message.error('查询列表失败！')
-      })
+      setLoading(true);
+      return api
+        .getFiles(data)
+        .then(res => {
+          setTableList(res);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+          // message.error('查询列表失败！');
+        });
     },
     /**
      * 设置单行文件小图标
@@ -203,15 +207,18 @@ const FiledList = props => {
 
       setLoading(true);
 
-      return api.createDirctory(data).then(res => {
-        setTableList(res)
-        fn.getDateList()
-        setLoading(false)
-        setVisible(false);
-      }).catch(() => {
-        setLoading(false)
-        message.error('创建文件夹失败！')
-      })
+      return api
+        .createDirctory(data)
+        .then(res => {
+          setTableList(res);
+          fn.getDateList();
+          setLoading(false);
+          setVisible(false);
+        })
+        .catch(() => {
+          setLoading(false);
+          message.error('创建文件夹失败！');
+        });
     },
     /** 清除创建 */
     clearParam: () => {
@@ -223,9 +230,10 @@ const FiledList = props => {
     /** 输入框验证 */
     verifyInput: data => {
       const { name } = data;
-      const reg =
-      // eslint-disable-next-line no-useless-escape
-      new RegExp(/^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?<![\s\.])$/);
+      const reg = new RegExp(
+        // eslint-disable-next-line no-useless-escape
+        /^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?<![\s\.])$/,
+      );
       const res = reg.test(name);
       if (!res) {
         message.error('输入字符不合法！');
@@ -248,12 +256,59 @@ const FiledList = props => {
         userCode: '',
         ...businessParma,
         logicDirectoryId: id,
+      };
+      return data;
+    },
+    /** 文件下载(单个) */
+    downloadFile: row => {
+      const data = {
+        spaceCode: props.projectId,
+        spaceType: 'project',
+        id: row.id,
+        fileType: row.fileType,
+        dispositionType: 2,
+        isDown: 2,
+      };
+      api
+        .downloadFiles(data)
+        .then(() => {
+          data.isDown = 1;
+          // eslint-disable-next-line max-len
+          const url = `http://192.168.20.6:8150/disk/v1/${data.spaceType}/${
+            data.spaceCode
+          }/files/download/${data.id}?${Qs.stringify(data)}`;
+          window.open(url);
+        })
+        .catch();
+    },
+    /** 文件下载（批量） */
+    downloadFileBatch: () => {
+      console.log(selectedRows);
+      const data = {
+        spaceCode: props.projectId,
+        spaceType: 'project',
+        dispositionType: 2,
+        files: [],
+        isDown: 2,
+      };
+
+      if (selectedRows && selectedRows.length) {
+        const newFiles = [];
+        selectedRows.forEach(item => {
+          const newItem = {
+            fileType: item.fileType,
+            id: item.id,
+          };
+          newFiles.push(newItem);
+        });
+        data.files = newFiles;
+        console.log(data);
+
+        return false;
       }
-      return data
-    }
+      return message.warning('请选中需要下载的文件！');
+    },
   };
-
-
 
   /**
    * 初始化操作
@@ -263,7 +318,7 @@ const FiledList = props => {
     fn.getDateList();
     // 查询项目基础信息及流程列表
     api1.getProjectProcess(props.projectId).then(res => {
-      setBaseList(res)
+      setBaseList(res);
     });
     // 查询成员列表
     api1.getProjectMember({ projectId: props.projectId }).then(res => {
@@ -282,7 +337,7 @@ const FiledList = props => {
       dataIndex: 'name',
       width: 150,
       render: (value, record) => (
-        <div className='classProjectName'>
+        <div className="classProjectName">
           {fn.setImg(record.fileType, record.extendName)}
           <span
             style={{ marginLeft: 10, cursor: 'pointer' }}
@@ -292,7 +347,13 @@ const FiledList = props => {
           >
             {value}
           </span>
-          <DownloadOutlined className="classDown" />
+          <a
+            href="#!"
+            className={`classFile${record.id}`}
+            onClick={() => fn.downloadFile(record)}
+          >
+            <DownloadOutlined className="classDown" />
+          </a>
         </div>
       ),
     },
@@ -343,7 +404,11 @@ const FiledList = props => {
               <FolderOutlined />
               新建文件夹
             </Button>
-            <Button onClick={() => { }}>
+            <Button
+              onClick={() => {
+                fn.downloadFileBatch();
+              }}
+            >
               <DownloadOutlined />
               下载
             </Button>
@@ -367,28 +432,28 @@ const FiledList = props => {
                 </Breadcrumb.Item>
                 {BreadcrumbName && BreadcrumbName.length > 0
                   ? BreadcrumbName.map((item, index) => {
-                    const key = index;
-                    return (
-                      <Breadcrumb.Item key={key}>
-                        <span
-                          onClick={() => {
-                            fn.getDateList({
-                              directoryId: item.id,
-                            });
-                            setListData({
-                              ...listData,
-                              directoryId: item.id,
-                            });
-                            setBreadcrumbName(
-                              BreadcrumbName.slice(0, key + 1),
-                            );
-                          }}
-                        >
-                          {item.name}
-                        </span>
-                      </Breadcrumb.Item>
-                    );
-                  })
+                      const key = index;
+                      return (
+                        <Breadcrumb.Item key={key}>
+                          <span
+                            onClick={() => {
+                              fn.getDateList({
+                                directoryId: item.id,
+                              });
+                              setListData({
+                                ...listData,
+                                directoryId: item.id,
+                              });
+                              setBreadcrumbName(
+                                BreadcrumbName.slice(0, key + 1),
+                              );
+                            }}
+                          >
+                            {item.name}
+                          </span>
+                        </Breadcrumb.Item>
+                      );
+                    })
                   : ''}
               </Breadcrumb>
             </div>
@@ -412,7 +477,11 @@ const FiledList = props => {
                       fn.handleChange(sortParameters);
                     }, 100);
                   }}
-                  style={{ width: '150px', transform: 'translateX(10px)', zIndex: '999' }}
+                  style={{
+                    width: '150px',
+                    transform: 'translateX(10px)',
+                    zIndex: '999',
+                  }}
                 >
                   {/* 排序 */}
                   <SwapRightOutlined
@@ -513,5 +582,5 @@ const FiledList = props => {
 
 export default connect(({ projectManage }) => ({
   filedList: projectManage.filedList,
-  projectList: projectManage.projectList
+  projectList: projectManage.projectList,
 }))(FiledList);
