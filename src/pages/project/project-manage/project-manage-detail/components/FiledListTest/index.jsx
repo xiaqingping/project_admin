@@ -99,7 +99,9 @@ const FiledList = props => {
   const [isRecycle, setRecycle] = useState(false);
   // 新建文件夹弹框得loading
   const [addLoading, setAddLoading] = useState(false);
-  let globalSearch = true;
+  // 是否为全局搜索
+  const [globalSearch, setGlobalSearch] = useState(0);
+  // let globalSearch = 0;
 
   // 批量操作
   const rowSelection = {
@@ -235,7 +237,6 @@ const FiledList = props => {
     },
     /** 查询 */
     queryList: e => {
-      console.log(listData);
       const value = e.target.value.trim();
       if (value) {
         setListData({
@@ -455,20 +456,21 @@ const FiledList = props => {
   };
 
   const searchChange = e => {
-    globalSearch = e;
+    setGlobalSearch(e);
     if (listData.searchName) {
       fn.getDateList({
-        directoryId: globalSearch * 1 === 0 ? 0 : listData.directoryId,
+        directoryId: e * 1 === 0 ? 0 : listData.directoryId,
       });
     }
   };
 
   const selectBefore = (
     <Select
-      defaultValue="全局搜索"
+      title={globalSearch * 1 === 0 ? '全局搜索' : '当前文件搜索'}
+      defaultValue={0}
       className="select-before"
       onChange={searchChange}
-      style={{ width: 100 }}
+      style={{ width: 90 }}
       dropdownMatchSelectWidth={150}
     >
       <Option value={0}>全局搜索</Option>
