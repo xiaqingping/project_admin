@@ -512,7 +512,7 @@ const FiledList = props => {
               </Breadcrumb>
             </div>
           </Col>
-          <Col span={7} offset={4}>
+          <Col span={7} offset={5}>
             <Row>
               <Col span={13}>
                 <Input
