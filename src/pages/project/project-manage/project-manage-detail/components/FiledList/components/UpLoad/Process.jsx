@@ -41,26 +41,25 @@ const Process = props => {
 
   const uploadfile = (fn) => {
     const formData = new FormData();
-    console.log(cur, cur + SIZE)
     formData.append('file', uploadFile.slice(cur, cur + SIZE));
     formData.append('fileOperationId', fileOperationId);
     formData.append('fileOperationLogicId', fileOperationLogicId);
     formData.append('partNumber', index);
-    console.log(uploadFile)
-    // const body = {
-    //   'fileOperationId': fileOperationId,
-    //   'fileOperationLogicId': fileOperationLogicId,
-    //   'partNumber': index,
-    //   formData
-    // }
     const params = {
       spaceType: data.spaceType,
       spaceCode: data.spaceCode,
     }
     api.uploadMoreFiles2(params, formData).then(res => {
       console.log(res)
-      //     setProgress(Math.ceil(cur / uploadFile.size * 100))
-      //     fn()
+      // const { status, fileOperationId: id1, fileOperationLogicId: id2 } = res
+      // if (status === 1 || status === 3) {
+      //   fileOperationId = id1
+      //   fileOperationLogicId = id2
+      //   index = res.partNumber
+      //   cur = res.partNumber - 1
+      //   setProgress(Math.ceil(cur / uploadFile.size * 100))
+      //   fn()
+      // }
     })
   }
 
@@ -84,7 +83,6 @@ const Process = props => {
             md5
           }
           api.uploadMoreFiles1(data).then(result => {
-            console.log(result)
             const {
               status,
               repeatFlag,

@@ -74,7 +74,7 @@ export default {
   // },
   // 批量上传第一接口
   uploadMoreFiles1(params) {
-    // http1 = 'http://192.168.20.27:8150/'
+    http1 = 'http://192.168.20.27:8150/'
     return request(`${http1}disk/v1/${params.spaceType}/${params.spaceCode}/files/multiPart`, {
       method: 'POST',
       data: params,
@@ -82,7 +82,7 @@ export default {
   },
    // 批量上传第二接口
    uploadMoreFiles2(params, formData) {
-    // http1 = 'http://192.168.20.27:8150/'
+    http1 = 'http://192.168.20.27:8150/'
     return request(`${http1}disk/v1/${params.spaceType}/${params.spaceCode}/files/multiPartUpload`,
     {
       method: 'POST',

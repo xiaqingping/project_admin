@@ -53,8 +53,6 @@ const FiledList = props => {
   const [tableList, setTableList] = useState({});
   // 面包屑
   const [BreadcrumbName, setBreadcrumbName] = useState([]);
-  // 当前层级
-  // const [hierarchy, setHierarchy] = useState('1');
   // 创建文件夹名称
   const [projectParma, setProjectParma] = useState({
     name: '',
@@ -101,6 +99,7 @@ const FiledList = props => {
   const [isRecycle, setRecycle] = useState(false);
   // 新建文件夹弹框得loading
   const [addLoading, setAddLoading] = useState(false);
+  let globalSearch = true;
 
   // 批量操作
   const rowSelection = {
@@ -133,9 +132,7 @@ const FiledList = props => {
         ...listData,
         ...data,
       });
-      setTimeout(() => {
-        fn.getDateList(data);
-      }, 100);
+      fn.getDateList(data);
     },
     /**
      * 获取列表数据
@@ -238,11 +235,17 @@ const FiledList = props => {
     },
     /** 查询 */
     queryList: e => {
+      console.log(listData);
       const value = e.target.value.trim();
       if (value) {
-        setListData({ ...listData, searchName: value });
+        setListData({
+          ...listData,
+          searchName: value,
+          directoryId: globalSearch ? 0 : listData.directoryId,
+        });
         fn.getDateList({
           searchName: value,
+          directoryId: globalSearch * 1 === 0 ? 0 : listData.directoryId,
         });
       }
     },
@@ -354,7 +357,7 @@ const FiledList = props => {
       dataIndex: 'name',
       width: 150,
       render: (value, record) => (
-        <div>
+        <div className="classProjectName">
           {fn.setImg(record.fileType, record.extendName)}
           <span
             style={{
@@ -451,6 +454,28 @@ const FiledList = props => {
     setRecycle(false);
   };
 
+  const searchChange = e => {
+    globalSearch = e;
+    if (listData.searchName) {
+      fn.getDateList({
+        directoryId: globalSearch * 1 === 0 ? 0 : listData.directoryId,
+      });
+    }
+  };
+
+  const selectBefore = (
+    <Select
+      defaultValue="全局搜索"
+      className="select-before"
+      onChange={searchChange}
+      style={{ width: 100 }}
+      dropdownMatchSelectWidth={150}
+    >
+      <Option value={0}>全局搜索</Option>
+      <Option value={1}>当前文件搜索</Option>
+    </Select>
+  );
+
   return (
     <ConfigProvider locale={zhCN}>
       {/* 搜索模块 */}
@@ -495,10 +520,11 @@ const FiledList = props => {
                 <Breadcrumb.Item>
                   <span
                     onClick={() => {
-                      fn.getDateList({ directoryId: '0' });
+                      fn.getDateList({ directoryId: '0', searchName: '' });
                       setListData({
                         ...listData,
                         directoryId: '0',
+                        searchName: '',
                       });
                       setBreadcrumbName([]);
                     }}
@@ -515,10 +541,12 @@ const FiledList = props => {
                             onClick={() => {
                               fn.getDateList({
                                 directoryId: item.id,
+                                searchName: '',
                               });
                               setListData({
                                 ...listData,
                                 directoryId: item.id,
+                                searchName: '',
                               });
                               setBreadcrumbName(
                                 BreadcrumbName.slice(0, key + 1),
@@ -534,18 +562,40 @@ const FiledList = props => {
               </Breadcrumb>
             </div>
           </Col>
-          <Col span={7} offset={5}>
+          <Col span={8} offset={4}>
             <Row>
-              <Col span={13}>
+              <Col span={14}>
                 <Input
-                  prefix={<SearchOutlined />}
+                  addonBefore={selectBefore}
                   placeholder="搜索"
+                  width={150}
                   onPressEnter={value => {
                     fn.queryList(value);
                   }}
+                  onChange={e =>
+                    setListData({
+                      ...listData,
+                      searchName: e.target.value,
+                    })
+                  }
+                  value={listData.searchName}
                 />
+                {/* <Input
+                  prefix={<SearchOutlined />}
+                  placeholder="搜索"
+                  onChange={e =>
+                    setListData({
+                      ...listData,
+                      searchName: e.target.value,
+                    })
+                  }
+                  value={listData.searchName}
+                  onPressEnter={value => {
+                    fn.queryList(value);
+                  }}
+                /> */}
               </Col>
-              <Col span={8} offset={2}>
+              <Col span={7} offset={2}>
                 <div
                   onClick={() => {
                     setIsActive(!isActive);

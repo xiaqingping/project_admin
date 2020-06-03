@@ -72,15 +72,11 @@ class FileEditModal extends React.Component {
                   required: true,
                   message: '请输入文件名称',
                 },
-                // {
-                //   max: 100,
-                //   message: '最多输入100个字符',
-                // },
 
                 {
                   // eslint-disable-next-line max-len
                   pattern: /^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?<![\s\.])$/,
-                  message: '禁止输入特殊字符',
+                  message: '输入内容不合法',
                 },
               ]}
             >
