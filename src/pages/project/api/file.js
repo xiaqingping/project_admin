@@ -15,6 +15,27 @@ export default {
     );
   },
 
+  // 创建目录
+  createDirctory(params) {
+    return request(
+      `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/dirctory`,
+      {
+        method: 'POST',
+        data: params,
+      },
+    );
+  },
+
+  // 单个下载文件
+  downloadFiles(params) {
+    return request(
+      `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/files/download/${params.id}`,
+      {
+        params,
+      },
+    );
+  },
+
   deleteFiles(data, spaceType, spaceCode) {
     return request(
       `${http}/disk/v1/${spaceType}/${spaceCode}/files/fileRecycle`,

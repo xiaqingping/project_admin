@@ -22,9 +22,11 @@ import {
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import zhCN from 'antd/es/locale/zh_CN';
+import Qs from 'qs';
 
 // 自定义
-import api from '@/pages/project/api/disk';
+// import api from '@/pages/project/api/disk';
+import api from '@/pages/project/api/file';
 import api1 from '@/pages/project/api/projectManageDetail';
 import file from '@/assets/imgs/file.png';
 import docx from '@/assets/imgs/word.png';
@@ -77,15 +79,14 @@ const FiledList = props => {
   const [sortParameters, setSortParameters] = useState(1);
   // 列表加载状态
   const [isloading, setLoading] = useState(true);
+  // 批量选择的id
+  const [selectedRows, setSelectedRows] = useState([]);
 
   // 批量操作
   const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        'selectedRows: ',
-        selectedRows,
-      );
+    onChange: (selectedRowKeys, selectRows) => {
+      const newRows = selectRows.filter(item => !!item === true);
+      setSelectedRows(newRows);
     },
     getCheckboxProps: record => ({
       disabled: record.name === 'Disabled User',
@@ -137,7 +138,6 @@ const FiledList = props => {
         })
         .catch(() => {
           setLoading(false);
-          message.error('查询列表失败！');
         });
     },
     /**
@@ -229,11 +229,10 @@ const FiledList = props => {
     /** 输入框验证 */
     verifyInput: data => {
       const { name } = data;
-      const reg =
+      const reg = new RegExp(
         // eslint-disable-next-line no-useless-escape
-        new RegExp(
-          /^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?<![\s\.])$/,
-        );
+        /^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?<![\s\.])$/,
+      );
       const res = reg.test(name);
       if (!res) {
         message.error('输入字符不合法！');
@@ -258,6 +257,55 @@ const FiledList = props => {
         logicDirectoryId: id,
       };
       return data;
+    },
+    /** 文件下载(单个) */
+    downloadFile: row => {
+      const data = {
+        spaceCode: props.projectId,
+        spaceType: 'project',
+        id: row.id,
+        fileType: row.fileType,
+        dispositionType: 2,
+        isDown: 2,
+      };
+      api
+        .downloadFiles(data)
+        .then(() => {
+          data.isDown = 1;
+          // eslint-disable-next-line max-len
+          const url = `http://192.168.20.6:8150/disk/v1/${data.spaceType}/${
+            data.spaceCode
+          }/files/download/${data.id}?${Qs.stringify(data)}`;
+          window.open(url);
+        })
+        .catch();
+    },
+    /** 文件下载（批量） */
+    downloadFileBatch: () => {
+      console.log(selectedRows);
+      const data = {
+        spaceCode: props.projectId,
+        spaceType: 'project',
+        dispositionType: 2,
+        files: [],
+        isDown: 2,
+      };
+
+      if (selectedRows && selectedRows.length) {
+        const newFiles = [];
+        selectedRows.forEach(item => {
+          const newItem = {
+            fileType: item.fileType,
+            id: item.id,
+          };
+          newFiles.push(newItem);
+        });
+        data.files = newFiles;
+        console.log(data);
+
+        return false;
+      }
+      return message.warning('请选中需要下载的文件！');
     },
   };
 
@@ -298,7 +346,13 @@ const FiledList = props => {
           >
             {value}
           </span>
-          <DownloadOutlined className="classDown" />
+          <a
+            href="#!"
+            className={`classFile${record.id}`}
+            onClick={() => fn.downloadFile(record)}
+          >
+            <DownloadOutlined className="classDown" />
+          </a>
         </div>
       ),
     },
@@ -349,7 +403,11 @@ const FiledList = props => {
               <FolderOutlined />
               新建文件夹
             </Button>
-            <Button onClick={() => {}}>
+            <Button
+              onClick={() => {
+                fn.downloadFileBatch();
+              }}
+            >
               <DownloadOutlined />
               下载
             </Button>
