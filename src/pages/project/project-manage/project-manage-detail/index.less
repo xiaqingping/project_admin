@@ -6,7 +6,7 @@
 
 .detailInfor {
   margin-top: 24px;
-  padding: 0 24px;
+  // padding: 0 24px;
 }
 
 .name {
@@ -31,25 +31,50 @@
   .footer {
     margin-left: calc((1600px - 100vw) / 2);
   }
+
+  .footerContent {
+    width: 1600px;
+    margin: 0 auto;
+  }
 }
 
 @media screen and (max-width: 1600px) {
   .footer {
     margin-left: calc((1152px - 100vw) / 2);
   }
+
+  .footerContent {
+    width: 1152px;
+    margin: 0 auto;
+  }
 }
 
-@media screen and (max-width: 1152px) {
+@media screen and (max-width: 1440px) {
   .footer {
-    width: 1152px;
+    margin-left: calc((1024px - 100vw) / 2);
+  }
+
+  .footerContent {
+    width: 1024px;
+    margin: 0 auto;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .footer {
+    width: 1024px;
     margin-left: 0;
+  }
+
+  .footerContent {
+    margin: 0 auto;
   }
 }
 
 .button {
   float: right;
   margin-top: 12px;
-  margin-right: 50px;
+  margin-right: 10px;
 }
 
 .example {

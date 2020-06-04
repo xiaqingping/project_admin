@@ -6,7 +6,6 @@ import {
   Breadcrumb,
   Select,
   Modal,
-  ConfigProvider,
   Table,
   Row,
   Col,
@@ -24,8 +23,7 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons';
 
-import zhCN from 'antd/es/locale/zh_CN';
-
+import Qs from 'qs';
 // 自定义
 import api from '@/pages/project/api/disk';
 import api1 from '@/pages/project/api/projectManageDetail';
@@ -76,15 +74,7 @@ const FiledList = props => {
     businessCode: '',
   });
 
-  // // 搜索条件
-  // const [listData, setListData] = useState({
-  //   spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
-  //   spaceCode: '', // String 必填 空间编号(可以为功能ID/编号...)
-  //   directoryId: '0', // String 可选 目录ID
-  //   searchName: '', // String 可选 搜索名称（文件或目录名称）
-  //   sortType: 1, // Integer 必填 {1, 2, 3}
-  //   sortWay: 1, // Integer 必填 {1, 2}
-  // });
+  const [searchName, setSearchName] = useState('');
 
   /** 状态 */
   // 新建文件夹Model状态
@@ -97,8 +87,7 @@ const FiledList = props => {
   const [selectedRows, setSelectedRows] = useState([]);
   // 排序状态
   const [isActive, setIsActive] = useState(false);
-  // 排序筛选参数
-  const [sortParameters, setSortParameters] = useState(1);
+
   // 列表加载状态
   const [isloading, setLoading] = useState(true);
   // 复制移动文件Model状态
@@ -242,7 +231,7 @@ const FiledList = props => {
         listData = {
           ...listData,
           searchName: value,
-          directoryId: globalSearch ? 0 : listData.directoryId,
+          directoryId: globalSearch ? listData.directoryId : 0,
         };
         fn.getDateList();
       }
@@ -314,6 +303,55 @@ const FiledList = props => {
       }
       return true;
     },
+    /** 文件下载(单个) */
+    downloadFile: row => {
+      const data = {
+        spaceCode: props.projectId,
+        spaceType: 'project',
+        id: row.id,
+        fileType: row.fileType,
+        dispositionType: 2,
+        isDown: 2,
+      };
+      api2
+        .downloadFiles(data)
+        .then(() => {
+          data.isDown = 1;
+          // eslint-disable-next-line max-len
+          const url = `http://192.168.20.6:8150/disk/v1/${data.spaceType}/${
+            data.spaceCode
+          }/files/download/${data.id}?${Qs.stringify(data)}`;
+          window.open(url);
+        })
+        .catch();
+    },
+    /** 文件下载（批量） */
+    downloadFileBatch: () => {
+      console.log(selectedRows);
+      const data = {
+        spaceCode: props.projectId,
+        spaceType: 'project',
+        dispositionType: 2,
+        files: [],
+        isDown: 2,
+      };
+
+      if (selectedRows && selectedRows.length) {
+        const newFiles = [];
+        selectedRows.forEach(item => {
+          const newItem = {
+            fileType: item.fileType,
+            id: item.id,
+          };
+          newFiles.push(newItem);
+        });
+        data.files = newFiles;
+        console.log(data);
+
+        return false;
+      }
+      return message.warning('请选中需要下载的文件！');
+    },
   };
 
   /**
@@ -368,7 +406,13 @@ const FiledList = props => {
           >
             {value}
           </span>
-          <DownloadOutlined className="classDown" />
+          <a
+            href="#!"
+            className={`classFile${record.id}`}
+            onClick={() => fn.downloadFile(record)}
+          >
+            <DownloadOutlined className="classDown" />
+          </a>
         </div>
       ),
     },
@@ -454,7 +498,7 @@ const FiledList = props => {
 
   const searchChange = e => {
     setGlobalSearch(e);
-    if (listData.searchName) {
+    if (listData.searchName.trim()) {
       fn.getDateList({
         directoryId: e * 1 === 0 ? 0 : listData.directoryId,
       });
@@ -476,7 +520,7 @@ const FiledList = props => {
   );
 
   return (
-    <ConfigProvider locale={zhCN}>
+    <div>
       {/* 搜索模块 */}
       <div className="classQuery">
         <Row>
@@ -525,6 +569,7 @@ const FiledList = props => {
                         directoryId: '0',
                         searchName: '',
                       };
+                      setSearchName('');
                       setBreadcrumbName([]);
                     }}
                   >
@@ -572,27 +617,10 @@ const FiledList = props => {
                     fn.queryList(value);
                   }}
                   onChange={e => {
-                    listData = {
-                      ...listData,
-                      searchName: e.target.value,
-                    };
+                    setSearchName(e.target.value);
                   }}
-                  value={listData.searchName}
+                  value={searchName}
                 />
-                {/* <Input
-                  prefix={<SearchOutlined />}
-                  placeholder="搜索"
-                  onChange={e =>
-                    setListData({
-                      ...listData,
-                      searchName: e.target.value,
-                    })
-                  }
-                  value={listData.searchName}
-                  onPressEnter={value => {
-                    fn.queryList(value);
-                  }}
-                /> */}
               </Col>
               <Col span={7} offset={2}>
                 <div
@@ -603,10 +631,7 @@ const FiledList = props => {
                       sortType: sortType === 1 ? 2 : 1,
                     };
                     fn.getDateList();
-                    // setIsActive(!isActive);
-                    // setTimeout(() => {
-                    //   fn.handleChange();
-                    // }, 100);
+                    setIsActive(!isActive);
                   }}
                   style={{
                     transform: 'translateX(10px)',
@@ -731,7 +756,7 @@ const FiledList = props => {
       {isRecycle && (
         <RecycleBin onClose={onClose} getData={() => fn.getDateList()} />
       )}
-    </ConfigProvider>
+    </div>
   );
 };
 

@@ -36,6 +36,16 @@ export default {
     );
   },
 
+  // 批量下载
+  batchDownload(params) {
+    return request(
+      `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/files/batchDownload`,
+      {
+        params,
+      },
+    );
+  },
+
   deleteFiles(data, spaceType, spaceCode) {
     return request(
       `${http}/disk/v1/${spaceType}/${spaceCode}/files/fileRecycle`,

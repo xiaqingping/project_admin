@@ -155,9 +155,14 @@ class projectDetail extends Component {
           </div>
 
           <div className={style.footer}>
-            <Button className={style.button} onClick={() => this.goBackLink()}>
-              返回
-            </Button>
+            <div className={style.footerContent}>
+              <Button
+                className={style.button}
+                onClick={() => this.goBackLink()}
+              >
+                返回
+              </Button>
+            </div>
           </div>
         </div>
       </>
