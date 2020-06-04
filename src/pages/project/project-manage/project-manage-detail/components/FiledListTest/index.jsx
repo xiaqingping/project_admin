@@ -597,14 +597,16 @@ const FiledList = props => {
               <Col span={7} offset={2}>
                 <div
                   onClick={() => {
+                    const { sortType } = listData;
                     listData = {
                       ...listData,
-                      sortType: listData.sortType === 1 ? 2 : 1,
+                      sortType: sortType === 1 ? 2 : 1,
                     };
+                    fn.getDateList();
                     // setIsActive(!isActive);
-                    setTimeout(() => {
-                      fn.handleChange();
-                    }, 100);
+                    // setTimeout(() => {
+                    //   fn.handleChange();
+                    // }, 100);
                   }}
                   style={{
                     transform: 'translateX(10px)',
@@ -639,8 +641,7 @@ const FiledList = props => {
                     }}
                     onChange={value => {
                       listData = { ...listData, sortWay: value };
-                      // setSortParameters(value);
-                      fn.handleChange();
+                      fn.getDateList();
                     }}
                     bordered={false}
                     dropdownMatchSelectWidth={120}
