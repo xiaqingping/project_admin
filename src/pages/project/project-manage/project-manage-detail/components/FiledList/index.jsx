@@ -11,6 +11,7 @@ import {
   Row,
   Col,
   message,
+  Spin,
 } from 'antd';
 import {
   FolderOutlined,
@@ -82,6 +83,8 @@ const FiledList = props => {
   /** 状态 */
   // 新建文件夹Model状态
   const [isVisible, setVisible] = useState(false);
+  // 新建文件夹提交状态
+  const [isSpinning, setIsSpinning] = useState(false);
   // 排序状态
   const [isActive, setIsActive] = useState(false);
   // 排序筛选参数
@@ -211,9 +214,8 @@ const FiledList = props => {
       // 校验输入值
       const result = fn.verifyInput(data);
       if (!result) return false;
-
       setLoading(true);
-
+      setIsSpinning(true);
       return api
         .createDirctory(data)
         .then(res => {
@@ -221,10 +223,11 @@ const FiledList = props => {
           fn.getDateList();
           setLoading(false);
           setVisible(false);
+          setIsSpinning(false);
         })
         .catch(() => {
           setLoading(false);
-          message.error('创建文件夹失败！');
+          setIsSpinning(false);
         });
     },
     /** 清除创建 */
@@ -237,10 +240,11 @@ const FiledList = props => {
     /** 输入框验证 */
     verifyInput: data => {
       const { name } = data;
-      const reg = new RegExp(
+      const reg =
         // eslint-disable-next-line no-useless-escape
-        /^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?<![\s\.])$/,
-      );
+        new RegExp(
+          /^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?<![\s\.])$/,
+        );
       const res = reg.test(name);
       if (!res) {
         message.error('输入字符不合法！');
@@ -422,9 +426,9 @@ const FiledList = props => {
   return (
     <ConfigProvider locale={zhCN}>
       {/* 搜索模块 */}
-      <div className="classQuery">
+      <div className="classQuery1">
         <Row>
-          <Col span={8}>
+          <Col span={12}>
             <Button
               type="primary"
               onClick={() => {
@@ -490,9 +494,77 @@ const FiledList = props => {
               </Breadcrumb>
             </div>
           </Col>
-          <Col span={8} offset={8}>
+          <Col span={12}>
             <Row>
-              <Col span={12}>
+              <Col span={24}>
+                <div
+                  onClick={() => {
+                    listData = {
+                      ...listData,
+                      sortType: listData.sortType === 1 ? 2 : 1,
+                    };
+                    // setIsActive(!isActive);
+                    setTimeout(() => {
+                      fn.handleChange();
+                    }, 100);
+                  }}
+                  className="classSort"
+                >
+                  {/* 排序 */}
+                  <span
+                    style={{
+                      width: '50px',
+                      float: 'left',
+                      transform: 'translate(20px, 5px)',
+                    }}
+                  >
+                    <SwapRightOutlined
+                      style={{
+                        transform: 'rotate(90deg) scaleY(-1) translateY(8px)',
+                        fontSize: '20px',
+                        color: isActive ? '#ccc' : '#1890ff',
+                      }}
+                    />
+                    <SwapLeftOutlined
+                      style={{
+                        transform: 'rotate(90deg)',
+                        fontSize: '20px',
+                        color: isActive ? '#1890ff' : '#ccc',
+                      }}
+                    />
+                  </span>
+
+                  {/* 筛选 */}
+                  <span>
+                    <Select
+                      className="classSelect"
+                      defaultValue="文件名"
+                      style={{
+                        width: 100,
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        color: 'rgb(24, 144, 255)',
+                      }}
+                      onChange={value => {
+                        listData = { ...listData, sortWay: value };
+                        // setSortParameters(value);
+                        fn.handleChange();
+                      }}
+                      bordered={false}
+                      dropdownMatchSelectWidth={120}
+                      dropdownStyle={{
+                        textAlign: 'center',
+                      }}
+                      onClick={e => e.stopPropagation()}
+                      showArrow={false}
+                    >
+                      <Option value={1}>文件名</Option>
+                      <Option value={2}>大小</Option>
+                      <Option value={3}>修改日期</Option>
+                    </Select>
+                  </span>
+                </div>
+                {/* 搜索框 */}
                 <Input
                   addonBefore={selectBefore}
                   placeholder="搜索"
@@ -509,73 +581,12 @@ const FiledList = props => {
                   value={listData.searchName}
                 />
               </Col>
-              <Col span={8} offset={4}>
-                <div
-                  onClick={() => {
-                    listData = {
-                      ...listData,
-                      sortType: listData.sortType === 1 ? 2 : 1,
-                    };
-                    // setIsActive(!isActive);
-                    setTimeout(() => {
-                      fn.handleChange();
-                    }, 100);
-                  }}
-                  style={{
-                    width: '150px',
-                    transform: 'translateX(10px)',
-                    zIndex: '999',
-                  }}
-                >
-                  {/* 排序 */}
-                  <SwapRightOutlined
-                    style={{
-                      transform: 'rotate(90deg) scaleY(-1) translateY(8px)',
-                      fontSize: '20px',
-                      color: isActive ? '#ccc' : '#1890ff',
-                    }}
-                  />
-                  <SwapLeftOutlined
-                    style={{
-                      transform: 'rotate(90deg)',
-                      fontSize: '20px',
-                      color: isActive ? '#1890ff' : '#ccc',
-                    }}
-                  />
-
-                  {/* 筛选 */}
-                  <Select
-                    className="classSelect"
-                    defaultValue="文件名"
-                    style={{
-                      width: 100,
-                      textAlign: 'center',
-                      fontSize: '14px',
-                      color: 'rgb(24, 144, 255)',
-                    }}
-                    onChange={value => {
-                      listData = { ...listData, sortWay: value };
-                      // setSortParameters(value);
-                      fn.handleChange();
-                    }}
-                    bordered={false}
-                    dropdownMatchSelectWidth={120}
-                    dropdownStyle={{ textAlign: 'center' }}
-                    onClick={e => e.stopPropagation()}
-                    showArrow={false}
-                  >
-                    <Option value={1}>文件名</Option>
-                    <Option value={2}>大小</Option>
-                    <Option value={3}>修改日期</Option>
-                  </Select>
-                </div>
-              </Col>
             </Row>
           </Col>
         </Row>
       </div>
       <Table
-        className="classrow"
+        className="classrow1"
         rowKey="name"
         rowSelection={rowSelection}
         columns={columns}
@@ -592,34 +603,39 @@ const FiledList = props => {
           fn.createDirctory();
           fn.clearParam();
         }}
-        onCancel={() => fn.clearParam()}
+        onCancel={() => {
+          fn.clearParam();
+          setVisible(false);
+        }}
       >
-        <div>
-          文件夹名称：{' '}
-          <Input
-            placeholder="输入文件夹名称"
-            value={projectParma.name}
-            onChange={e => {
-              setProjectParma({
-                ...projectParma,
-                name: e.target.value.trim(),
-              });
-            }}
-          />
-        </div>
-        <div>
-          描述：{' '}
-          <Input
-            placeholder="输入描述"
-            value={projectParma.describe}
-            onChange={e => {
-              setProjectParma({
-                ...projectParma,
-                describe: e.target.value.trim(),
-              });
-            }}
-          />
-        </div>
+        <Spin spinning={isSpinning} tip="Loading...">
+          <div>
+            文件夹名称：{' '}
+            <Input
+              placeholder="输入文件夹名称"
+              value={projectParma.name}
+              onChange={e => {
+                setProjectParma({
+                  ...projectParma,
+                  name: e.target.value.trim(),
+                });
+              }}
+            />
+          </div>
+          <div>
+            描述：{' '}
+            <Input
+              placeholder="输入描述"
+              value={projectParma.describe}
+              onChange={e => {
+                setProjectParma({
+                  ...projectParma,
+                  describe: e.target.value.trim(),
+                });
+              }}
+            />
+          </div>
+        </Spin>
       </Modal>
     </ConfigProvider>
   );
