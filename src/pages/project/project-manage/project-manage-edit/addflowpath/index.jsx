@@ -424,49 +424,11 @@ class Test extends Component {
       },
     ];
 
-    // 判断list数组的长度，为0时控制form的margin-bottom的值，
-    let listLength;
-    if (list.length === 0) {
-      listLength = {
-        margin: '0 24px 286px 24px',
-      };
-    }
-    if (list.length !== 0 && list.length === 1) {
-      listLength = {
-        margin: '0 24px 375px 24px',
-      };
-    }
-    if (list.length !== 0 && list.length === 2) {
-      listLength = {
-        margin: '0 24px 300px 24px',
-      };
-    }
-    if (list.length !== 0 && list.length === 3) {
-      listLength = {
-        margin: '0 24px 220px 24px',
-      };
-    }
-    if (list.length !== 0 && list.length === 4) {
-      listLength = {
-        margin: '0 24px 144px 24px',
-      };
-    }
-    if (list.length !== 0 && list.length === 5) {
-      listLength = {
-        margin: '0 24px 65px 24px',
-      };
-    }
-    if ((list.length !== 0 && list.length === 6) || list.length > 6) {
-      listLength = {
-        margin: '0 24px 24px 24px',
-      };
-    }
-
     return (
       // <ConfigProvider renderEmpty={this.EmptyState}>
       <ConfigProvider>
         <div style={{ background: '#F0F2F5', width: '100%' }}>
-          <Form style={listLength}>
+          <Form>
             <div
               style={{
                 background: '#FFFFFF',
