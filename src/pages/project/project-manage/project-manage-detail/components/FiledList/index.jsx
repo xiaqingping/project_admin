@@ -6,7 +6,6 @@ import {
   Breadcrumb,
   Select,
   Modal,
-  ConfigProvider,
   Table,
   Row,
   Col,
@@ -16,13 +15,11 @@ import {
 import {
   FolderOutlined,
   DownloadOutlined,
-  SearchOutlined,
   FileExclamationOutlined,
   SwapLeftOutlined,
   SwapRightOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import zhCN from 'antd/es/locale/zh_CN';
 import Qs from 'qs';
 
 // 自定义
@@ -70,15 +67,6 @@ const FiledList = props => {
     businessName: '',
     businessCode: '',
   });
-  // 搜索条件
-  // const [listData, setListData] = useState({
-  //   spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
-  //   spaceCode: '', // String 必填 空间编号(可以为功能ID/编号...)
-  //   directoryId: '0', // String 可选 目录ID
-  //   searchName: '', // String 可选 搜索名称（文件或目录名称）
-  //   sortType: 1, // Integer 必填 {1, 2, 3}
-  //   sortWay: 1, // Integer 必填 {1, 2}
-  // });
 
   /** 状态 */
   // 新建文件夹Model状态
@@ -87,14 +75,13 @@ const FiledList = props => {
   const [isSpinning, setIsSpinning] = useState(false);
   // 排序状态
   const [isActive, setIsActive] = useState(false);
-  // 排序筛选参数
-  const [sortParameters, setSortParameters] = useState(1);
   // 列表加载状态
   const [isloading, setLoading] = useState(true);
   // 批量选择的id
   const [selectedRows, setSelectedRows] = useState([]);
   // 是否为全局搜索
   const [globalSearch, setGlobalSearch] = useState(0);
+  const [SearchName, setSeachName] = useState('');
 
   // 批量操作
   const rowSelection = {
@@ -174,14 +161,12 @@ const FiledList = props => {
     /** 查询 */
     queryList: e => {
       const value = e.target.value.trim();
-      if (value) {
-        listData = {
-          ...listData,
-          searchName: value,
-          directoryId: globalSearch ? 0 : listData.directoryId,
-        };
-        fn.getDateList();
-      }
+      listData = {
+        ...listData,
+        searchName: value,
+        directoryId: globalSearch ? 0 : listData.directoryId,
+      };
+      fn.getDateList()
     },
     /** 目录查询 */
     querydirectory: (id, type, name) => {
@@ -243,6 +228,7 @@ const FiledList = props => {
       const reg =
         // eslint-disable-next-line no-useless-escape
         new RegExp(
+          // eslint-disable-next-line no-useless-escape
           /^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?<![\s\.])$/,
         );
       const res = reg.test(name);
@@ -287,14 +273,13 @@ const FiledList = props => {
           // eslint-disable-next-line max-len
           const url = `http://192.168.20.6:8150/disk/v1/${data.spaceType}/${
             data.spaceCode
-          }/files/download/${data.id}?${Qs.stringify(data)}`;
+            }/files/download/${data.id}?${Qs.stringify(data)}`;
           window.open(url);
         })
         .catch();
     },
     /** 文件下载（批量） */
     downloadFileBatch: () => {
-      console.log(selectedRows);
       const data = {
         spaceCode: props.projectId,
         spaceType: 'project',
@@ -313,8 +298,6 @@ const FiledList = props => {
           newFiles.push(newItem);
         });
         data.files = newFiles;
-        console.log(data);
-
         return false;
       }
       return message.warning('请选中需要下载的文件！');
@@ -402,20 +385,18 @@ const FiledList = props => {
 
   const searchChange = e => {
     setGlobalSearch(e);
-    if (listData.searchName) {
-      fn.getDateList({
-        directoryId: e * 1 === 0 ? 0 : listData.directoryId,
-      });
-    }
+    const id = e === 0 ? 0 : listData.directoryId
+    console.log({ directoryId: id })
+    if (listData.searchName) fn.getDateList({ directoryId: id })
   };
 
   const selectBefore = (
     <Select
-      title={globalSearch * 1 === 0 ? '全局搜索' : '当前文件搜索'}
+      title={globalSearch * 1 === 0 ? ' 全局搜索 ' : ' 当前文件搜索 '}
       defaultValue={0}
       className="select-before"
       onChange={searchChange}
-      style={{ width: 90 }}
+      style={{ paddingRight: '10px', paddingLeft: '10px' }}
       dropdownMatchSelectWidth={150}
     >
       <Option value={0}>全局搜索</Option>
@@ -424,7 +405,7 @@ const FiledList = props => {
   );
 
   return (
-    <ConfigProvider locale={zhCN}>
+    <div>
       {/* 搜索模块 */}
       <div className="classQuery1">
         <Row>
@@ -453,13 +434,14 @@ const FiledList = props => {
                 <Breadcrumb.Item>
                   <span
                     onClick={() => {
-                      fn.getDateList({ directoryId: '0', searchName: '' });
                       listData = {
                         ...listData,
                         directoryId: '0',
                         searchName: '',
-                      };
-                      setBreadcrumbName([]);
+                      }
+                      setSeachName('')
+                      setBreadcrumbName([])
+                      fn.getDateList()
                     }}
                   >
                     全部文件
@@ -467,29 +449,28 @@ const FiledList = props => {
                 </Breadcrumb.Item>
                 {BreadcrumbName && BreadcrumbName.length > 0
                   ? BreadcrumbName.map((item, index) => {
-                      const key = index;
-                      return (
-                        <Breadcrumb.Item key={key}>
-                          <span
-                            onClick={() => {
-                              fn.getDateList({
-                                directoryId: item.id,
-                              });
-                              listData = {
-                                ...listData,
-                                directoryId: item.id,
-                                searchName: '',
-                              };
-                              setBreadcrumbName(
-                                BreadcrumbName.slice(0, key + 1),
-                              );
-                            }}
-                          >
-                            {item.name}
-                          </span>
-                        </Breadcrumb.Item>
-                      );
-                    })
+                    const key = index;
+                    return (
+                      <Breadcrumb.Item key={key}>
+                        <span
+                          onClick={() => {
+                            listData = {
+                              ...listData,
+                              directoryId: item.id,
+                              searchName: '',
+                            };
+                            setBreadcrumbName(
+                              BreadcrumbName.slice(0, key + 1),
+                            )
+                            setSeachName('')
+                            fn.getDateList()
+                          }}
+                        >
+                          {item.name}
+                        </span>
+                      </Breadcrumb.Item>
+                    );
+                  })
                   : ''}
               </Breadcrumb>
             </div>
@@ -497,21 +478,22 @@ const FiledList = props => {
           <Col span={12}>
             <Row>
               <Col span={24}>
-                <div
-                  onClick={() => {
+                <div className="classSort"
+                  onClick={e => {
+                    e.stopPropagation()
                     const { sortType } = listData;
+                    setIsActive(!isActive)
                     listData = {
                       ...listData,
                       sortType: sortType === 1 ? 2 : 1,
                     };
                     fn.getDateList();
                   }}
-                  className="classSort"
                 >
                   {/* 排序 */}
                   <span
                     style={{
-                      width: '50px',
+                      width: '40px',
                       float: 'left',
                       transform: 'translate(20px, 5px)',
                     }}
@@ -537,19 +519,12 @@ const FiledList = props => {
                     <Select
                       className="classSelect"
                       defaultValue="文件名"
-                      style={{
-                        width: 100,
-                        textAlign: 'center',
-                        fontSize: '14px',
-                        color: 'rgb(24, 144, 255)',
-                      }}
                       onChange={value => {
                         listData = { ...listData, sortWay: value };
-                        // setSortParameters(value);
                         fn.getDateList();
                       }}
                       bordered={false}
-                      dropdownMatchSelectWidth={120}
+                      dropdownMatchSelectWidth={100}
                       dropdownStyle={{
                         textAlign: 'center',
                       }}
@@ -566,17 +541,21 @@ const FiledList = props => {
                 <Input
                   addonBefore={selectBefore}
                   placeholder="搜索"
-                  width={150}
-                  onPressEnter={value => {
-                    fn.queryList(value);
+                  // width='70%'
+                  style={{
+                    width: '70%',
+                    float: 'right',
+                    transform: 'translateX(15px)'
                   }}
-                  onChange={e => {
+                  onPressEnter={e => {
                     listData = {
                       ...listData,
                       searchName: e.target.value,
-                    };
+                    }
+                    fn.queryList(e)
                   }}
-                  value={listData.searchName}
+                  onChange={e => setSeachName(e.target.value)}
+                  value={SearchName}
                 />
               </Col>
             </Row>
@@ -635,7 +614,7 @@ const FiledList = props => {
           </div>
         </Spin>
       </Modal>
-    </ConfigProvider>
+    </div>
   );
 };
 

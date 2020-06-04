@@ -38,7 +38,10 @@ const Process = props => {
 
   const uploadfile = fn => {
     const formData = new FormData();
-    formData.append('file', uploadFile.slice(cur, cur + SIZE));
+    let end = cur + SIZE
+    if(uploadFile.size - cur < SIZE) end = uploadFile.size
+    console.log(cur, end)
+    formData.append('file', uploadFile.slice(cur, end));
     formData.append('fileOperationId', fileOperationId);
     formData.append('fileOperationLogicId', fileOperationLogicId);
     formData.append('partNumber', index);
@@ -63,8 +66,9 @@ const Process = props => {
   /** 文件上传入口 */
   const fun = () => {
     if (arr[props.id].flag && cur < uploadFile.size) {
+      cur = SIZE * (index -1)
       uploadfile(fun);
-      cur += SIZE;
+      console.log('cur', cur)
     }
   };
 
