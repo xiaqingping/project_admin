@@ -474,7 +474,7 @@ const FiledList = props => {
                 >
                   {/* 排序 */}
                   <span
-                    style={{ width: '50px' }}
+                    style={{ width: '50px', float: 'left', transform: 'translate(20px, 5px)' }}
                   >
                     <SwapRightOutlined
                       style={{
@@ -498,10 +498,11 @@ const FiledList = props => {
                       className="classSelect"
                       defaultValue="文件名"
                       style={{
-                        width: 80,
+                        width: 'auto',
                         textAlign: 'center',
                         fontSize: '14px',
                         color: 'rgb(24, 144, 255)',
+                        padding: '0'
                       }}
                       onChange={value => {
                         setSortParameters(value);
@@ -522,7 +523,7 @@ const FiledList = props => {
                 {/* 搜索框 */}
                 <Input
                   prefix={<SearchOutlined />}
-                  style={{ width: '45%', float: 'right' }}
+                  style={{ width: '50%', float: 'right', transform: 'translateX(20px)' }}
                   placeholder="搜索"
                   onChange={e => {
                     setListData({
