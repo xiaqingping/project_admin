@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'dva';
-// import axios from 'axios';
 import BMF from 'browser-md5-file';
 import { Button, Progress } from 'antd';
 
 // 自定义
-import api from '@/pages/project/api/disk';
+import api from '@/pages/project/api/file';
 
 let arr = [];
 
@@ -39,7 +38,7 @@ const Process = props => {
   const uploadfile = fn => {
     const formData = new FormData();
     let end = cur + SIZE
-    if(uploadFile.size - cur < SIZE) end = uploadFile.size
+    if (uploadFile.size - cur < SIZE) end = uploadFile.size
     console.log(cur, end)
     formData.append('file', uploadFile.slice(cur, end));
     formData.append('fileOperationId', fileOperationId);
@@ -50,23 +49,30 @@ const Process = props => {
       spaceCode: data.spaceCode,
     };
     api.uploadMoreFiles2(params, formData).then(res => {
-      console.log(res);
-      // const { status, fileOperationId: id1, fileOperationLogicId: id2 } = res
-      // if (status === 1 || status === 3) {
-      //   fileOperationId = id1
-      //   fileOperationLogicId = id2
-      //   index = res.partNumber
-      //   cur = res.partNumber - 1
-      //   setProgress(Math.ceil(cur / uploadFile.size * 100))
-      //   fn()
-      // }
+      const { status, fileOperationId: id1, fileOperationLogicId: id2 } = res
+      if (status === 1 || status === 3) {
+        fileOperationId = id1
+        fileOperationLogicId = id2
+        index = res.partNumber
+        cur = res.partNumber - 1
+        setProgress(Math.ceil(cur / uploadFile.size * 100))
+        fn()
+      } else if (status === 4) {
+        const dataParams = {
+          fileOperationId: id1,
+          fileOperationLogicId: id2
+        }
+        api.uploadMoreFiles3(params, dataParams).then(reData => {
+          console.log(reData)
+        })
+      }
     });
   };
 
   /** 文件上传入口 */
   const fun = () => {
     if (arr[props.id].flag && cur < uploadFile.size) {
-      cur = SIZE * (index -1)
+      cur = SIZE * (index - 1)
       uploadfile(fun);
       console.log('cur', cur)
     }
@@ -122,10 +128,10 @@ const Process = props => {
         {progress >= 100 ? (
           '上传完成'
         ) : (
-          <Button onClick={stop} style={{ marginLeft: '10px' }}>
-            {isStart ? '暂停' : '开始'}
-          </Button>
-        )}
+            <Button onClick={stop} style={{ marginLeft: '10px' }}>
+              {isStart ? '暂停' : '开始'}
+            </Button>
+          )}
       </div>
     </>
   );

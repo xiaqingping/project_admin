@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'dva';
+import React, { useState, useEffect } from 'react'
+import { connect } from 'dva'
 import {
   Button,
   Input,
@@ -11,31 +11,30 @@ import {
   Col,
   message,
   Spin,
-} from 'antd';
+} from 'antd'
 import {
   FolderOutlined,
   DownloadOutlined,
   FileExclamationOutlined,
   SwapLeftOutlined,
   SwapRightOutlined,
-  ExclamationCircleOutlined,
-} from '@ant-design/icons';
-import Qs from 'qs';
+  // ExclamationCircleOutlined,
+} from '@ant-design/icons'
+import Qs from 'qs'
 
 // 自定义
-// import api from '@/pages/project/api/disk';
-import api from '@/pages/project/api/file';
-import api1 from '@/pages/project/api/projectManageDetail';
-import file from '@/assets/imgs/file.png';
-import docx from '@/assets/imgs/word.png';
-import excel from '@/assets/imgs/excel.png';
-import pdf from '@/assets/imgs/pdf.png';
-import FileUpload from './components/UpLoad';
-import './index.less';
+import api from '@/pages/project/api/file'
+import api1 from '@/pages/project/api/projectManageDetail'
+import file from '@/assets/imgs/file.png'
+import docx from '@/assets/imgs/word.png'
+import excel from '@/assets/imgs/excel.png'
+import pdf from '@/assets/imgs/pdf.png'
+import FileUpload from './components/UpLoad'
+import './index.less'
 
-const { Option } = Select;
-const { confirm } = Modal;
-// 搜索条件
+const { Option } = Select
+// const { confirm } = Modal
+// 列表搜索条件
 let listData = {
   spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
   spaceCode: '', // String 必填 空间编号(可以为功能ID/编号...)
@@ -43,93 +42,110 @@ let listData = {
   searchName: '', // String 可选 搜索名称（文件或目录名称）
   sortType: 1, // Integer 必填 {1, 2, 3}
   sortWay: 1, // Integer 必填 {1, 2}
-};
+}
 
 /**
  * 文件列表组件
  * 文件服务
- * @param {*} props
+ * @author xiaqingping
+ * @version v0.1 2020-06-04
+ * @since 文件列表组件
  */
 const FiledList = props => {
+
   // 列表数据
-  const [tableList, setTableList] = useState({});
+  const [tableList, setTableList] = useState({})
   // 面包屑
-  const [BreadcrumbName, setBreadcrumbName] = useState([]);
+  const [BreadcrumbName, setBreadcrumbName] = useState([])
   // 创建文件夹名称
   const [projectParma, setProjectParma] = useState({
     name: '',
     describe: '',
-  });
+  })
   // 项目基础信息
-  const [baseList, setBaseList] = useState();
+  const [baseList, setBaseList] = useState()
   // 用户信息
   const [businessParma, setBusinessParma] = useState({
     businessName: '',
     businessCode: '',
-  });
+  })
 
   /** 状态 */
   // 新建文件夹Model状态
-  const [isVisible, setVisible] = useState(false);
+  const [isVisible, setVisible] = useState(false)
   // 新建文件夹提交状态
-  const [isSpinning, setIsSpinning] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(false)
   // 排序状态
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(false)
   // 列表加载状态
-  const [isloading, setLoading] = useState(true);
+  const [isloading, setLoading] = useState(true)
   // 批量选择的id
-  const [selectedRows, setSelectedRows] = useState([]);
-  // 是否为全局搜索
-  const [globalSearch, setGlobalSearch] = useState(0);
-  const [SearchName, setSeachName] = useState('');
+  const [selectedRows, setSelectedRows] = useState([])
+  // 是否为全局搜索 [0, 1]
+  const [globalSearch, setGlobalSearch] = useState(1)
+  // SearchName查询名称状态(String)
+  const [SearchName, setSeachName] = useState('')
 
   // 批量操作
   const rowSelection = {
     onChange: (selectedRowKeys, selectRows) => {
-      const newRows = selectRows.filter(item => !!item === true);
-      setSelectedRows(newRows);
+      const newRows = selectRows.filter(item => !!item === true)
+      setSelectedRows(newRows)
     },
     getCheckboxProps: record => ({
       disabled: record.name === 'Disabled User',
       name: record.name,
     }),
-  };
+  }
 
   /**
    * 方法对象
    */
   const fn = {
     /**
-     * 通过列名称筛选
-     * @param {String} value
+     * 批量上传 测试功能
      */
-    handleChange: () => {
-      fn.getDateList();
+    getFileUpload: () => {
+      const { projectId } = props
+      const id = listData.directoryId === '0' ? '3' : listData.directoryId
+      const data = {
+        spaceType: 'project',
+        spaceCode: projectId,
+        sourceType: 'project',
+        sourceId: projectId,
+        userName: '',
+        userCode: '',
+        ...businessParma,
+        logicDirectoryId: id,
+      }
+      return data
     },
+    /** 通过列名称筛选 */
+    handleChange: () => fn.getDateList(),
     /**
      * 获取列表数据
-     * @param {*} props
+     * @param {Object} parameters 列表补充参数
      */
     getDateList: parameters => {
-      const { projectId } = props;
+      const { projectId } = props
       const data = {
         ...listData,
         spaceCode: projectId,
         ...parameters,
-      };
+      }
 
-      if (!data.directoryId) setBreadcrumbName([]);
+      if (!data.directoryId) setBreadcrumbName([])
 
-      setLoading(true);
+      setLoading(true)
       return api
         .getFiles(data)
         .then(res => {
-          setTableList(res);
-          setLoading(false);
+          setTableList(res)
+          setLoading(false)
         })
         .catch(() => {
-          setLoading(false);
-        });
+          setLoading(false)
+        })
     },
     /**
      * 设置单行文件小图标
@@ -137,53 +153,63 @@ const FiledList = props => {
      * @param {String} extendName 文件后缀
      */
     setImg: (type, extendName) => {
-      const extendType = { file, docx, excel, pdf };
+      const extendType = { file, docx, excel, pdf }
       if (type) {
-        if (type === 2) return <img src={file} alt="" />;
+        if (type === 2) return <img src={file} alt="" />
 
         if (extendType[extendName])
-          return <img src={extendType[extendName]} alt="" />;
+          return <img src={extendType[extendName]} alt="" />
       }
-      return <FileExclamationOutlined />;
+      return <FileExclamationOutlined />
     },
     /** 删除警告 */
-    showDeleteConfirm: () => {
-      confirm({
-        title: '删除后将不可恢复，确定删除当前项目吗？',
-        icon: <ExclamationCircleOutlined />,
-        content: '',
-        centered: true,
-        onOk() {
-          console.log('OK');
-        },
-      });
-    },
-    /** 查询 */
+    // showDeleteConfirm: () => {
+    //   confirm({
+    //     title: '删除后将不可恢复，确定删除当前项目吗？',
+    //     icon: <ExclamationCircleOutlined />,
+    //     content: '',
+    //     centered: true,
+    //     onOk() {
+    //       console.log('OK')
+    //     },
+    //   })
+    // },
+    /**
+     * 搜索框查询
+     * @param {Object} e 目标对象
+     */
     queryList: e => {
-      const value = e.target.value.trim();
+      const value = e.target.value.trim()
+      const id = globalSearch * 1 === 0 ? 0 : listData.directoryId
       listData = {
         ...listData,
         searchName: value,
-        directoryId: globalSearch ? 0 : listData.directoryId,
-      };
+        directoryId: id
+      }
       fn.getDateList()
     },
-    /** 目录查询 */
+    /**
+     * 目录查询
+     * 点击查询下一级目录
+     * @param {String} id 层级/面包屑id值
+     * @param {Number} type 文件类型
+     * @param {String} name 面包屑/目录名称
+     */
     querydirectory: (id, type, name) => {
       if (type === 2) {
-        setBreadcrumbName([...BreadcrumbName, { name, id }]);
+        setBreadcrumbName([...BreadcrumbName, { name, id }])
         listData = {
           ...listData,
           directoryId: id,
-        };
-        fn.getDateList();
+        }
+        fn.getDateList()
       }
     },
     /** 创建目录 */
     createDirctory: () => {
-      const { projectId } = props;
-      const { code } = baseList;
-      const id = listData.directoryId === '0' ? '3' : listData.directoryId;
+      const { projectId } = props
+      const { code } = baseList
+      const id = listData.directoryId === '0' ? '3' : listData.directoryId
       const data = {
         spaceType: 'project',
         spaceCode: projectId,
@@ -195,66 +221,52 @@ const FiledList = props => {
         ...businessParma,
         ...projectParma,
         parentId: id,
-      };
+      }
       // 校验输入值
-      const result = fn.verifyInput(data);
-      if (!result) return false;
-      setLoading(true);
-      setIsSpinning(true);
+      const result = fn.verifyInput(data)
+      if (!result) return false
+      setLoading(true)
+      setIsSpinning(true)
       return api
         .createDirctory(data)
         .then(res => {
-          setTableList(res);
-          fn.getDateList();
-          setLoading(false);
-          setVisible(false);
-          setIsSpinning(false);
+          setTableList(res)
+          fn.getDateList()
+          setLoading(false)
+          setVisible(false)
+          setIsSpinning(false)
         })
         .catch(() => {
-          setLoading(false);
-          setIsSpinning(false);
-        });
+          setLoading(false)
+          setIsSpinning(false)
+        })
     },
     /** 清除创建 */
     clearParam: () => {
       setProjectParma({
         name: '',
         describe: '',
-      });
+      })
     },
-    /** 输入框验证 */
+    /**
+     * 输入框验证
+     * 验证创建目录名称是否合法
+     * @param {Object} data 验证数据
+     */
     verifyInput: data => {
-      const { name } = data;
+      const { name } = data
       const reg =
         // eslint-disable-next-line no-useless-escape
         new RegExp(
           // eslint-disable-next-line no-useless-escape
           /^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?<![\s\.])$/,
-        );
-      const res = reg.test(name);
+        )
+      const res = reg.test(name)
       if (!res) {
-        message.error('输入字符不合法！');
-        return false;
+        message.error('输入字符不合法！')
+        return false
       }
-      return true;
-    },
-    /**
-     * 批量上传
-     */
-    getFileUpload: () => {
-      const { projectId } = props;
-      const id = listData.directoryId === '0' ? '3' : listData.directoryId;
-      const data = {
-        spaceType: 'project',
-        spaceCode: projectId,
-        sourceType: 'project',
-        sourceId: projectId,
-        userName: '',
-        userCode: '',
-        ...businessParma,
-        logicDirectoryId: id,
-      };
-      return data;
+      return true
     },
     /** 文件下载(单个) */
     downloadFile: row => {
@@ -265,18 +277,18 @@ const FiledList = props => {
         fileType: row.fileType,
         dispositionType: 2,
         isDown: 2,
-      };
+      }
       api
         .downloadFiles(data)
         .then(() => {
-          data.isDown = 1;
+          data.isDown = 1
           // eslint-disable-next-line max-len
           const url = `http://192.168.20.6:8150/disk/v1/${data.spaceType}/${
             data.spaceCode
-            }/files/download/${data.id}?${Qs.stringify(data)}`;
-          window.open(url);
+            }/files/download/${data.id}?${Qs.stringify(data)}`
+          window.open(url)
         })
-        .catch();
+        .catch()
     },
     /** 文件下载（批量） */
     downloadFileBatch: () => {
@@ -286,43 +298,43 @@ const FiledList = props => {
         dispositionType: 2,
         files: [],
         isDown: 2,
-      };
+      }
 
       if (selectedRows && selectedRows.length) {
-        const newFiles = [];
+        const newFiles = []
         selectedRows.forEach(item => {
           const newItem = {
             fileType: item.fileType,
             id: item.id,
-          };
-          newFiles.push(newItem);
-        });
-        data.files = newFiles;
-        return false;
+          }
+          newFiles.push(newItem)
+        })
+        data.files = newFiles
+        return false
       }
-      return message.warning('请选中需要下载的文件！');
+      return message.warning('请选中需要下载的文件！')
     },
-  };
+  }
 
   /**
    * 初始化操作
    */
   useEffect(() => {
     // 初始化列表数据
-    fn.getDateList();
+    fn.getDateList()
     // 查询项目基础信息及流程列表
     api1.getProjectProcess(props.projectId).then(res => {
-      setBaseList(res);
-    });
+      setBaseList(res)
+    })
     // 查询成员列表
     api1.getProjectMember({ projectId: props.projectId }).then(res => {
-      const { code, name } = res[0];
+      const { code, name } = res[0]
       setBusinessParma({
         businessName: name,
         businessCode: code,
-      });
-    });
-  }, []);
+      })
+    })
+  }, [])
 
   // 表结构
   const columns = [
@@ -336,7 +348,7 @@ const FiledList = props => {
           <span
             style={{ marginLeft: 10, cursor: 'pointer' }}
             onClick={() => {
-              fn.querydirectory(record.id, record.fileType, record.name);
+              fn.querydirectory(record.id, record.fileType, record.name)
             }}
           >
             {value}
@@ -372,28 +384,28 @@ const FiledList = props => {
       width: 100,
       render: text => `${text}kb`,
     },
-    {
-      title: '操作',
-      width: 80,
-      render: () => (
-        <>
-          <a onClick={() => fn.showDeleteConfirm()}>删除</a>
-        </>
-      ),
-    },
-  ];
+    // {
+    //   title: '操作',
+    //   width: 80,
+    //   render: () => (
+    //     <>
+    //       <a onClick={() => fn.showDeleteConfirm()}>删除</a>
+    //     </>
+    //   ),
+    // },
+  ]
 
   const searchChange = e => {
-    setGlobalSearch(e);
+    setGlobalSearch(e)
     const id = e === 0 ? 0 : listData.directoryId
-    console.log({ directoryId: id })
-    if (listData.searchName) fn.getDateList({ directoryId: id })
-  };
+    listData.directoryId = id
+    fn.getDateList()
+  }
 
   const selectBefore = (
     <Select
       title={globalSearch * 1 === 0 ? ' 全局搜索 ' : ' 当前文件搜索 '}
-      defaultValue={0}
+      defaultValue={globalSearch}
       className="select-before"
       onChange={searchChange}
       style={{ paddingRight: '10px', paddingLeft: '10px' }}
@@ -402,7 +414,7 @@ const FiledList = props => {
       <Option value={0}>全局搜索</Option>
       <Option value={1}>当前文件搜索</Option>
     </Select>
-  );
+  )
 
   return (
     <div>
@@ -413,7 +425,7 @@ const FiledList = props => {
             <Button
               type="primary"
               onClick={() => {
-                setVisible(true);
+                setVisible(true)
               }}
             >
               <FolderOutlined />
@@ -421,7 +433,7 @@ const FiledList = props => {
             </Button>
             <Button
               onClick={() => {
-                fn.downloadFileBatch();
+                fn.downloadFileBatch()
               }}
             >
               <DownloadOutlined />
@@ -449,7 +461,7 @@ const FiledList = props => {
                 </Breadcrumb.Item>
                 {BreadcrumbName && BreadcrumbName.length > 0
                   ? BreadcrumbName.map((item, index) => {
-                    const key = index;
+                    const key = index
                     return (
                       <Breadcrumb.Item key={key}>
                         <span
@@ -458,7 +470,7 @@ const FiledList = props => {
                               ...listData,
                               directoryId: item.id,
                               searchName: '',
-                            };
+                            }
                             setBreadcrumbName(
                               BreadcrumbName.slice(0, key + 1),
                             )
@@ -469,7 +481,7 @@ const FiledList = props => {
                           {item.name}
                         </span>
                       </Breadcrumb.Item>
-                    );
+                    )
                   })
                   : ''}
               </Breadcrumb>
@@ -481,13 +493,13 @@ const FiledList = props => {
                 <div className="classSort"
                   onClick={e => {
                     e.stopPropagation()
-                    const { sortType } = listData;
+                    const { sortType } = listData
                     setIsActive(!isActive)
                     listData = {
                       ...listData,
                       sortType: sortType === 1 ? 2 : 1,
-                    };
-                    fn.getDateList();
+                    }
+                    fn.getDateList()
                   }}
                 >
                   {/* 排序 */}
@@ -520,8 +532,8 @@ const FiledList = props => {
                       className="classSelect"
                       defaultValue="文件名"
                       onChange={value => {
-                        listData = { ...listData, sortWay: value };
-                        fn.getDateList();
+                        listData = { ...listData, sortWay: value }
+                        fn.getDateList()
                       }}
                       bordered={false}
                       dropdownMatchSelectWidth={100}
@@ -541,7 +553,6 @@ const FiledList = props => {
                 <Input
                   addonBefore={selectBefore}
                   placeholder="搜索"
-                  // width='70%'
                   style={{
                     width: '70%',
                     float: 'right',
@@ -577,12 +588,12 @@ const FiledList = props => {
         visible={isVisible}
         centered
         onOk={() => {
-          fn.createDirctory();
-          fn.clearParam();
+          fn.createDirctory()
+          fn.clearParam()
         }}
         onCancel={() => {
-          fn.clearParam();
-          setVisible(false);
+          fn.clearParam()
+          setVisible(false)
         }}
       >
         <Spin spinning={isSpinning} tip="Loading...">
@@ -595,7 +606,7 @@ const FiledList = props => {
                 setProjectParma({
                   ...projectParma,
                   name: e.target.value.trim(),
-                });
+                })
               }}
             />
           </div>
@@ -608,17 +619,18 @@ const FiledList = props => {
                 setProjectParma({
                   ...projectParma,
                   describe: e.target.value.trim(),
-                });
+                })
               }}
             />
           </div>
         </Spin>
       </Modal>
     </div>
-  );
-};
+  )
+}
 
 export default connect(({ projectManage }) => ({
   filedList: projectManage.filedList,
   projectList: projectManage.projectList,
-}))(FiledList);
+}))(FiledList)
+
