@@ -312,9 +312,16 @@ const FiledList = props => {
           };
           newFiles.push(newItem);
         });
-        data.files = newFiles;
+        data.files = JSON.stringify(newFiles);
         console.log(data);
-
+        api.batchDownload(data).then(() => {
+          data.isDown = 1;
+          // eslint-disable-next-line max-len
+          const url = `http://192.168.20.6:8150/disk/v1/${data.spaceType}/${
+            data.spaceCode
+          }/files/batchDownload?${Qs.stringify(data)}`;
+          window.open(url);
+        });
         return false;
       }
       return message.warning('请选中需要下载的文件！');
