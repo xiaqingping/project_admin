@@ -11,6 +11,7 @@ import {
   Row,
   Col,
   message,
+  Spin
 } from 'antd';
 import {
   FolderOutlined,
@@ -73,6 +74,8 @@ const FiledList = props => {
   /** 状态 */
   // 新建文件夹Model状态
   const [isVisible, setVisible] = useState(false);
+  // 新建文件夹提交状态
+  const [isSpinning, setIsSpinning] = useState(false);
   // 排序状态
   const [isActive, setIsActive] = useState(false);
   // 排序筛选参数
@@ -81,6 +84,7 @@ const FiledList = props => {
   const [isloading, setLoading] = useState(true);
   // 批量选择的id
   const [selectedRows, setSelectedRows] = useState([]);
+
 
   // 批量操作
   const rowSelection = {
@@ -102,10 +106,10 @@ const FiledList = props => {
      * 通过列名称筛选
      * @param {String} value
      */
-    handleChange: () => {
+    handleChange: value => {
       const sortWay = isActive ? 1 : 2;
       const data = {
-        sortType: sortParameters,
+        sortType: value,
         sortWay,
       };
       setListData({
@@ -203,21 +207,18 @@ const FiledList = props => {
       // 校验输入值
       const result = fn.verifyInput(data);
       if (!result) return false;
-
       setLoading(true);
-
-      return api
-        .createDirctory(data)
-        .then(res => {
-          setTableList(res);
-          fn.getDateList();
-          setLoading(false);
-          setVisible(false);
-        })
-        .catch(() => {
-          setLoading(false);
-          message.error('创建文件夹失败！');
-        });
+      setIsSpinning(true)
+      return api.createDirctory(data).then(res => {
+        setTableList(res)
+        fn.getDateList()
+        setLoading(false)
+        setVisible(false);
+        setIsSpinning(false)
+      }).catch(() => {
+        setLoading(false)
+        setIsSpinning(false)
+      })
     },
     /** 清除创建 */
     clearParam: () => {
@@ -229,10 +230,9 @@ const FiledList = props => {
     /** 输入框验证 */
     verifyInput: data => {
       const { name } = data;
-      const reg = new RegExp(
-        // eslint-disable-next-line no-useless-escape
-        /^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?<![\s\.])$/,
-      );
+      const reg =
+      // eslint-disable-next-line no-useless-escape
+      new RegExp(/^(?![\s\.])[\u4E00-\u9FA5\uFE30-\uFFA0\w \.\-\(\)\+=!@#$%^&]{1,99}(?<![\s\.])$/);
       const res = reg.test(name);
       if (!res) {
         message.error('输入字符不合法！');
@@ -391,9 +391,9 @@ const FiledList = props => {
   return (
     <ConfigProvider locale={zhCN}>
       {/* 搜索模块 */}
-      <div className="classQuery">
+      <div className="classQuery1">
         <Row>
-          <Col span={8}>
+          <Col span={12}>
             <Button
               type="primary"
               onClick={() => {
@@ -418,10 +418,11 @@ const FiledList = props => {
                 <Breadcrumb.Item>
                   <span
                     onClick={() => {
-                      fn.getDateList({ directoryId: '0' });
+                      fn.getDateList({ directoryId: '0', searchName: '' });
                       setListData({
                         ...listData,
                         directoryId: '0',
+                        searchName: ''
                       });
                       setBreadcrumbName([]);
                     }}
@@ -431,44 +432,37 @@ const FiledList = props => {
                 </Breadcrumb.Item>
                 {BreadcrumbName && BreadcrumbName.length > 0
                   ? BreadcrumbName.map((item, index) => {
-                      const key = index;
-                      return (
-                        <Breadcrumb.Item key={key}>
-                          <span
-                            onClick={() => {
-                              fn.getDateList({
-                                directoryId: item.id,
-                              });
-                              setListData({
-                                ...listData,
-                                directoryId: item.id,
-                              });
-                              setBreadcrumbName(
-                                BreadcrumbName.slice(0, key + 1),
-                              );
-                            }}
-                          >
-                            {item.name}
-                          </span>
-                        </Breadcrumb.Item>
-                      );
-                    })
+                    const key = index;
+                    return (
+                      <Breadcrumb.Item key={key}>
+                        <span
+                          onClick={() => {
+                            fn.getDateList({
+                              directoryId: item.id,
+                              searchName: ''
+                            });
+                            setListData({
+                              ...listData,
+                              directoryId: item.id,
+                              searchName: ''
+                            });
+                            setBreadcrumbName(
+                              BreadcrumbName.slice(0, key + 1),
+                            );
+                          }}
+                        >
+                          {item.name}
+                        </span>
+                      </Breadcrumb.Item>
+                    );
+                  })
                   : ''}
               </Breadcrumb>
             </div>
           </Col>
-          <Col span={8} offset={8}>
+          <Col span={12}>
             <Row>
-              <Col span={12}>
-                <Input
-                  prefix={<SearchOutlined />}
-                  placeholder="搜索"
-                  onPressEnter={value => {
-                    fn.queryList(value);
-                  }}
-                />
-              </Col>
-              <Col span={8} offset={4}>
+              <Col span={24}>
                 <div
                   onClick={() => {
                     setIsActive(!isActive);
@@ -476,60 +470,79 @@ const FiledList = props => {
                       fn.handleChange(sortParameters);
                     }, 100);
                   }}
-                  style={{
-                    width: '150px',
-                    transform: 'translateX(10px)',
-                    zIndex: '999',
-                  }}
+                  className='classSort'
                 >
                   {/* 排序 */}
-                  <SwapRightOutlined
-                    style={{
-                      transform: 'rotate(90deg) scaleY(-1) translateY(8px)',
-                      fontSize: '20px',
-                      color: isActive ? '#ccc' : '#1890ff',
-                    }}
-                  />
-                  <SwapLeftOutlined
-                    style={{
-                      transform: 'rotate(90deg)',
-                      fontSize: '20px',
-                      color: isActive ? '#1890ff' : '#ccc',
-                    }}
-                  />
+                  <span
+                    style={{ width: '50px', float: 'left', transform: 'translate(20px, 5px)' }}
+                  >
+                    <SwapRightOutlined
+                      style={{
+                        transform: 'rotate(90deg) scaleY(-1) translateY(8px)',
+                        fontSize: '20px',
+                        color: isActive ? '#ccc' : '#1890ff',
+                      }}
+                    />
+                    <SwapLeftOutlined
+                      style={{
+                        transform: 'rotate(90deg)',
+                        fontSize: '20px',
+                        color: isActive ? '#1890ff' : '#ccc',
+                      }}
+                    />
+                  </span>
 
                   {/* 筛选 */}
-                  <Select
-                    className="classSelect"
-                    defaultValue="文件名"
-                    style={{
-                      width: 100,
-                      textAlign: 'center',
-                      fontSize: '14px',
-                      color: 'rgb(24, 144, 255)',
-                    }}
-                    onChange={value => {
-                      setSortParameters(value);
-                      fn.handleChange(sortParameters);
-                    }}
-                    bordered={false}
-                    dropdownMatchSelectWidth={120}
-                    dropdownStyle={{ textAlign: 'center' }}
-                    onClick={e => e.stopPropagation()}
-                    showArrow={false}
-                  >
-                    <Option value={1}>文件名</Option>
-                    <Option value={2}>大小</Option>
-                    <Option value={3}>修改日期</Option>
-                  </Select>
+                  <span>
+                    <Select
+                      className="classSelect"
+                      defaultValue="文件名"
+                      style={{
+                        width: 'auto',
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        color: 'rgb(24, 144, 255)',
+                        padding: '0'
+                      }}
+                      onChange={value => {
+                        setSortParameters(value);
+                        fn.handleChange(value);
+                      }}
+                      bordered={false}
+                      dropdownMatchSelectWidth={120}
+                      dropdownStyle={{ textAlign: 'center' }}
+                      onClick={e => e.stopPropagation()}
+                      showArrow={false}
+                    >
+                      <Option value={1}>文件名</Option>
+                      <Option value={2}>大小</Option>
+                      <Option value={3}>修改日期</Option>
+                    </Select>
+                  </span>
                 </div>
+                {/* 搜索框 */}
+                <Input
+                  prefix={<SearchOutlined />}
+                  style={{ width: '50%', float: 'right', transform: 'translateX(20px)' }}
+                  placeholder="搜索"
+                  onChange={e => {
+                    setListData({
+                      ...listData,
+                      searchName: e.target.value
+                    })
+                  }}
+                  value={listData.searchName}
+                  onPressEnter={value => {
+                    fn.queryList(value);
+                  }}
+                />
               </Col>
             </Row>
           </Col>
         </Row>
       </div>
       <Table
-        className="classrow"
+        className="classrow1"
         rowKey="name"
         rowSelection={rowSelection}
         columns={columns}
@@ -546,34 +559,36 @@ const FiledList = props => {
           fn.createDirctory();
           fn.clearParam();
         }}
-        onCancel={() => fn.clearParam()}
+        onCancel={() => { fn.clearParam(); setVisible(false); }}
       >
-        <div>
-          文件夹名称：{' '}
-          <Input
-            placeholder="输入文件夹名称"
-            value={projectParma.name}
-            onChange={e => {
-              setProjectParma({
-                ...projectParma,
-                name: e.target.value.trim(),
-              });
-            }}
-          />
-        </div>
-        <div>
-          描述：{' '}
-          <Input
-            placeholder="输入描述"
-            value={projectParma.describe}
-            onChange={e => {
-              setProjectParma({
-                ...projectParma,
-                describe: e.target.value.trim(),
-              });
-            }}
-          />
-        </div>
+        <Spin spinning={isSpinning} tip="Loading...">
+          <div>
+            文件夹名称：{' '}
+            <Input
+              placeholder="输入文件夹名称"
+              value={projectParma.name}
+              onChange={e => {
+                setProjectParma({
+                  ...projectParma,
+                  name: e.target.value.trim(),
+                });
+              }}
+            />
+          </div>
+          <div>
+            描述：{' '}
+            <Input
+              placeholder="输入描述"
+              value={projectParma.describe}
+              onChange={e => {
+                setProjectParma({
+                  ...projectParma,
+                  describe: e.target.value.trim(),
+                });
+              }}
+            />
+          </div>
+        </Spin>
       </Modal>
     </ConfigProvider>
   );
