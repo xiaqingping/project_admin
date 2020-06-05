@@ -6,6 +6,8 @@ import Process from './Process'
 let uploadFile = null
 // eslint-disable-next-line prefer-const
 let uploadFiles = []
+let ids = []
+let newArr = []
 
 const FileUpload = props => {
   const data = props.baseList()
@@ -45,19 +47,23 @@ const FileUpload = props => {
     uploadFile = file
     for (let i = 0; i < e.target.files.length; i++) {
       uploadFiles.push(e.target.files[i])
+      newArr = [...uploadFiles]
     }
     setTypeuploadFiles(uploadFiles)
     setvisible(true)
   }
 
   const removeuploadFile = id => {
-    // uploadFiles = uploadFiles.filter((item, index) => {
-    //   console.log(id, index)
-    //   return index !== id
-    // })
-    uploadFiles.splice(id,1)
+    ids.push(id);
+    uploadFiles = newArr.filter((item, index) => {
+      return !ids.includes(index)
+    })
+
     console.log(id, uploadFiles)
-    if (uploadFiles.length <= 0) setTypeuploadFiles(false)
+    if (uploadFiles.length <= 0) {
+      setTypeuploadFiles(false)
+      ids = []
+    }
   }
 
   return (
@@ -90,17 +96,17 @@ const FileUpload = props => {
       >
         <div>
           {
-            uploadFiles && uploadFiles.length > 0 ?
-            uploadFiles.map((item, index) => {
-              // eslint-disable-next-line react/no-array-index-key
-              return <Process
-                removeuploadFile={removeuploadFile}
-                proList={proList}
-                key={`${index + 0}`}
-                uploadFile={item}
-                id={index}
-              />
-            }) : <Empty description='暂无任务' image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            typeuploadFiles && uploadFiles && uploadFiles.length > 0 ?
+              uploadFiles.map((item, index) => {
+                // eslint-disable-next-line react/no-array-index-key
+                return <Process
+                  removeuploadFile={removeuploadFile}
+                  proList={proList}
+                  key={`${index + 0}`}
+                  uploadFile={item}
+                  id={index}
+                />
+              }) : <Empty description='暂无任务' image={Empty.PRESENTED_IMAGE_SIMPLE} />
           }
         </div>
       </Modal>

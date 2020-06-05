@@ -93,6 +93,7 @@ const FiledList = props => {
   const rowSelection = {
     onChange: (selectedRowKeys, selectRows) => {
       const newRows = selectRows.filter(item => !!item === true)
+      // console.log(newRows)
       setSelectedRows(newRows)
     },
     getCheckboxProps: record => ({
@@ -111,7 +112,6 @@ const FiledList = props => {
     getFileUpload: () => {
       const { projectId } = props
       const id = listData.directoryId
-      // const id = listData.directoryId === '0' ? '3' : listData.directoryId
       const data = {
         spaceType: 'project',
         spaceCode: projectId,
@@ -201,12 +201,14 @@ const FiledList = props => {
      */
     querydirectory: (id, type, name) => {
       if (type === 2) {
-        setBreadcrumbName([...BreadcrumbName, { name, id }])
         listData = {
           ...listData,
           directoryId: id,
         }
-        fn.getDateList()
+        fn.getDateList().then(() => {
+          rowSelection.onChange(null,[])
+          setBreadcrumbName([...BreadcrumbName, { name, id }])
+        })
       }
     },
     /** 创建目录 */
@@ -510,8 +512,10 @@ const FiledList = props => {
                         searchName: '',
                       }
                       setSeachName('')
-                      setBreadcrumbName([])
-                      fn.getDateList()
+                      fn.getDateList().then(() => {
+                        rowSelection.onChange(null,[])
+                        setBreadcrumbName([])
+                      })
                     }}
                   >
                     全部文件
@@ -529,11 +533,13 @@ const FiledList = props => {
                               directoryId: item.id,
                               searchName: '',
                             }
-                            setBreadcrumbName(
-                              BreadcrumbName.slice(0, key + 1),
-                            )
                             setSeachName('')
-                            fn.getDateList()
+                            fn.getDateList().then(() => {
+                              rowSelection.onChange(null,[])
+                              setBreadcrumbName(
+                                BreadcrumbName.slice(0, key + 1),
+                              )
+                            })
                           }}
                         >
                           {item.name}
