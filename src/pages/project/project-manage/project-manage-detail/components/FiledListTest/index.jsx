@@ -323,7 +323,7 @@ const FiledList = props => {
           data.isDown = 1;
           const url = `${
             env === 'dev'
-              ? 'http://localhost:8001/192.168.20.14:8150'
+              ? 'http://localhost:8000/192.168.20.6:8150'
               : baseURLMap.env
           }/disk/v1/${data.spaceType}/${data.spaceCode}/files/download/${
             data.id
@@ -351,10 +351,11 @@ const FiledList = props => {
           };
           newFiles.push(newItem);
         });
+        console.log(newFiles);
         axios({
           url: `${
             env === 'dev'
-              ? 'http://localhost:8001/192.168.20.14:8150'
+              ? 'http://localhost:8000/192.168.20.6:8150'
               : baseURLMap.env
           }/disk/v1/${data.spaceType}/${
             data.spaceCode

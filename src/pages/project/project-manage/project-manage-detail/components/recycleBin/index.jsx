@@ -3,6 +3,7 @@ import React from 'react';
 import { Modal, Table, Popconfirm, Button, Divider } from 'antd';
 import { FileExclamationOutlined } from '@ant-design/icons';
 import { connect } from 'dva';
+import { cutString } from '@/utils/utils';
 import api from '@/pages/project/api/recy';
 
 // 选择流程模型模态框
@@ -238,10 +239,11 @@ class recycliBin extends React.Component {
         title: '文件名称',
         dataIndex: 'name',
         width: 150,
+        // ellipsis:true,
         render: value => (
           <>
             <FileExclamationOutlined />
-            <span style={{ marginLeft: 10 }}>{value}</span>
+            <span style={{ marginLeft: 10 }}>{cutString(value, 50)}</span>
           </>
         ),
       },
@@ -249,6 +251,7 @@ class recycliBin extends React.Component {
         title: '描述',
         dataIndex: 'describe',
         width: 300,
+        ellipsis: true,
       },
       {
         title: '来源',
@@ -305,49 +308,47 @@ class recycliBin extends React.Component {
     };
 
     return (
-      <div>
-        <Modal
-          title="回收站"
-          className="classChooseProcessModel"
-          visible
-          onOk={this.handleOk}
-          onCancel={this.handleCancel}
-          width={1050}
-          okText="确认"
-          cancelText="取消"
+      <Modal
+        title="回收站"
+        className="classChooseProcessModel"
+        visible
+        onOk={this.handleOk}
+        onCancel={this.handleCancel}
+        width={1150}
+        okText="确认"
+        cancelText="取消"
+      >
+        <Button
+          onClick={() => {
+            this.deleteAll();
+          }}
         >
-          <Button
-            onClick={() => {
-              this.deleteAll();
-            }}
-          >
-            批量删除
-          </Button>
-          <Button
-            onClick={() => {
-              this.reductionAll();
-            }}
-          >
-            批量还原
-          </Button>
-          <Button
-            onClick={() => {
-              this.emptyAll();
-            }}
-          >
-            全部清空
-          </Button>
-          <Table
-            className="classrow"
-            rowKey="name"
-            rowSelection={rowSelection}
-            columns={columns}
-            dataSource={recycleTableList.length > 0 ? recycleTableList : []}
-            pagination={false}
-            loading={loading}
-          />
-        </Modal>
-      </div>
+          批量删除
+        </Button>
+        <Button
+          onClick={() => {
+            this.reductionAll();
+          }}
+        >
+          批量还原
+        </Button>
+        <Button
+          onClick={() => {
+            this.emptyAll();
+          }}
+        >
+          全部清空
+        </Button>
+        <Table
+          className="classrow"
+          rowKey="id"
+          rowSelection={rowSelection}
+          columns={columns}
+          dataSource={recycleTableList.length > 0 ? recycleTableList : []}
+          pagination={false}
+          loading={loading}
+        />
+      </Modal>
     );
   }
 }
