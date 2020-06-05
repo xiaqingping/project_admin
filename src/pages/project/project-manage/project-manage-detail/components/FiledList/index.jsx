@@ -107,7 +107,8 @@ const FiledList = props => {
      */
     getFileUpload: () => {
       const { projectId } = props
-      const id = listData.directoryId === '0' ? '3' : listData.directoryId
+      const id = listData.directoryId
+      // const id = listData.directoryId === '0' ? '3' : listData.directoryId
       const data = {
         spaceType: 'project',
         spaceCode: projectId,
@@ -209,7 +210,8 @@ const FiledList = props => {
     createDirctory: () => {
       const { projectId } = props
       const { code } = baseList
-      const id = listData.directoryId === '0' ? '3' : listData.directoryId
+      const id = listData.directoryId
+      // const id = listData.directoryId === '0' ? '3' : listData.directoryId
       const data = {
         spaceType: 'project',
         spaceCode: projectId,
@@ -437,33 +439,6 @@ const FiledList = props => {
               type="primary"
               onClick={() => {
                 setVisible(true)
-
-                // const params = {
-                //   spaceType: 'project',
-                //   spaceCode: '6e761a1aa7934884b11bf57ebf69db51',
-                // }
-                // const files = [
-                //   // dispositionType: 2,
-                //   {
-                //     fileType: '2',
-                //     id: 'db000d30c0ce47eb8fc7f5b8c5fe2d84'
-                //   }
-                // ]
-                // api.bulkDownload(params, files).then((res) => {
-                //   console.log('res', res.headers);
-                //   const content = res;
-                //   const elink = document.createElement('a');
-                //   elink.download = "test.xlsx";
-                //   elink.style.display = 'none';
-                //   const blob = new Blob([content]);
-                //   elink.href = URL.createObjectURL(blob);
-                //   document.body.appendChild(elink);
-                //   elink.click();
-                //   document.body.removeChild(elink);
-
-                // }).catch((err) => {
-                //   console.log(err);
-                // })
               }}
             >
               <FolderOutlined />
@@ -478,7 +453,7 @@ const FiledList = props => {
               下载
             </Button>
             <FileUpload source={baseList} baseList={fn.getFileUpload} />
-            <br />
+            {/* <br /> */}
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
               <Breadcrumb style={{ cursor: 'pointer' }}>
                 <Breadcrumb.Item>
