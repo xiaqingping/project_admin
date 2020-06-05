@@ -8,6 +8,13 @@ const projectModel = {
       { value: 4, text: '已终止', color: '#ff4d4f' },
       { value: 5, text: '待处理', color: '#faad14' },
     ],
+    // 批量下载 请求地址
+    baseURLMap: {
+      dev: 'https://devapi.sangon.com:30443/api',
+      test: 'https://testapi.sangon.com/api',
+      pre: 'https://preapi.sangon.com/api',
+      prod: 'https://api.sangon.com/api',
+    },
     // 业务伙伴认证状态
     BpCertificationStatus: [
       {
@@ -160,56 +167,56 @@ const projectModel = {
     // 文件列表测试数据
     filedList: [
       {
-        "id": "1",
-        "name": "XXXX文件1",
-        "describe": "XXXX流程名称1", // 描述
-        "sourceType": "smaple",
-        "sourceCode": 2,
-        "sourceId": 1,
-        "size": 122313,
-        "changeDate": "2020/05/26 15:15",
-        "type": 2,
-        "mediaType": "1",
-        "extendName": ""
+        id: '1',
+        name: 'XXXX文件1',
+        describe: 'XXXX流程名称1', // 描述
+        sourceType: 'smaple',
+        sourceCode: 2,
+        sourceId: 1,
+        size: 122313,
+        changeDate: '2020/05/26 15:15',
+        type: 2,
+        mediaType: '1',
+        extendName: '',
       },
       {
-        "id": "2",
-        "name": "XXXX文件2",
-        "describe": "XXXX流程名称2", // 描述
-        "sourceType": "smaple",
-        "sourceCode": 2,
-        "sourceId": 1,
-        "size": 122313,
-        "changeDate": "2020/05/26 15:15",
-        "type": 1,
-        "mediaType": "2",
-        "extendName": "word"
+        id: '2',
+        name: 'XXXX文件2',
+        describe: 'XXXX流程名称2', // 描述
+        sourceType: 'smaple',
+        sourceCode: 2,
+        sourceId: 1,
+        size: 122313,
+        changeDate: '2020/05/26 15:15',
+        type: 1,
+        mediaType: '2',
+        extendName: 'word',
       },
       {
-        "id": "3",
-        "name": "XXXX文件3",
-        "describe": "XXXX流程名称3", // 描述
-        "sourceType": "smaple",
-        "sourceCode": 2,
-        "sourceId": 1,
-        "size": 122313,
-        "changeDate": "2020/05/26 15:15",
-        "type": 1,
-        "mediaType": "2",
-        "extendName": "excel"
+        id: '3',
+        name: 'XXXX文件3',
+        describe: 'XXXX流程名称3', // 描述
+        sourceType: 'smaple',
+        sourceCode: 2,
+        sourceId: 1,
+        size: 122313,
+        changeDate: '2020/05/26 15:15',
+        type: 1,
+        mediaType: '2',
+        extendName: 'excel',
       },
       {
-        "id": "4",
-        "name": "XXXX文件4",
-        "describe": "XXXX流程名称4", // 描述
-        "sourceType": "smaple",
-        "sourceCode": 2,
-        "sourceId": 1,
-        "size": 122313,
-        "changeDate": "2020/05/26 15:15",
-        "type": 1,
-        "mediaType": "2",
-        "extendName": "pdf"
+        id: '4',
+        name: 'XXXX文件4',
+        describe: 'XXXX流程名称4', // 描述
+        sourceType: 'smaple',
+        sourceCode: 2,
+        sourceId: 1,
+        size: 122313,
+        changeDate: '2020/05/26 15:15',
+        type: 1,
+        mediaType: '2',
+        extendName: 'pdf',
       },
     ],
   },
