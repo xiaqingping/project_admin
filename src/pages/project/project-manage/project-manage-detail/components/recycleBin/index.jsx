@@ -339,7 +339,7 @@ class recycliBin extends React.Component {
           </Button>
           <Table
             className="classrow"
-            rowKey="name"
+            rowKey="id"
             rowSelection={rowSelection}
             columns={columns}
             dataSource={recycleTableList.length > 0 ? recycleTableList : []}

@@ -54,7 +54,7 @@ export default {
     return request(
       `${http}/disk/v1/${spaceType}/${spaceCode}/files/fileRecycle`,
       {
-        method: 'PUT',
+        method: 'DELETE',
         data,
       },
     );
