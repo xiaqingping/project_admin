@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import { connect } from 'dva'
 import {
   Button,
@@ -11,7 +12,9 @@ import {
   Col,
   message,
   Spin,
-} from 'antd'
+  notification,
+  Tooltip,
+} from 'antd';
 import {
   FolderOutlined,
   DownloadOutlined,
@@ -273,6 +276,8 @@ const FiledList = props => {
     },
     /** 文件下载(单个) */
     downloadFile: row => {
+      const { baseURLMap } = props;
+      const env = BASE_API;
       const data = {
         spaceCode: props.projectId,
         spaceType: 'project',
@@ -284,27 +289,30 @@ const FiledList = props => {
       api
         .downloadFiles(data)
         .then(() => {
-          data.isDown = 1
-          // eslint-disable-next-line max-len
-          const url = `http://192.168.20.6:8150/disk/v1/${data.spaceType}/${
-            data.spaceCode
-            }/files/download/${data.id}?${Qs.stringify(data)}`
-          window.open(url)
+          data.isDown = 1;
+          const url = `${
+            env === 'dev'
+              ? 'http://localhost:8001/192.168.20.14:8150'
+              : baseURLMap.env
+          }/disk/v1/${data.spaceType}/${data.spaceCode}/files/download/${
+            data.id
+          }?${Qs.stringify(data)}`;
+          window.open(url);
         })
         .catch()
     },
     /** 文件下载（批量） */
     downloadFileBatch: () => {
+      const { baseURLMap } = props;
+      const env = BASE_API;
       const data = {
         spaceCode: props.projectId,
         spaceType: 'project',
-        dispositionType: 2,
-        files: [],
-        isDown: 2,
-      }
+        isDown: 1,
+      };
 
       if (selectedRows && selectedRows.length) {
-        const newFiles = []
+        const newFiles = [];
         selectedRows.forEach(item => {
           const newItem = {
             fileType: item.fileType,
@@ -312,19 +320,49 @@ const FiledList = props => {
           };
           newFiles.push(newItem);
         });
-        data.files = JSON.stringify(newFiles);
-        console.log(data);
-        api.batchDownload(data).then(() => {
-          data.isDown = 1;
-          // eslint-disable-next-line max-len
-          const url = `http://192.168.20.6:8150/disk/v1/${data.spaceType}/${
+        axios({
+          url: `${
+            env === 'dev'
+              ? 'http://localhost:8001/192.168.20.14:8150'
+              : baseURLMap.env
+          }/disk/v1/${data.spaceType}/${
             data.spaceCode
-          }/files/batchDownload?${Qs.stringify(data)}`;
-          window.open(url);
-        });
+          }/files/batchDownload?isDown=${data.isDown}`,
+          method: 'post',
+          data: newFiles,
+          headers: {
+            Authorization:
+              '2oKfjHGD8_Ks-GZ2j7IeFJSAdTARWPRHmUuO5eM34S0hXfahsxNFLPNEM1Si0RQr',
+            usercode: 123,
+            username: 123,
+          },
+        })
+          .then(res => {
+            const content = res;
+            const elink = document.createElement('a');
+            const fileName = res.headers['content-disposition'].split('=')[1];
+            elink.download = fileName;
+            elink.style.display = 'none';
+            const blob = new Blob([content]);
+            elink.href = URL.createObjectURL(blob);
+            document.body.appendChild(elink);
+            elink.click();
+            document.body.removeChild(elink);
+          })
+          .catch(err => {
+            if (err.response.data.details[0]) {
+              // eslint-disable-next-line no-shadow
+              const message = '请求错误！';
+              const description = err.response.data.details[0];
+              notification.error({
+                message,
+                description,
+              });
+            }
+          });
         return false;
       }
-      return message.warning('请选中需要下载的文件！')
+      return message.warning('请选中需要下载的文件！');
     },
   }
 
@@ -364,7 +402,9 @@ const FiledList = props => {
               fn.querydirectory(record.id, record.fileType, record.name)
             }}
           >
-            {value}
+            <Tooltip placement="top" title={value}>
+              {value}
+            </Tooltip>
           </span>
           <a
             href="#!"
@@ -380,6 +420,11 @@ const FiledList = props => {
       title: '描述',
       dataIndex: 'describe',
       width: 300,
+      render: value => (
+        <Tooltip placement="top" title={value}>
+          {value}
+        </Tooltip>
+      ),
     },
     {
       title: '来源',
