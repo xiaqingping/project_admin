@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'dva';
+import axios from 'axios';
 import {
   Button,
   Input,
@@ -11,11 +12,11 @@ import {
   Col,
   message,
   Spin,
+  notification,
 } from 'antd';
 import {
   FolderOutlined,
   DownloadOutlined,
-  SearchOutlined,
   FileExclamationOutlined,
   SwapLeftOutlined,
   SwapRightOutlined,
@@ -327,13 +328,12 @@ const FiledList = props => {
     },
     /** 文件下载（批量） */
     downloadFileBatch: () => {
-      console.log(selectedRows);
+      const { baseURLMap } = props;
+      const env = BASE_API;
       const data = {
         spaceCode: props.projectId,
         spaceType: 'project',
-        dispositionType: 2,
-        files: [],
-        isDown: 2,
+        isDown: 1,
       };
 
       if (selectedRows && selectedRows.length) {
@@ -345,9 +345,47 @@ const FiledList = props => {
           };
           newFiles.push(newItem);
         });
-        data.files = newFiles;
-        console.log(data);
-
+        axios({
+          // eslint-disable-next-line max-len
+          url: `${
+            env === 'dev'
+              ? 'http://localhost:8001/192.168.20.14:8150'
+              : baseURLMap.env
+          }/disk/v1/${data.spaceType}/${
+            data.spaceCode
+          }/files/batchDownload?isDown=${data.isDown}`,
+          method: 'post',
+          data: newFiles,
+          headers: {
+            Authorization:
+              '2oKfjHGD8_Ks-GZ2j7IeFJSAdTARWPRHmUuO5eM34S0hXfahsxNFLPNEM1Si0RQr',
+            usercode: 123,
+            username: 123,
+          },
+        })
+          .then(res => {
+            const content = res;
+            const elink = document.createElement('a');
+            const fileName = res.headers['content-disposition'].split('=')[1];
+            elink.download = fileName;
+            elink.style.display = 'none';
+            const blob = new Blob([content]);
+            elink.href = URL.createObjectURL(blob);
+            document.body.appendChild(elink);
+            elink.click();
+            document.body.removeChild(elink);
+          })
+          .catch(err => {
+            if (err.response.data.details[0]) {
+              // eslint-disable-next-line no-shadow
+              const message = '请求错误！';
+              const description = err.response.data.details[0];
+              notification.error({
+                message,
+                description,
+              });
+            }
+          });
         return false;
       }
       return message.warning('请选中需要下载的文件！');
@@ -534,7 +572,11 @@ const FiledList = props => {
               <FolderOutlined />
               新建文件夹
             </Button>
-            <Button onClick={() => {}}>
+            <Button
+              onClick={() => {
+                fn.downloadFileBatch();
+              }}
+            >
               <DownloadOutlined />
               下载
             </Button>

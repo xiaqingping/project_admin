@@ -3,13 +3,13 @@
  */
 import request from '@/utils/request';
 
-let http = 'http://192.168.20.6:8150';
+// const http = 'http://192.168.20.6:8150';
 // http = 'http://192.168.20.27:8150';
-// http = 'http://192.168.20.14:8150';
+const http = 'http://192.168.20.14:8150';
 export default {
   // 查询文件列表
   getFiles(params) {
-    const http = 'http://192.168.20.14:8150';
+    // const http = 'http://192.168.20.14:8150';
     return request(
       `${http}/disk/v2/${params.spaceType}/${params.spaceCode}/files`,
       {
@@ -40,11 +40,13 @@ export default {
   },
 
   // 批量下载
-  batchDownload(params) {
+  downloadFilesBatch(infor, data) {
     return request(
-      `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/files/batchDownload`,
+      // eslint-disable-next-line max-len
+      `${http}/disk/v1/${infor.spaceType}/${infor.spaceCode}/files/batchDownload?isDown=${infor.isDown}`,
       {
-        params,
+        method: 'POST',
+        data,
       },
     );
   },
@@ -145,7 +147,7 @@ export default {
         dataType: 'JSON',
         data: formData,
       },
-    )
+    );
   },
   // 批量上传第二接口
   uploadMoreFiles3(params, data) {
@@ -156,7 +158,7 @@ export default {
         method: 'POST',
         data,
       },
-    )
+    );
   },
   // 批量下载
   bulkDownload(params, files) {
@@ -165,11 +167,11 @@ export default {
       `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/files/batchDownload?isDown=1`,
       {
         method: 'POST',
-        data: files
+        data: files,
       },
       // {
       //   responseType: 'blob'
       // }
-    )
+    );
   },
 };
