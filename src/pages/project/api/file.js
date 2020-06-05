@@ -9,6 +9,7 @@ const http = 'http://192.168.20.14:8150';
 export default {
   // 查询文件列表
   getFiles(params) {
+    // const http = 'http://192.168.20.14:8150';
     return request(
       `${http}/disk/v2/${params.spaceType}/${params.spaceCode}/files`,
       {
@@ -162,7 +163,6 @@ export default {
   // 批量下载
   bulkDownload(params, files) {
     // http = 'http://192.168.20.27:8150';
-    console.log(params, files, http);
     return request(
       `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/files/batchDownload?isDown=1`,
       {
