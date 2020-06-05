@@ -13,6 +13,7 @@ import {
   message,
   Spin,
   notification,
+  Tooltip,
 } from 'antd';
 import {
   FolderOutlined,
@@ -271,6 +272,8 @@ const FiledList = props => {
     },
     /** 文件下载(单个) */
     downloadFile: row => {
+      const { baseURLMap } = props;
+      const env = BASE_API;
       const data = {
         spaceCode: props.projectId,
         spaceType: 'project',
@@ -283,10 +286,13 @@ const FiledList = props => {
         .downloadFiles(data)
         .then(() => {
           data.isDown = 1;
-          // eslint-disable-next-line max-len
-          const url = `http://192.168.20.14:8150/disk/v1/${data.spaceType}/${
-            data.spaceCode
-          }/files/download/${data.id}?${Qs.stringify(data)}`;
+          const url = `${
+            env === 'dev'
+              ? 'http://localhost:8001/192.168.20.14:8150'
+              : baseURLMap.env
+          }/disk/v1/${data.spaceType}/${data.spaceCode}/files/download/${
+            data.id
+          }?${Qs.stringify(data)}`;
           window.open(url);
         })
         .catch();
@@ -311,7 +317,6 @@ const FiledList = props => {
           newFiles.push(newItem);
         });
         axios({
-          // eslint-disable-next-line max-len
           url: `${
             env === 'dev'
               ? 'http://localhost:8001/192.168.20.14:8150'
@@ -392,7 +397,9 @@ const FiledList = props => {
               fn.querydirectory(record.id, record.fileType, record.name);
             }}
           >
-            {value}
+            <Tooltip placement="top" title={value}>
+              {value}
+            </Tooltip>
           </span>
           <a
             href="#!"
@@ -408,6 +415,11 @@ const FiledList = props => {
       title: '描述',
       dataIndex: 'describe',
       width: 300,
+      render: value => (
+        <Tooltip placement="top" title={value}>
+          {value}
+        </Tooltip>
+      ),
     },
     {
       title: '来源',
