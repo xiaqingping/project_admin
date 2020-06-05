@@ -67,11 +67,11 @@ export default {
     });
   },
   // 批量上传文件
-  // uploadMoreFiles(sourceKey, sourceCode) {
-  //   if (!verifySourceKey(sourceKey)) return false;
-  //   const { origin } = new URL(baseURL);
-  //   return `${origin}/zuul/api/disk/v1/files/upload_more/${sourceKey}/${sourceCode}`;
-  // },
+  uploadMoreFiles(sourceKey, sourceCode) {
+    if (!verifySourceKey(sourceKey)) return false;
+    const { origin } = new URL(baseURL);
+    return `${origin}/zuul/api/disk/v1/files/upload_more/${sourceKey}/${sourceCode}`;
+  },
   // 批量上传第一接口
   uploadMoreFiles1(params) {
     http1 = 'http://192.168.20.27:8150/';
