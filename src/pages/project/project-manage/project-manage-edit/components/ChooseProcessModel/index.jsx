@@ -408,11 +408,13 @@ class ChooseProcessModel extends React.Component {
             </InfiniteScroll>
           </div>
         </Modal>
-        <ChooseProcessModelCheck
-          visible={viewvisible}
-          onClose={this.viewClose}
-          viewlist={viewlist}
-        />
+        {viewvisible && (
+          <ChooseProcessModelCheck
+            visible={viewvisible}
+            onClose={this.viewClose}
+            viewlist={viewlist}
+          />
+        )}
       </div>
     );
   }

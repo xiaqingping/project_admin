@@ -424,11 +424,49 @@ class Test extends Component {
       },
     ];
 
+    // 判断list数组的长度，为0时控制form的margin-bottom的值，
+    let listLength;
+    if (list.length === 0) {
+      listLength = {
+        marginBottom: '286px',
+      };
+    }
+    if (list.length !== 0 && list.length === 1) {
+      listLength = {
+        marginBottom: '375px',
+      };
+    }
+    if (list.length !== 0 && list.length === 2) {
+      listLength = {
+        marginBottom: '300px',
+      };
+    }
+    if (list.length !== 0 && list.length === 3) {
+      listLength = {
+        marginBottom: '220px',
+      };
+    }
+    if (list.length !== 0 && list.length === 4) {
+      listLength = {
+        marginBottom: '144px',
+      };
+    }
+    if (list.length !== 0 && list.length === 5) {
+      listLength = {
+        marginBottom: '65px',
+      };
+    }
+    if ((list.length !== 0 && list.length === 6) || list.length > 6) {
+      listLength = {
+        marginBottom: '24px',
+      };
+    }
+
     return (
       // <ConfigProvider renderEmpty={this.EmptyState}>
       <ConfigProvider>
-        <div style={{ background: '#F0F2F5', width: '100%' }}>
-          <Form>
+        <div style={{ background: '#F0F2F5' }}>
+          <Form style={listLength}>
             <div
               style={{
                 background: '#FFFFFF',
@@ -475,45 +513,46 @@ class Test extends Component {
               </Button>
             </div>
           </Form>
-          <div
-            style={{
-              height: '56px',
-              // width: '100%',
-              lineHeight: '56px',
-              textAlign: 'right',
-              background: '#FFFFFF',
-            }}
-            className="footer"
-          >
-            <div className="footerCenter">
-              <Button
-                type="default"
-                onClick={() => this.goBack(true)}
-                style={{ marginRight: '10px' }}
-              >
-                返回
-              </Button>
-              <Button
-                type="primary"
-                onClick={() => this.handleSave()}
-                style={{ marginRight: '10px' }}
-                loading={buttonLoading}
-              >
-                保存
-              </Button>
-            </div>
-          </div>
-
-          {visible ? (
-            <ChooseProcessModel
-              visible={visible}
-              onClose={v => this.onClose(v)}
-              getData={v => this.getData(v)}
-            />
-          ) : (
-            ''
-          )}
         </div>
+
+        <div
+          style={{
+            height: '56px',
+            // width: '100%',
+            lineHeight: '56px',
+            textAlign: 'right',
+            background: '#FFFFFF',
+          }}
+          className="footer"
+        >
+          <div className="footerCenter">
+            <Button
+              type="default"
+              onClick={() => this.goBack(true)}
+              style={{ marginRight: '10px' }}
+            >
+              返回
+            </Button>
+            <Button
+              type="primary"
+              onClick={() => this.handleSave()}
+              style={{ marginRight: '10px' }}
+              loading={buttonLoading}
+            >
+              保存
+            </Button>
+          </div>
+        </div>
+
+        {visible ? (
+          <ChooseProcessModel
+            visible={visible}
+            onClose={v => this.onClose(v)}
+            getData={v => this.getData(v)}
+          />
+        ) : (
+          ''
+        )}
       </ConfigProvider>
     );
   }
