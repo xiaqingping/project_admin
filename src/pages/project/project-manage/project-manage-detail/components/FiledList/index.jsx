@@ -222,6 +222,7 @@ const FiledList = props => {
         ...projectParma,
         parentId: id,
       }
+
       // 校验输入值
       const result = fn.verifyInput(data)
       if (!result) return false
@@ -320,6 +321,7 @@ const FiledList = props => {
    * 初始化操作
    */
   useEffect(() => {
+
     // 初始化列表数据
     fn.getDateList()
     // 查询项目基础信息及流程列表
@@ -426,6 +428,33 @@ const FiledList = props => {
               type="primary"
               onClick={() => {
                 setVisible(true)
+
+                // const params = {
+                //   spaceType: 'project',
+                //   spaceCode: '6e761a1aa7934884b11bf57ebf69db51',
+                // }
+                // const files = [
+                //   // dispositionType: 2,
+                //   {
+                //     fileType: '2',
+                //     id: 'db000d30c0ce47eb8fc7f5b8c5fe2d84'
+                //   }
+                // ]
+                // api.bulkDownload(params, files).then((res) => {
+                //   console.log('res', res.headers);
+                //   const content = res;
+                //   const elink = document.createElement('a');
+                //   elink.download = "test.xlsx";
+                //   elink.style.display = 'none';
+                //   const blob = new Blob([content]);
+                //   elink.href = URL.createObjectURL(blob);
+                //   document.body.appendChild(elink);
+                //   elink.click();
+                //   document.body.removeChild(elink);
+
+                // }).catch((err) => {
+                //   console.log(err);
+                // })
               }}
             >
               <FolderOutlined />
@@ -493,11 +522,11 @@ const FiledList = props => {
                 <div className="classSort"
                   onClick={e => {
                     e.stopPropagation()
-                    const { sortType } = listData
+                    const { sortWay } = listData
                     setIsActive(!isActive)
                     listData = {
                       ...listData,
-                      sortType: sortType === 1 ? 2 : 1,
+                      sortWay: sortWay === 1 ? 2 : 1,
                     }
                     fn.getDateList()
                   }}
@@ -532,7 +561,7 @@ const FiledList = props => {
                       className="classSelect"
                       defaultValue="文件名"
                       onChange={value => {
-                        listData = { ...listData, sortWay: value }
+                        listData = { ...listData, sortType: value }
                         fn.getDateList()
                       }}
                       bordered={false}

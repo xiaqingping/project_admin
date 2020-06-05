@@ -182,7 +182,6 @@ service.interceptors.request.use(config => {
   if (config.url.split(repeatUrl).length === 3) {
     config.url = config.url.substr(repeatUrl.length);
   }
-
   return config;
 }, err);
 /* eslint-enable no-param-reassign */

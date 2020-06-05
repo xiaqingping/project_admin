@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'dva';
 import BMF from 'browser-md5-file';
-import { Button, Progress } from 'antd';
+import { Button, Progress, Modal, Radio } from 'antd';
 
 // 自定义
 import api from '@/pages/project/api/file';
@@ -12,18 +12,23 @@ const Process = props => {
   const { uploadFile: upfiles, proList } = props;
   const uploadFile = upfiles;
   const { name, size, type } = uploadFile;
-  console.log(props);
   let cur = 0;
   let index = 0;
   const SIZE = 1024 * 1024;
   let fileOperationId = '';
   let fileOperationLogicId = '';
 
+
+
   // let md5Value = ''
   // 进度
   const [progress, setProgress] = useState(0);
   // 暂停/上传状态
   const [isStart, setIsStart] = useState(true);
+  // model
+  const [visible, setVisible] = useState(false)
+  // 单选值
+  const [radioValue, setRadioValue] = useState(1)
 
   // 上传参数
   let data = {
@@ -60,7 +65,9 @@ const Process = props => {
       } else if (status === 4) {
         const dataParams = {
           fileOperationId: id1,
-          fileOperationLogicId: id2
+          fileOperationLogicId: id2,
+          // file: '',
+          // partNumber: '',
         }
         api.uploadMoreFiles3(params, dataParams).then(reData => {
           console.log(reData)
@@ -95,18 +102,36 @@ const Process = props => {
             fileOperationId: id1,
             fileOperationLogicId: id2,
           } = result;
-
-          if ((status === 1 || status === 3) && repeatFlag) {
-            fileOperationId = id1;
-            fileOperationLogicId = id2;
-            index = partNumber;
-            cur = partNumber - 1;
-            fun();
+          if (repeatFlag === 2) {
+            if (status === 1 || status === 3) {
+              fileOperationId = id1;
+              fileOperationLogicId = id2;
+              index = partNumber;
+              cur = partNumber - 1;
+              fun();
+            } else if (status === 4) {
+              const dataParams = {
+                fileOperationId: id1,
+                fileOperationLogicId: id2,
+              }
+              const params = {
+                spaceType: data.spaceType,
+                spaceCode: data.spaceCode,
+              }
+              api.uploadMoreFiles3(params, dataParams).then(reData => {
+                console.log(reData)
+              })
+            }
+          } else {
+            setVisible(true)
           }
         });
       });
     });
   };
+
+
+
 
   const start = () => res();
 
@@ -115,6 +140,18 @@ const Process = props => {
     arr[props.id].flag = !arr[props.id].flag;
     fun();
   };
+
+  const handleOk = () => {
+    setVisible(false)
+  }
+
+  const handleCancel = () => {
+    setVisible(false)
+  }
+
+  const onchangeRadio = value => {
+    setRadioValue(value)
+  }
 
   useEffect(() => {
     arr = [...arr, { id: props.id, flag: true }];
@@ -132,6 +169,17 @@ const Process = props => {
               {isStart ? '暂停' : '开始'}
             </Button>
           )}
+        < Modal
+          title="确认上传"
+          visible={visible}
+          onOk={handleOk}
+          onCancel={handleCancel}
+        >
+          <Radio.Group onChange={onchangeRadio} value={radioValue}>
+            <Radio value={1}>覆盖</Radio>
+            <Radio value={2}>后台重命名</Radio>
+          </Radio.Group>
+        </Modal >
       </div>
     </>
   );

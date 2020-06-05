@@ -4,8 +4,8 @@
 import request from '@/utils/request';
 
 let http = 'http://192.168.20.6:8150';
-http = 'http://192.168.20.27:8150/';
-// http = 'http://192.168.20.14:8150/';
+// http = 'http://192.168.20.27:8150';
+// http = 'http://192.168.20.14:8150';
 export default {
   // 查询文件列表
   getFiles(params) {
@@ -114,9 +114,10 @@ export default {
   },
   // 批量上传第一接口
   uploadMoreFiles1(params) {
-    http = 'http://192.168.20.27:8150/';
+    // http = 'http://192.168.20.27:8150';
+
     return request(
-      `${http}disk/v1/${params.spaceType}/${params.spaceCode}/files/multiPart`,
+      `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/files/multiPart`,
       {
         method: 'POST',
         data: params,
@@ -125,9 +126,9 @@ export default {
   },
   // 批量上传第二接口
   uploadMoreFiles2(params, formData) {
-    http = 'http://192.168.20.27:8150/';
+    // http = 'http://192.168.20.27:8150';
     return request(
-      `${http}disk/v1/${params.spaceType}/${params.spaceCode}/files/multiPartUpload`,
+      `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/files/multiPartUpload`,
       {
         method: 'POST',
         dataType: 'JSON',
@@ -137,13 +138,28 @@ export default {
   },
   // 批量上传第二接口
   uploadMoreFiles3(params, data) {
-    http = 'http://192.168.20.27:8150/';
+    // http = 'http://192.168.20.27:8150';
     return request(
-      `${http}disk/v1/${params.spaceType}/${params.spaceCode}/files/mergeMultiPartUpload`,
+      `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/files/mergeMultiPartUpload`,
       {
         method: 'POST',
         data,
       },
     )
-  }
+  },
+  // 批量下载
+  bulkDownload(params, files) {
+    // http = 'http://192.168.20.27:8150';
+    console.log(params, files, http)
+    return request(
+      `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/files/batchDownload?isDown=1`,
+      {
+        method: 'POST',
+        data: files
+      },
+      // {
+      //   responseType: 'blob'
+      // }
+    )
+  },
 };
