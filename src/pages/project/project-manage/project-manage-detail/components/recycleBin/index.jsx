@@ -27,6 +27,9 @@ class recycliBin extends React.Component {
 
   // 回收站列表
   getDeleteList = parameters => {
+    this.setState({
+      loading: true,
+    });
     let data = {
       spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
       spaceCode: '6e761a1aa7934884b11bf57ebf69db51', // String 必填 空间编号(可以为功能ID/编号...)
@@ -50,12 +53,16 @@ class recycliBin extends React.Component {
           recycleTableList: res,
         });
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        this.setState({
+          loading: false,
+        });
+      });
   };
 
   // 关闭模态框的方法
   handleCancel = () => {
-    console.log('关闭');
     this.props.onClose();
   };
 
@@ -65,7 +72,6 @@ class recycliBin extends React.Component {
    * @param onClose 关闭流程模型弹框的方法
    */
   handleOk = () => {
-    console.log('确定关闭');
     this.props.onClose();
   };
 
@@ -74,14 +80,17 @@ class recycliBin extends React.Component {
     const data = {};
     data.spaceType = 'project'; // String 必填 空间类型（来源可以为服务名称...）
     data.spaceCode = '6e761a1aa7934884b11bf57ebf69db51'; // String 必填 空间编号(可以为功能ID/编号...)
-    const files = [
-      {
-        id: row.id, // String 可选 文件或文件夹的ID
-        fileType: row.fileType, // Integer 必填 {1目录, 2文件}
-      },
+    // const files = [
+    //   {
+    //     id: row.id, // String 可选 文件或文件夹的ID
+    //     fileType: row.fileType, // Integer 必填 {1目录, 2文件}
+    //   },
+    // ];
+    const ids = [
+      row.id, // String 可选 文件或文件夹的ID
     ];
     api
-      .deleteRecycleRestore(data, files)
+      .deleteRecycleRestore(data, ids)
       .then(() => {
         this.setState({
           loading: false,
@@ -101,7 +110,6 @@ class recycliBin extends React.Component {
     const { selectedRowList } = this.state;
 
     if (selectedRowList.length !== 0) {
-      console.log(selectedRowList);
       this.setState({
         loading: true,
       });
@@ -110,17 +118,10 @@ class recycliBin extends React.Component {
       data.spaceCode = '6e761a1aa7934884b11bf57ebf69db51';
       const files = [];
       selectedRowList.forEach(item => {
-        console.log(item);
         let newlist = {};
-        newlist = {
-          id: item.id, // String 可选 文件或文件夹的ID
-          fileType: item.fileType, // Integer 必填 {1目录, 2文件}
-        };
+        newlist = item.id; // String 可选 文件或文件夹的ID
         files.push(newlist);
       });
-      console.log(files);
-      console.log(data);
-      data.files = files;
       api
         .deleteRecycleRestore(data, files)
         .then(() => {
@@ -144,15 +145,16 @@ class recycliBin extends React.Component {
     const data = {};
     data.spaceType = 'project';
     data.spaceCode = '6e761a1aa7934884b11bf57ebf69db51';
-    const files = [
-      {
-        id: row.id,
-        fileType: row.fileType,
-      }, // String id可选 文件或文件夹的ID, Integer fileType必填 {1目录, 2文件}
-    ];
+    // const files = [
+    //   {
+    //     id: row.id,
+    //     fileType: row.fileType,
+    //   }, // String id可选 文件或文件夹的ID, Integer fileType必填 {1目录, 2文件}
+    // ];
+    const ids = [row.id];
     // data.files=newlist;
     api
-      .getRecycleRestore(data, files)
+      .getRecycleRestore(data, ids)
       .then(() => {
         this.setState({
           loading: false,
@@ -181,14 +183,9 @@ class recycliBin extends React.Component {
       const files = [];
       selectedRowList.forEach(item => {
         let newlist = {};
-        newlist = {
-          id: item.id, // String 可选 文件或文件夹的ID
-          fileType: item.fileType, // Integer 必填 {1目录, 2文件}
-        };
+        newlist = item.id; // String 可选 文件或文件夹的ID
         files.push(newlist);
       });
-      // data.files =files;
-      console.log(data);
       api
         .getRecycleRestore(data, files)
         .then(() => {
@@ -210,16 +207,26 @@ class recycliBin extends React.Component {
 
   // 全部清空
   emptyAll = () => {
+    this.setState({
+      loading: true,
+    });
     const data = {};
     data.spaceType = 'project';
     data.spaceCode = '6e761a1aa7934884b11bf57ebf69db51';
     api
       .emptyRecycle(data)
-      .then(res => {
-        console.log(res);
+      .then(() => {
+        this.setState({
+          loading: false,
+        });
         this.getDeleteList();
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        this.setState({
+          loading: false,
+        });
+      });
   };
 
   render() {
