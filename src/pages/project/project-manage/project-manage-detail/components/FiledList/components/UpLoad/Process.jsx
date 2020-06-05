@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'dva'
 import BMF from 'browser-md5-file'
-import { Button, Progress, Modal, Radio } from 'antd'
+import { Button, Progress, Modal, Radio, message } from 'antd'
 
 // 自定义
 import api from '@/pages/project/api/file'
@@ -28,13 +28,17 @@ const Process = props => {
   const [radioValue, setRadioValue] = useState(1)
   // 组件显示状态
   const [isshow, setIsshow] = useState('block')
+  // 是否暂停状态
+  const [isButtonshow, setIsButtonshow] = useState(false)
+  // 按钮下文字状态
+  const [isButtontxt, setIsButtontxt] = useState('准备中。。。')
 
   // 上传参数
   let data = {
     ...proList,
     size,
     md5: '',
-    mediaType: type,
+    mediaType: !type ? 'application/octet-stream' : type,
     extendName: name ? name.split('.')[1] : '',
     name,
   }
@@ -43,7 +47,6 @@ const Process = props => {
     const formData = new FormData()
     let end = cur + SIZE
     if (uploadFile.size - cur < SIZE) end = uploadFile.size
-    console.log(cur, end)
     formData.append('file', uploadFile.slice(cur, end))
     formData.append('fileOperationId', fileOperationId)
     formData.append('fileOperationLogicId', fileOperationLogicId)
@@ -65,12 +68,14 @@ const Process = props => {
         const dataParams = {
           fileOperationId: id1,
           fileOperationLogicId: id2,
-          // file: '',
-          // partNumber: '',
         }
         api.uploadMoreFiles3(params, dataParams).then(reData => {
           console.log(reData)
         })
+      } else if (status === 2) {
+        message.success('已覆盖')
+        setIsshow('none')
+        removeuploadFile(id)
       }
     }).catch(secondERR => {
       console.log('第二接口error', secondERR)
@@ -95,6 +100,7 @@ const Process = props => {
           md5,
         }
         api.uploadMoreFiles1(data).then(result => {
+          setIsButtonshow(true)
           const {
             status,
             repeatFlag,
@@ -129,6 +135,8 @@ const Process = props => {
           } else {
             setVisible(true)
           }
+        }).catch(() => {
+          setIsButtontxt('上传失败！')
         })
       })
     })
@@ -142,7 +150,8 @@ const Process = props => {
   const stop = () => {
     setIsStart(!arr[props.id].flag)
     arr[props.id].flag = !arr[props.id].flag
-    fun()
+    if(arr[props.id].flag)start()
+
   }
 
   const handleOk = () => {
@@ -180,6 +189,10 @@ const Process = props => {
             api.uploadMoreFiles3(params, dataParams).catch(thirdERR => {
               console.log('第三接口error', thirdERR)
             })
+          } else if (status === 2) {
+            message.success('已覆盖')
+            setIsshow('none')
+            removeuploadFile(id)
           }
         } else {
           setVisible(true)
@@ -198,7 +211,7 @@ const Process = props => {
   }
 
   const onchangeRadio = e => {
-    const {value} = e.target
+    const { value } = e.target
     setRadioValue(value)
   }
 
@@ -212,13 +225,16 @@ const Process = props => {
       <div style={{ marginBottom: '10px', display: isshow }}>
         <div>{uploadFile.name}</div>
         <Progress percent={progress} style={{ width: '80%', marginLeft: '10px' }} />
-        {progress >= 100 ? (
+        {
+        // eslint-disable-next-line no-nested-ternary
+        progress >= 100 ? (
           '上传完成'
-        ) : (
-            <Button onClick={stop} style={{ marginLeft: '10px' }}>
+        ) : isButtonshow ?
+            (<Button onClick={stop} style={{ marginLeft: '10px' }}>
               {isStart ? '暂停' : '开始'}
-            </Button>
-        )}
+            </Button>) :
+            isButtontxt
+        }
       </div>
       < Modal
         title="确认上传"
@@ -230,7 +246,7 @@ const Process = props => {
         <div>当前目录下文件{uploadFile.name}以存在</div>
         <Radio.Group onChange={onchangeRadio} value={radioValue}>
           <Radio value={1}>覆盖</Radio>
-          <Radio value={2}>后台重命名</Radio>
+          <Radio value={3}>后台重命名</Radio>
         </Radio.Group>
       </Modal >
     </>
