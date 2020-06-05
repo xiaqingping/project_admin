@@ -6,7 +6,6 @@ import {
   Breadcrumb,
   Select,
   Modal,
-  ConfigProvider,
   Table,
   Row,
   Col,
@@ -24,8 +23,7 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons';
 
-import zhCN from 'antd/es/locale/zh_CN';
-
+import Qs from 'qs';
 // 自定义
 import api from '@/pages/project/api/disk';
 import api1 from '@/pages/project/api/projectManageDetail';
@@ -42,6 +40,16 @@ import ChooseFileList from './components/chooseFileList';
 
 const { Option } = Select;
 const { confirm } = Modal;
+
+// 搜索条件
+let listData = {
+  spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
+  spaceCode: '', // String 必填 空间编号(可以为功能ID/编号...)
+  directoryId: '0', // String 可选 目录ID
+  searchName: '', // String 可选 搜索名称（文件或目录名称）
+  sortType: 1, // Integer 必填 {1, 2, 3}
+  sortWay: 1, // Integer 必填 {1, 2}
+};
 
 /**
  * 文件列表组件
@@ -66,15 +74,7 @@ const FiledList = props => {
     businessCode: '',
   });
 
-  // 搜索条件
-  const [listData, setListData] = useState({
-    spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
-    spaceCode: '', // String 必填 空间编号(可以为功能ID/编号...)
-    directoryId: '0', // String 可选 目录ID
-    searchName: '', // String 可选 搜索名称（文件或目录名称）
-    sortType: 1, // Integer 必填 {1, 2, 3}
-    sortWay: 1, // Integer 必填 {1, 2}
-  });
+  const [searchName, setSearchName] = useState('');
 
   /** 状态 */
   // 新建文件夹Model状态
@@ -87,8 +87,7 @@ const FiledList = props => {
   const [selectedRows, setSelectedRows] = useState([]);
   // 排序状态
   const [isActive, setIsActive] = useState(false);
-  // 排序筛选参数
-  const [sortParameters, setSortParameters] = useState(1);
+
   // 列表加载状态
   const [isloading, setLoading] = useState(true);
   // 复制移动文件Model状态
@@ -99,7 +98,9 @@ const FiledList = props => {
   const [isRecycle, setRecycle] = useState(false);
   // 新建文件夹弹框得loading
   const [addLoading, setAddLoading] = useState(false);
-  let globalSearch = true;
+  // 是否为全局搜索
+  const [globalSearch, setGlobalSearch] = useState(0);
+  // let globalSearch = 0;
 
   // 批量操作
   const rowSelection = {
@@ -122,17 +123,7 @@ const FiledList = props => {
      * @param {String} value
      */
     handleChange: () => {
-      // const sortWay = isActive ? 1 : 2;
-      const data = {
-        sortType: sortParameters,
-        sortWay: isActive ? 1 : 2,
-      };
-
-      setListData({
-        ...listData,
-        ...data,
-      });
-      fn.getDateList(data);
+      fn.getDateList();
     },
     /**
      * 获取列表数据
@@ -235,29 +226,25 @@ const FiledList = props => {
     },
     /** 查询 */
     queryList: e => {
-      console.log(listData);
       const value = e.target.value.trim();
       if (value) {
-        setListData({
+        listData = {
           ...listData,
           searchName: value,
-          directoryId: globalSearch ? 0 : listData.directoryId,
-        });
-        fn.getDateList({
-          searchName: value,
-          directoryId: globalSearch * 1 === 0 ? 0 : listData.directoryId,
-        });
+          directoryId: globalSearch ? listData.directoryId : 0,
+        };
+        fn.getDateList();
       }
     },
     /** 目录查询 */
     querydirectory: (id, type, name) => {
       if (type === 2) {
         setBreadcrumbName([...BreadcrumbName, { name, id }]);
-        setListData({
+        listData = {
           ...listData,
           directoryId: id,
-        });
-        fn.getDateList({ directoryId: id });
+        };
+        fn.getDateList();
       }
     },
     /** 创建目录 */
@@ -316,6 +303,55 @@ const FiledList = props => {
       }
       return true;
     },
+    /** 文件下载(单个) */
+    downloadFile: row => {
+      const data = {
+        spaceCode: props.projectId,
+        spaceType: 'project',
+        id: row.id,
+        fileType: row.fileType,
+        dispositionType: 2,
+        isDown: 2,
+      };
+      api2
+        .downloadFiles(data)
+        .then(() => {
+          data.isDown = 1;
+          // eslint-disable-next-line max-len
+          const url = `http://192.168.20.6:8150/disk/v1/${data.spaceType}/${
+            data.spaceCode
+          }/files/download/${data.id}?${Qs.stringify(data)}`;
+          window.open(url);
+        })
+        .catch();
+    },
+    /** 文件下载（批量） */
+    downloadFileBatch: () => {
+      console.log(selectedRows);
+      const data = {
+        spaceCode: props.projectId,
+        spaceType: 'project',
+        dispositionType: 2,
+        files: [],
+        isDown: 2,
+      };
+
+      if (selectedRows && selectedRows.length) {
+        const newFiles = [];
+        selectedRows.forEach(item => {
+          const newItem = {
+            fileType: item.fileType,
+            id: item.id,
+          };
+          newFiles.push(newItem);
+        });
+        data.files = newFiles;
+        console.log(data);
+
+        return false;
+      }
+      return message.warning('请选中需要下载的文件！');
+    },
   };
 
   /**
@@ -370,7 +406,13 @@ const FiledList = props => {
           >
             {value}
           </span>
-          <DownloadOutlined className="classDown" />
+          <a
+            href="#!"
+            className={`classFile${record.id}`}
+            onClick={() => fn.downloadFile(record)}
+          >
+            <DownloadOutlined className="classDown" />
+          </a>
         </div>
       ),
     },
@@ -455,20 +497,21 @@ const FiledList = props => {
   };
 
   const searchChange = e => {
-    globalSearch = e;
-    if (listData.searchName) {
+    setGlobalSearch(e);
+    if (listData.searchName.trim()) {
       fn.getDateList({
-        directoryId: globalSearch * 1 === 0 ? 0 : listData.directoryId,
+        directoryId: e * 1 === 0 ? 0 : listData.directoryId,
       });
     }
   };
 
   const selectBefore = (
     <Select
-      defaultValue="全局搜索"
+      title={globalSearch * 1 === 0 ? '全局搜索' : '当前文件搜索'}
+      defaultValue={0}
       className="select-before"
       onChange={searchChange}
-      style={{ width: 100 }}
+      style={{ width: 90 }}
       dropdownMatchSelectWidth={150}
     >
       <Option value={0}>全局搜索</Option>
@@ -477,7 +520,7 @@ const FiledList = props => {
   );
 
   return (
-    <ConfigProvider locale={zhCN}>
+    <div>
       {/* 搜索模块 */}
       <div className="classQuery">
         <Row>
@@ -521,11 +564,12 @@ const FiledList = props => {
                   <span
                     onClick={() => {
                       fn.getDateList({ directoryId: '0', searchName: '' });
-                      setListData({
+                      listData = {
                         ...listData,
                         directoryId: '0',
                         searchName: '',
-                      });
+                      };
+                      setSearchName('');
                       setBreadcrumbName([]);
                     }}
                   >
@@ -543,11 +587,11 @@ const FiledList = props => {
                                 directoryId: item.id,
                                 searchName: '',
                               });
-                              setListData({
+                              listData = {
                                 ...listData,
                                 directoryId: item.id,
                                 searchName: '',
-                              });
+                              };
                               setBreadcrumbName(
                                 BreadcrumbName.slice(0, key + 1),
                               );
@@ -572,36 +616,22 @@ const FiledList = props => {
                   onPressEnter={value => {
                     fn.queryList(value);
                   }}
-                  onChange={e =>
-                    setListData({
-                      ...listData,
-                      searchName: e.target.value,
-                    })
-                  }
-                  value={listData.searchName}
-                />
-                {/* <Input
-                  prefix={<SearchOutlined />}
-                  placeholder="搜索"
-                  onChange={e =>
-                    setListData({
-                      ...listData,
-                      searchName: e.target.value,
-                    })
-                  }
-                  value={listData.searchName}
-                  onPressEnter={value => {
-                    fn.queryList(value);
+                  onChange={e => {
+                    setSearchName(e.target.value);
                   }}
-                /> */}
+                  value={searchName}
+                />
               </Col>
               <Col span={7} offset={2}>
                 <div
                   onClick={() => {
+                    const { sortType } = listData;
+                    listData = {
+                      ...listData,
+                      sortType: sortType === 1 ? 2 : 1,
+                    };
+                    fn.getDateList();
                     setIsActive(!isActive);
-                    setTimeout(() => {
-                      fn.handleChange(sortParameters);
-                    }, 100);
                   }}
                   style={{
                     transform: 'translateX(10px)',
@@ -635,8 +665,8 @@ const FiledList = props => {
                       color: 'rgb(24, 144, 255)',
                     }}
                     onChange={value => {
-                      setSortParameters(value);
-                      fn.handleChange(sortParameters);
+                      listData = { ...listData, sortWay: value };
+                      fn.getDateList();
                     }}
                     bordered={false}
                     dropdownMatchSelectWidth={120}
@@ -726,7 +756,7 @@ const FiledList = props => {
       {isRecycle && (
         <RecycleBin onClose={onClose} getData={() => fn.getDateList()} />
       )}
-    </ConfigProvider>
+    </div>
   );
 };
 

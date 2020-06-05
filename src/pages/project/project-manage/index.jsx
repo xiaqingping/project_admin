@@ -192,10 +192,9 @@ class ProjectManagement extends Component {
     return [
       {
         title: '项目',
-        width: 250,
+        width: 200,
         dataIndex: 'code',
         hideInSearch: true,
-        ellipsis: true,
         render: (value, row) => (
           <>
             <div style={{ float: 'left' }}>
@@ -211,7 +210,7 @@ class ProjectManagement extends Component {
       {
         title: '描述',
         dataIndex: 'describe',
-        width: 400,
+        width: 300,
         ellipsis: true,
         hideInSearch: true,
       },
@@ -244,7 +243,7 @@ class ProjectManagement extends Component {
         },
       },
       {
-        width: 450,
+        width: 300,
         title: '标签',
         dataIndex: 'labels',
         hideInSearch: true,

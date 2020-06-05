@@ -3,8 +3,13 @@
 }
 
 .globalHeader {
-  padding: 0 24px !important;
+  // padding: 0 24px !important;
   background-color: #1b91ff !important;
+}
+
+.globalHeader,
+.ant-layout-header {
+  padding: 0;
 }
 
 .logoImg {
@@ -32,16 +37,30 @@
 .globalHeaderWidth {
   width: 1600px;
   margin: 0 auto;
+  background-color: #1b91ff !important;
 }
 
 @media screen and (max-width: 3000px) {
   .globalHeaderWidth {
     width: 100%;
   }
+
+  .globalHeader {
+    width: 1600px;
+    margin: 0 auto;
+  }
 }
 
-@media screen and (max-width: 1152px) {
-  .globalHeaderWidth {
+@media screen and (max-width: 1600px) {
+  .globalHeader {
     width: 1152px;
+    margin: 0 auto;
+  }
+}
+
+@media screen and (max-width: 1440px) {
+  .globalHeader {
+    width: 1024px;
+    margin: 0 auto;
   }
 }
