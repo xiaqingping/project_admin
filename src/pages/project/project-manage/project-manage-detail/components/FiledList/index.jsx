@@ -21,7 +21,6 @@ import {
   FileExclamationOutlined,
   SwapLeftOutlined,
   SwapRightOutlined,
-  // ExclamationCircleOutlined,
 } from '@ant-design/icons'
 import Qs from 'qs'
 
@@ -35,7 +34,7 @@ import pdf from '@/assets/imgs/pdf.png'
 import './index.less'
 
 const { Option } = Select
-// const { confirm } = Modal
+
 // 列表搜索条件
 let listData = {
   spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
@@ -91,7 +90,6 @@ const FiledList = props => {
   const [globalSearch, setGlobalSearch] = useState(1)
   // SearchName查询名称状态(String)
   const [SearchName, setSeachName] = useState('')
-
 
   // 批量操作
   const rowSelection = {
@@ -347,7 +345,6 @@ const FiledList = props => {
    * 初始化操作
    */
   useEffect(() => {
-
     // 初始化列表数据
     fn.getDateList()
     // 查询项目基础信息及流程列表
