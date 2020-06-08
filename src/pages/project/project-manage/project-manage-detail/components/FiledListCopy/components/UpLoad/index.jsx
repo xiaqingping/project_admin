@@ -9,6 +9,13 @@ let uploadFiles = []
 let ids = []
 let newArr = []
 
+/**
+ * 文件批量上传组件
+ * 批量上传文件
+ * @author xiaqingping
+ * @version v0.1 2020-06-08
+ * @since 文件批量上传组件
+ */
 const FileUpload = props => {
   const data = props.baseList()
 
@@ -18,21 +25,20 @@ const FileUpload = props => {
   // uploadFiles状态
   const [typeuploadFiles, setTypeuploadFiles] = useState(true)
 
-
   // 参数
   const proList = {
-    sourceType: 'project',
-    sourceCode: props.source ? props.source.code : '',
-    sourceId: '',
-    logicDirectoryId: '',
-    spaceType: 'project',
-    spaceCode: '',
+    sourceType: 'project', // 来源类型
+    sourceCode: props.source ? props.source.code : '', // 来源编号
+    sourceId: '', // 来源ID
+    logicDirectoryId: '', // 逻辑目录ID
+    spaceType: 'project', // 空间类型
+    spaceCode: '', // 空间编号
     userName: '',
     userCode: '',
     businessName: '',
     businessCode: '',
     dirctoryPath: '',
-    describe: '这是描述',
+    describe: '描述内容',
     isPublic: 2,
     type: 4,
     size: '',
@@ -42,6 +48,8 @@ const FileUpload = props => {
     name: '',
     ...data
   }
+
+  /** 上传改变 */
   const handleChange = (e) => {
     const [file] = e.target.files
     uploadFile = file
@@ -51,15 +59,18 @@ const FileUpload = props => {
     }
     setTypeuploadFiles(uploadFiles)
     setvisible(true)
+    // 处理重复文件无法上传
+    document.getElementById('file').setAttribute('type', 'text')
+    document.getElementById('file').setAttribute('type', 'file')
   }
 
+  /** 移除文件 */
   const removeuploadFile = id => {
     ids.push(id);
     uploadFiles = newArr.filter((item, index) => {
       return !ids.includes(index)
     })
 
-    console.log(id, uploadFiles)
     if (uploadFiles.length <= 0) {
       setTypeuploadFiles(false)
       ids = []
