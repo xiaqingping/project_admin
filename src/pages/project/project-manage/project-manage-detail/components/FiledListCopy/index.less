@@ -1,0 +1,54 @@
+.classDown {
+  visibility: hidden;
+}
+
+tr:hover .classDown {
+  visibility: visible;
+}
+
+.classQuery1 {
+  padding: 20px;
+  padding-top: 5px;
+  button {
+    height: 35px;
+    margin-right: 10px;
+  }
+}
+
+.classProjectName {
+  width: 200px;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.classSort {
+  width: 120px;
+  margin-left: 10px;
+  float: right;
+  .ant-select-selector {
+    padding: 0;
+  }
+  .classSelect {
+    text-align: center;
+    font-size: 14px;
+    color: #1890ff;
+    transform: translateX(10px);
+  }
+}
+
+.classrow1 {
+  .ant-table-container table > thead > tr:first-child th:first-child {
+    padding-right: 0;
+    padding-left: 0;
+  }
+  .ant-table-tbody > tr > td:nth-child(1) {
+    padding-right: 0;
+    padding-left: 0;
+  }
+  .ant-table-container table > thead > tr:first-child th:nth-child(2),
+  .ant-table-tbody > tr > td:nth-child(2) {
+    padding-left: 0;
+  }
+}

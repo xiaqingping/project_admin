@@ -14,6 +14,7 @@ const sourceKeyList = [
 ];
 
 let http1 = 'http://192.168.20.6:8150/';
+http1 = 'http://192.168.20.14:8150/';
 if (process.env.NODE_ENV !== 'development') {
   http1 = '';
 }
@@ -34,7 +35,6 @@ export default {
   // 查询文件
   getFiles(params) {
     // http1 = 'http://192.168.20.27:8150/'
-    // http1 = 'http://192.168.20.14:8150/';
     return request(
       `${http1}disk/v2/${params.spaceType}/${params.spaceCode}/files`,
       {
@@ -74,7 +74,6 @@ export default {
   },
   // 批量上传第一接口
   uploadMoreFiles1(params) {
-    http1 = 'http://192.168.20.27:8150/';
     return request(
       `${http1}disk/v1/${params.spaceType}/${params.spaceCode}/files/multiPart`,
       {
@@ -85,7 +84,6 @@ export default {
   },
   // 批量上传第二接口
   uploadMoreFiles2(params, formData) {
-    http1 = 'http://192.168.20.27:8150/';
     return request(
       `${http1}disk/v1/${params.spaceType}/${params.spaceCode}/files/multiPartUpload`,
       {
