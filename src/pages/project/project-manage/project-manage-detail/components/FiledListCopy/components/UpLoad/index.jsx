@@ -38,7 +38,7 @@ const FileUpload = props => {
     businessName: '',
     businessCode: '',
     dirctoryPath: '',
-    describe: '描述',
+    describe: '描述内容',
     isPublic: 2,
     type: 4,
     size: '',
@@ -59,6 +59,9 @@ const FileUpload = props => {
     }
     setTypeuploadFiles(uploadFiles)
     setvisible(true)
+    // 处理重复文件无法上传
+    document.getElementById('file').setAttribute('type', 'text')
+    document.getElementById('file').setAttribute('type', 'file')
   }
 
   /** 移除文件 */

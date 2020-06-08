@@ -72,8 +72,15 @@ const Process = props => {
     }
     // 上传第二接口
     api.uploadMoreFiles2(params, formData).then(res => {
-      const { status, fileOperationId: id1, fileOperationLogicId: id2 } = res
-      setProgress(Math.ceil(end / uploadFile.size * 100))
+      const { status, fileOperationId: id1, fileOperationLogicId: id2, uploadProgressNumber } = res
+      console.log(uploadProgressNumber)
+      if(uploadProgressNumber) {
+        console.log(uploadProgressNumber * SIZE, uploadProgressNumber.SIZE / uploadFile.size * 100)
+        setProgress(Math.ceil(uploadProgressNumber * SIZE / uploadFile.size * 100))
+      } else {
+        setProgress(Math.ceil(end / uploadFile.size * 100))
+      }
+      // status 1待上传 2完成 3失败 4合并分片
       if (status === 1 || status === 3) {
         fileOperationId = id1
         fileOperationLogicId = id2
@@ -126,6 +133,7 @@ const Process = props => {
           fileOperationLogicId: id2,
         } = result
         if (repeatFlag === 2) {
+          // status 1待上传 2完成 3失败 4合并分片
           if (status === 1 || status === 3) {
             fileOperationId = id1
             fileOperationLogicId = id2
