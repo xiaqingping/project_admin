@@ -216,7 +216,6 @@ const FiledList = props => {
       const { projectId } = props
       const { code } = baseList
       const id = listData.directoryId
-      // const id = listData.directoryId === '0' ? '3' : listData.directoryId
       const data = {
         spaceType: 'project',
         spaceCode: projectId,

@@ -73,6 +73,8 @@ const FiledList = props => {
     businessName: '',
     businessCode: '',
   })
+  // selectedRowKeys 多选框的值 []
+  const [selectedRowKeys, setselectedRowKeys] = useState([])
 
   /** 状态 */
   // 新建文件夹Model状态
@@ -90,21 +92,15 @@ const FiledList = props => {
   // SearchName查询名称状态(String)
   const [SearchName, setSeachName] = useState('')
 
+
   // 批量操作
   const rowSelection = {
-    onChange: (selectedRowKeys, selectRows) => {
-      // const newRows = selectRows.filter(item => !!item === true)
-      console.log(selectRows )
-      setSelectedRows(selectRows)
+    onChange: (selectedRowKey, selectRows) => {
+      const newRows = selectRows.filter(item => !!item === true)
+      setselectedRowKeys(selectedRowKey)
+      setSelectedRows(newRows)
     },
-    // selectedRowKeys: selectedRows,
-    getCheckboxProps: record => {
-      // console.log(record)
-      return ({
-        name: record.id,
-        value: []
-      })
-    },
+    selectedRowKeys,
   }
 
   /**
@@ -118,6 +114,8 @@ const FiledList = props => {
      * @param {Object} parameters 列表补充参数
      */
     getDateList: parameters => {
+      // 清除多选框的值
+      setselectedRowKeys([])
       const { projectId } = props
       const data = {
         ...listData,
@@ -175,14 +173,13 @@ const FiledList = props => {
      * @param {String} name 面包屑/目录名称
      */
     querydirectory: (id, type, name, seachBreadcrumbName) => {
-      console.log(seachBreadcrumbName)
       if (type === 2) {
         listData = {
           ...listData,
           directoryId: id,
         }
         fn.getDateList().then(() => {
-          if(seachBreadcrumbName) {
+          if (seachBreadcrumbName) {
             setBreadcrumbName([...seachBreadcrumbName, { name, id }])
           } else {
             setBreadcrumbName([...BreadcrumbName, { name, id }])
@@ -426,7 +423,7 @@ const FiledList = props => {
       dataIndex: 'size',
       width: 100,
       render: text => {
-        if(text > 1024 * 1024) return `${Math.floor((text / (1024 * 1024)) * 100) / 100}M`
+        if (text > 1024 * 1024) return `${Math.floor((text / (1024 * 1024)) * 100) / 100}M`
         return `${Math.floor((text / 1024 * 100) / 100)}kb`
       },
     },
@@ -436,7 +433,7 @@ const FiledList = props => {
     setGlobalSearch(e)
     const id = e === 0 ? 0 : listData.directoryId
     listData.directoryId = id
-    fn.getDateList()
+    // fn.getDateList()
   }
 
   const selectBefore = (
