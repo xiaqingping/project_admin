@@ -178,7 +178,7 @@ const FiledList = props => {
         }
         fn.getDateList().then(() => {
           if (seachBreadcrumbName) {
-            setBreadcrumbName([...seachBreadcrumbName, { name, id }])
+            setBreadcrumbName([...(seachBreadcrumbName.reverse()), { name, id }])
           } else {
             setBreadcrumbName([...BreadcrumbName, { name, id }])
           }
