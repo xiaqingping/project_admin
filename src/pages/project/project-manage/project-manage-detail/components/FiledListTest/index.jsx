@@ -142,7 +142,7 @@ const FiledList = props => {
       if (!data.directoryId) setBreadcrumbName([]);
 
       setLoading(true);
-      return api
+      return api2
         .getFiles(data)
         .then(res => {
           setTableList(res);
