@@ -321,13 +321,9 @@ const FiledList = props => {
         .downloadFiles(data)
         .then(() => {
           data.isDown = 1;
-          const url = `${
-            env === 'dev'
-              ? 'http://localhost:8000/192.168.20.6:8150'
-              : baseURLMap.env
-          }/disk/v1/${data.spaceType}/${data.spaceCode}/files/download/${
-            data.id
-          }?${Qs.stringify(data)}`;
+          const url = `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
+            data.spaceType
+          }/${data.spaceCode}/files/download/${data.id}?${Qs.stringify(data)}`;
           window.open(url);
         })
         .catch();
@@ -351,15 +347,10 @@ const FiledList = props => {
           };
           newFiles.push(newItem);
         });
-        console.log(newFiles);
         axios({
-          url: `${
-            env === 'dev'
-              ? 'http://localhost:8000/192.168.20.6:8150'
-              : baseURLMap.env
-          }/disk/v1/${data.spaceType}/${
-            data.spaceCode
-          }/files/batchDownload?isDown=${data.isDown}`,
+          url: `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
+            data.spaceType
+          }/${data.spaceCode}/files/batchDownload?isDown=${data.isDown}`,
           method: 'post',
           data: newFiles,
           headers: {
@@ -372,7 +363,8 @@ const FiledList = props => {
           .then(res => {
             const content = res;
             const elink = document.createElement('a');
-            const fileName = res.headers['content-disposition'].split('=')[1];
+            let fileName = res.headers['content-disposition'].split('=')[1];
+            fileName = decodeURI(fileName);
             elink.download = fileName;
             elink.style.display = 'none';
             const blob = new Blob([content]);
@@ -382,7 +374,7 @@ const FiledList = props => {
             document.body.removeChild(elink);
           })
           .catch(err => {
-            if (err.response.data.details[0]) {
+            if (err.response && err.response.data.details[0]) {
               // eslint-disable-next-line no-shadow
               const message = '请求错误！';
               const description = err.response.data.details[0];
