@@ -401,7 +401,7 @@ const FiledList = props => {
               下载
             </Button>
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
-              <Breadcrumb style={{ cursor: 'pointer' }}>
+              <Breadcrumb style={{ cursor: 'pointer', minWidth: '60px', float: 'left' }}>
                 <Breadcrumb.Item>
                   <span
                     onClick={() => {
@@ -445,10 +445,13 @@ const FiledList = props => {
                     );
                   })
                   : ''}
-                {SearchName && SearchName.length > 0 ?
-                  <Breadcrumb.Item> 搜索 “{SearchName}”</Breadcrumb.Item> : ''
-                }
+
               </Breadcrumb>
+              {SearchName && SearchName.length > 0 ?
+                <span style={{ float: 'left', marginLeft: '5px' }}>
+                  {'>  '} 搜索 “{SearchName}”
+                </span> : ''
+              }
 
             </div>
           </Col>
