@@ -3,10 +3,10 @@
  */
 import request from '@/utils/request';
 
-// let http = '';
-let http = 'http://192.168.20.6:8150';
-// let http = 'http://192.168.20.27:8150';
-// let http = 'http://192.168.20.14:8150';
+let http = '';
+// http = 'http://192.168.20.6:8150';
+// http = 'http://192.168.20.27:8150';
+// http = 'http://192.168.20.14:8150';
 if (process.env.NODE_ENV !== 'development') {
   http = '';
 }
@@ -107,7 +107,6 @@ export default {
       },
     );
   },
-
   // 复制文件或目录 （批量）
   fileBatchCopy(data) {
     return request(

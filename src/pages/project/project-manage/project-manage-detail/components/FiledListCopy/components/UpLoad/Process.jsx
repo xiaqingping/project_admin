@@ -24,10 +24,11 @@ const Process = props => {
   // 当前文件
   const uploadFile = upfiles
   const { name, size, type } = uploadFile
-  const SIZE = 1024 * 1024
+  const SIZE = 1024 * 1024 // 默认切片大小
 
-  let cur = 0
-  let index = 0
+  let cur = 0 // start字节
+  let index = 0 // 当前片数
+  // 传参
   let fileOperationId = ''
   let fileOperationLogicId = ''
 
@@ -62,6 +63,7 @@ const Process = props => {
     const formData = new FormData()
     let end = cur + SIZE
     if (uploadFile.size - cur < SIZE) end = uploadFile.size
+
     formData.append('file', uploadFile.slice(cur, end))
     formData.append('fileOperationId', fileOperationId)
     formData.append('fileOperationLogicId', fileOperationLogicId)
@@ -70,12 +72,12 @@ const Process = props => {
       spaceType: data.spaceType,
       spaceCode: data.spaceCode,
     }
+
     // 上传第二接口
     api.uploadMoreFiles2(params, formData).then(res => {
       const { status, fileOperationId: id1, fileOperationLogicId: id2, uploadProgressNumber } = res
-      console.log(uploadProgressNumber)
+
       if(uploadProgressNumber) {
-        console.log(uploadProgressNumber * SIZE, uploadProgressNumber.SIZE / uploadFile.size * 100)
         setProgress(Math.ceil(uploadProgressNumber * SIZE / uploadFile.size * 100))
       } else {
         setProgress(Math.ceil(end / uploadFile.size * 100))
@@ -132,6 +134,7 @@ const Process = props => {
           fileOperationId: id1,
           fileOperationLogicId: id2,
         } = result
+
         if (repeatFlag === 2) {
           // status 1待上传 2完成 3失败 4合并分片
           if (status === 1 || status === 3) {
@@ -271,7 +274,7 @@ const Process = props => {
         onCancel={handleCancel}
         mask={false}
       >
-        <div>当前目录下文件{uploadFile.name}以存在</div>
+        <div>当前目录下文件{uploadFile.name}已存在</div>
         <Radio.Group onChange={onchangeRadio} value={radioValue}>
           <Radio value={1}>覆盖</Radio>
           <Radio value={3}>后台重命名</Radio>

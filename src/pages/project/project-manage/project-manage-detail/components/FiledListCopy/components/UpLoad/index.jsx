@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Button, Modal, Empty } from 'antd';
-import Process from './Process'
+import { Button, Empty, Drawer } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import Process from './Process';
+
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let uploadFile = null
@@ -98,29 +100,38 @@ const FileUpload = props => {
       >
         查看
 				</span>  <br />
-      <Modal
+
+      <Drawer
         title="上传"
+        width={600}
+        closable={false}
+        onClose={() => { setvisible(false) }}
         visible={visible}
-        centered
-        onOk={() => { setvisible(false) }}
-        onCancel={() => { setvisible(false) }}
       >
         <div>
-          {
-            typeuploadFiles && uploadFiles && uploadFiles.length > 0 ?
-              uploadFiles.map((item, index) => {
-                // eslint-disable-next-line react/no-array-index-key
-                return <Process
-                  removeuploadFile={removeuploadFile}
-                  proList={proList}
-                  key={`${index + 0}`}
-                  uploadFile={item}
-                  id={index}
-                />
-              }) : <Empty description='暂无任务' image={Empty.PRESENTED_IMAGE_SIMPLE} />
-          }
+          <div style={{height: '50px'}}>
+            <UploadOutlined
+            style={{ float: 'right', color: '#1890ff'}}
+            onClick={() => { document.getElementById('file').click() }}
+             />
+          </div>
+          <div>
+            {
+              typeuploadFiles && uploadFiles && uploadFiles.length > 0 ?
+                uploadFiles.map((item, index) => {
+                  return <Process
+                    removeuploadFile={removeuploadFile}
+                    proList={proList}
+                    key={`${index + 0}`}
+                    uploadFile={item}
+                    id={index}
+                  />
+                }) : <Empty description='暂无任务' image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            }
+          </div>
+
         </div>
-      </Modal>
+      </Drawer>
     </>
   );
 }

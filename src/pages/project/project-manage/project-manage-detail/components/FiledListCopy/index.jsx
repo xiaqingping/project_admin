@@ -441,7 +441,10 @@ const FiledList = props => {
       title: '大小',
       dataIndex: 'size',
       width: 100,
-      render: text => `${text}kb`,
+      render: text => {
+        if (text > 1024 * 1024) return `${Math.floor((text / (1024 * 1024)) * 100) / 100}M`
+        return `${Math.floor((text / 1024 * 100) / 100)}kb`
+      },
     },
     // {
     //   title: '操作',
