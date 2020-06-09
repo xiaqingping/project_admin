@@ -93,14 +93,15 @@ const FileUpload = props => {
         onClick={() => { document.getElementById('file').click() }}
       >
         上传
-        </Button>
+      </Button>
+
       <span
         style={{ color: '#1890ff', marginLeft: '10px' }}
         onClick={() => { setvisible(true) }}
       >
         查看
 				</span>  <br />
-
+      {/* 上传状态显示 */}
       <Drawer
         title="上传"
         width={600}
@@ -109,11 +110,11 @@ const FileUpload = props => {
         visible={visible}
       >
         <div>
-          <div style={{height: '50px'}}>
+          <div style={{ height: '30px' }}>
             <UploadOutlined
-            style={{ float: 'right', color: '#1890ff'}}
-            onClick={() => { document.getElementById('file').click() }}
-             />
+              style={{ float: 'right', color: '#1890ff', fontSize: '20px' }}
+              onClick={() => { document.getElementById('file').click() }}
+            />
           </div>
           <div>
             {
@@ -129,7 +130,6 @@ const FileUpload = props => {
                 }) : <Empty description='暂无任务' image={Empty.PRESENTED_IMAGE_SIMPLE} />
             }
           </div>
-
         </div>
       </Drawer>
     </>
