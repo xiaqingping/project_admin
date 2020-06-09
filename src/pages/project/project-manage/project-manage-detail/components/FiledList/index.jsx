@@ -169,6 +169,7 @@ const FiledList = props => {
      * @param {String} id 层级/面包屑id值
      * @param {Number} type 文件类型
      * @param {String} name 面包屑/目录名称
+     * @param {Array} seachBreadcrumbName 面包屑导航
      */
     querydirectory: (id, type, name, seachBreadcrumbName) => {
       if (type === 2) {
@@ -377,6 +378,7 @@ const FiledList = props => {
                 ...listData,
                 searchName: ''
               }
+              setSeachName('')
               fn.querydirectory(
                 record.id, record.fileType, record.name, record.directoryPathResEntitys)
             }}
@@ -424,13 +426,30 @@ const FiledList = props => {
         return `${Math.floor((text / 1024 * 100) / 100)}kb`
       },
     },
+    {
+      title: '所在目录',
+      dataIndex: '',
+      align: 'center',
+      width: 150,
+      className: SearchName && SearchName.length > 0 ? '' : 'notshow',
+      render: (value, record) => {
+        let catalog = '/'
+        if(record && record.directoryPathResEntitys && record.directoryPathResEntitys.length > 0) {
+          catalog = record.directoryPathResEntitys[0].name
+        }
+        return catalog
+      }
+    },
   ]
 
   const searchChange = e => {
     setGlobalSearch(e)
     const id = e === 0 ? 0 : listData.directoryId
-    listData.directoryId = id
-    // fn.getDateList()
+    listData = {
+      ...listData,
+      directoryId: id
+    }
+    fn.getDateList()
   }
 
   const selectBefore = (
@@ -515,7 +534,11 @@ const FiledList = props => {
                     )
                   })
                   : ''}
+                {SearchName && SearchName.length > 0 ?
+                  <Breadcrumb.Item> 搜索 “{SearchName}”</Breadcrumb.Item> : ''
+                }
               </Breadcrumb>
+
             </div>
           </Col>
           <Col span={12}>
@@ -589,14 +612,24 @@ const FiledList = props => {
                     float: 'right',
                     transform: 'translateX(15px)'
                   }}
-                  onPressEnter={e => {
+                  onChange={e => {
+                    setSeachName(e.target.value)
                     listData = {
                       ...listData,
                       searchName: e.target.value,
                     }
-                    fn.queryList(e)
+
+                    const debounce = (fn1, wait) => {
+                      let timer = null;
+                      return () => {
+                        if (timer !== null) {
+                          clearTimeout(timer);
+                        }
+                        timer = setTimeout(fn1, wait);
+                      }
+                    }
+                    debounce(fn.queryList(e), 500)
                   }}
-                  onChange={e => setSeachName(e.target.value)}
                   value={SearchName}
                 />
               </Col>

@@ -274,7 +274,7 @@ const Process = props => {
         onCancel={handleCancel}
         mask={false}
       >
-        <div>当前目录下文件{uploadFile.name}以存在</div>
+        <div>当前目录下文件{uploadFile.name}已存在</div>
         <Radio.Group onChange={onchangeRadio} value={radioValue}>
           <Radio value={1}>覆盖</Radio>
           <Radio value={3}>后台重命名</Radio>
