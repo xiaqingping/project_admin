@@ -6,14 +6,13 @@ import request from '@/utils/request';
 let http = '';
 // http = 'http://192.168.20.6:8150';
 // http = 'http://192.168.20.27:8150';
-// http = 'http://192.168.20.14:8150';
+http = 'http://192.168.20.14:8150';
 if (process.env.NODE_ENV !== 'development') {
   http = '';
 }
 export default {
   // 查询文件列表
   getFiles(params) {
-    // const http = 'http://192.168.20.14:8150';
     return request(
       `${http}/disk/v2/${params.spaceType}/${params.spaceCode}/files`,
       {
@@ -130,8 +129,6 @@ export default {
   },
   // 批量上传第一接口
   uploadMoreFiles1(params) {
-    // http = 'http://192.168.20.27:8150';
-
     return request(
       `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/files/multiPart`,
       {
@@ -142,7 +139,6 @@ export default {
   },
   // 批量上传第二接口
   uploadMoreFiles2(params, formData) {
-    // http = 'http://192.168.20.27:8150';
     return request(
       `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/files/multiPartUpload`,
       {
@@ -154,7 +150,6 @@ export default {
   },
   // 批量上传第二接口
   uploadMoreFiles3(params, data) {
-    // http = 'http://192.168.20.27:8150';
     return request(
       `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/files/mergeMultiPartUpload`,
       {
@@ -165,16 +160,12 @@ export default {
   },
   // 批量下载
   bulkDownload(params, files) {
-    // http = 'http://192.168.20.27:8150';
     return request(
       `${http}/disk/v1/${params.spaceType}/${params.spaceCode}/files/batchDownload?isDown=1`,
       {
         method: 'POST',
         data: files,
       },
-      // {
-      //   responseType: 'blob'
-      // }
     );
   },
 };

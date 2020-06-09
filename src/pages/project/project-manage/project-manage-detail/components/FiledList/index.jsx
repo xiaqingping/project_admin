@@ -6,17 +6,14 @@ import {
   Input,
   Breadcrumb,
   Select,
-  Modal,
   Table,
   Row,
   Col,
   message,
-  Spin,
   notification,
   Tooltip,
 } from 'antd';
 import {
-  FolderOutlined,
   DownloadOutlined,
   FileExclamationOutlined,
   SwapLeftOutlined,
@@ -26,7 +23,6 @@ import Qs from 'qs';
 
 // 自定义
 import api from '@/pages/project/api/file';
-import api1 from '@/pages/project/api/projectManageDetail';
 import file from '@/assets/imgs/file.png';
 import docx from '@/assets/imgs/word.png';
 import excel from '@/assets/imgs/excel.png';
@@ -57,28 +53,12 @@ const FiledList = props => {
   const [tableList, setTableList] = useState({});
   // 面包屑
   const [BreadcrumbName, setBreadcrumbName] = useState([]);
-  // 创建文件夹名称
-  const [projectParma, setProjectParma] = useState({
-    name: '',
-    describe: '',
-  });
 
-  // 项目基础信息
-  const [baseList, setBaseList] = useState();
-
-  // 用户信息
-  const [businessParma, setBusinessParma] = useState({
-    businessName: '',
-    businessCode: '',
-  });
   // selectedRowKeys 多选框的值 []
   const [selectedRowKeys, setselectedRowKeys] = useState([]);
 
   /** 状态 */
-  // 新建文件夹Model状态
-  const [isVisible, setVisible] = useState(false);
-  // 新建文件夹提交状态
-  const [isSpinning, setIsSpinning] = useState(false);
+
   // 排序状态
   const [isActive, setIsActive] = useState(false);
   // 列表加载状态
@@ -185,50 +165,6 @@ const FiledList = props => {
         });
       }
     },
-    /** 创建目录 */
-    createDirctory: () => {
-      const { projectId } = props;
-      const { code } = baseList;
-      const id = listData.directoryId;
-      const data = {
-        spaceType: 'project',
-        spaceCode: projectId,
-        sourceType: 'project',
-        sourceCode: code,
-        sourceId: projectId,
-        userName: '',
-        userCode: '',
-        ...businessParma,
-        ...projectParma,
-        parentId: id,
-      };
-
-      // 校验输入值
-      const result = fn.verifyInput(data);
-      if (!result) return false;
-      setLoading(true);
-      setIsSpinning(true);
-      return api
-        .createDirctory(data)
-        .then(res => {
-          setTableList(res);
-          fn.getDateList();
-          setLoading(false);
-          setVisible(false);
-          setIsSpinning(false);
-        })
-        .catch(() => {
-          setLoading(false);
-          setIsSpinning(false);
-        });
-    },
-    /** 清除创建 */
-    clearParam: () => {
-      setProjectParma({
-        name: '',
-        describe: '',
-      });
-    },
     /**
      * 输入框验证
      * 验证创建目录名称是否合法
@@ -267,7 +203,7 @@ const FiledList = props => {
           data.isDown = 1;
           const url = `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
             data.spaceType
-          }/${data.spaceCode}/files/download/${data.id}?${Qs.stringify(data)}`;
+            }/${data.spaceCode}/files/download/${data.id}?${Qs.stringify(data)}`;
           window.open(url);
         })
         .catch();
@@ -294,7 +230,7 @@ const FiledList = props => {
         axios({
           url: `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
             data.spaceType
-          }/${data.spaceCode}/files/batchDownload?isDown=${data.isDown}`,
+            }/${data.spaceCode}/files/batchDownload?isDown=${data.isDown}`,
           method: 'post',
           data: newFiles,
           headers: {
@@ -339,18 +275,6 @@ const FiledList = props => {
   useEffect(() => {
     // 初始化列表数据
     fn.getDateList();
-    // 查询项目基础信息及流程列表
-    api1.getProjectProcess(props.projectId).then(res => {
-      setBaseList(res);
-    });
-    // 查询成员列表
-    api1.getProjectMember({ projectId: props.projectId }).then(res => {
-      const { code, name } = res[0];
-      setBusinessParma({
-        businessName: name,
-        businessCode: code,
-      });
-    });
   }, []);
 
   // 表结构
@@ -430,7 +354,7 @@ const FiledList = props => {
       className: SearchName && SearchName.length > 0 ? '' : 'notshow',
       render: (value, record) => {
         let catalog = '/'
-        if(record && record.directoryPathResEntitys && record.directoryPathResEntitys.length > 0) {
+        if (record && record.directoryPathResEntitys && record.directoryPathResEntitys.length > 0) {
           catalog = record.directoryPathResEntitys[0].name
         }
         return catalog
@@ -465,18 +389,9 @@ const FiledList = props => {
   return (
     <div>
       {/* 搜索模块 */}
-      <div className="classQuery1">
+      <div className="classQuery2">
         <Row>
           <Col span={12}>
-            <Button
-              type="primary"
-              onClick={() => {
-                setVisible(true);
-              }}
-            >
-              <FolderOutlined />
-              新建文件夹
-            </Button>
             <Button
               onClick={() => {
                 fn.downloadFileBatch();
@@ -486,7 +401,7 @@ const FiledList = props => {
               下载
             </Button>
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
-              <Breadcrumb style={{ cursor: 'pointer' }}>
+              <Breadcrumb style={{ cursor: 'pointer', minWidth: '60px', float: 'left' }}>
                 <Breadcrumb.Item>
                   <span
                     onClick={() => {
@@ -506,34 +421,37 @@ const FiledList = props => {
                 </Breadcrumb.Item>
                 {BreadcrumbName && BreadcrumbName.length > 0
                   ? BreadcrumbName.map((item, index) => {
-                      const key = index;
-                      return (
-                        <Breadcrumb.Item key={key}>
-                          <span
-                            onClick={() => {
-                              listData = {
-                                ...listData,
-                                directoryId: item.id,
-                                searchName: '',
-                              };
-                              setSeachName('');
-                              fn.getDateList().then(() => {
-                                setBreadcrumbName(
-                                  BreadcrumbName.slice(0, key + 1),
-                                );
-                              });
-                            }}
-                          >
-                            {item.name}
-                          </span>
-                        </Breadcrumb.Item>
-                      );
-                    })
+                    const key = index;
+                    return (
+                      <Breadcrumb.Item key={key}>
+                        <span
+                          onClick={() => {
+                            listData = {
+                              ...listData,
+                              directoryId: item.id,
+                              searchName: '',
+                            };
+                            setSeachName('');
+                            fn.getDateList().then(() => {
+                              setBreadcrumbName(
+                                BreadcrumbName.slice(0, key + 1),
+                              );
+                            });
+                          }}
+                        >
+                          {item.name}
+                        </span>
+                      </Breadcrumb.Item>
+                    );
+                  })
                   : ''}
-                {SearchName && SearchName.length > 0 ?
-                  <Breadcrumb.Item> 搜索 “{SearchName}”</Breadcrumb.Item> : ''
-                }
+
               </Breadcrumb>
+              {SearchName && SearchName.length > 0 ?
+                <span style={{ float: 'left', marginLeft: '5px' }}>
+                  {'>  '} 搜索 “{SearchName}”
+                </span> : ''
+              }
 
             </div>
           </Col>
@@ -643,49 +561,6 @@ const FiledList = props => {
         pagination={false}
         loading={isloading}
       />
-      {/* Model新建文件夹 */}
-      <Modal
-        title="新建文件夹"
-        visible={isVisible}
-        centered
-        onOk={() => {
-          fn.createDirctory();
-          fn.clearParam();
-        }}
-        onCancel={() => {
-          fn.clearParam();
-          setVisible(false);
-        }}
-      >
-        <Spin spinning={isSpinning} tip="Loading...">
-          <div>
-            文件夹名称：{' '}
-            <Input
-              placeholder="输入文件夹名称"
-              value={projectParma.name}
-              onChange={e => {
-                setProjectParma({
-                  ...projectParma,
-                  name: e.target.value.trim(),
-                });
-              }}
-            />
-          </div>
-          <div>
-            描述：{' '}
-            <Input
-              placeholder="输入描述"
-              value={projectParma.describe}
-              onChange={e => {
-                setProjectParma({
-                  ...projectParma,
-                  describe: e.target.value.trim(),
-                });
-              }}
-            />
-          </div>
-        </Spin>
-      </Modal>
     </div>
   );
 };
