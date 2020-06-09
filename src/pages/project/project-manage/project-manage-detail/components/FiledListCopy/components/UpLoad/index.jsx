@@ -104,6 +104,7 @@ const FileUpload = props => {
         查看
       </span>{' '}
       <br />
+      {/* 上传状态显示 */}
       <Drawer
         title="上传"
         width={600}
@@ -114,9 +115,9 @@ const FileUpload = props => {
         visible={visible}
       >
         <div>
-          <div style={{ height: '50px' }}>
+          <div style={{ height: '30px' }}>
             <UploadOutlined
-              style={{ float: 'right', color: '#1890ff' }}
+              style={{ float: 'right', color: '#1890ff', fontSize: '20px' }}
               onClick={() => {
                 document.getElementById('file').click();
               }}

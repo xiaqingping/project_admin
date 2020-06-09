@@ -5,6 +5,7 @@ import { Button, Progress, Modal, Radio, message } from 'antd';
 
 // 自定义
 import api from '@/pages/project/api/file';
+import './index.less';
 
 let arr = [];
 
@@ -295,6 +296,7 @@ const Process = props => {
         onOk={handleOk}
         onCancel={handleCancel}
         mask={false}
+        wrapClassName="trueModel"
       >
         <div>当前目录下文件{uploadFile.name}已存在</div>
         <Radio.Group onChange={onchangeRadio} value={radioValue}>
