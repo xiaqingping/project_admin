@@ -21,6 +21,7 @@ import {
   FileExclamationOutlined,
   SwapLeftOutlined,
   SwapRightOutlined,
+  // ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import Qs from 'qs';
 
@@ -31,10 +32,11 @@ import file from '@/assets/imgs/file.png';
 import docx from '@/assets/imgs/word.png';
 import excel from '@/assets/imgs/excel.png';
 import pdf from '@/assets/imgs/pdf.png';
+import FileUpload from './components/UpLoad';
 import './index.less';
 
 const { Option } = Select;
-
+// const { confirm } = Modal
 // 列表搜索条件
 let listData = {
   spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
@@ -62,17 +64,13 @@ const FiledList = props => {
     name: '',
     describe: '',
   });
-
   // 项目基础信息
   const [baseList, setBaseList] = useState();
-
   // 用户信息
   const [businessParma, setBusinessParma] = useState({
     businessName: '',
     businessCode: '',
   });
-  // selectedRowKeys 多选框的值 []
-  const [selectedRowKeys, setselectedRowKeys] = useState([]);
 
   /** 状态 */
   // 新建文件夹Model状态
@@ -92,18 +90,39 @@ const FiledList = props => {
 
   // 批量操作
   const rowSelection = {
-    onChange: (selectedRowKey, selectRows) => {
+    onChange: (selectedRowKeys, selectRows) => {
       const newRows = selectRows.filter(item => !!item === true);
-      setselectedRowKeys(selectedRowKey);
+      // console.log(newRows)
       setSelectedRows(newRows);
     },
-    selectedRowKeys,
+    getCheckboxProps: record => ({
+      disabled: record.name === 'Disabled User',
+      name: record.name,
+    }),
   };
 
   /**
    * 方法对象
    */
   const fn = {
+    /**
+     * 批量上传 测试功能
+     */
+    getFileUpload: () => {
+      const { projectId } = props;
+      const id = listData.directoryId;
+      const data = {
+        spaceType: 'project',
+        spaceCode: projectId,
+        sourceType: 'project',
+        sourceId: projectId,
+        userName: '',
+        userCode: '',
+        ...businessParma,
+        logicDirectoryId: id,
+      };
+      return data;
+    },
     /** 通过列名称筛选 */
     handleChange: () => fn.getDateList(),
     /**
@@ -111,8 +130,6 @@ const FiledList = props => {
      * @param {Object} parameters 列表补充参数
      */
     getDateList: parameters => {
-      // 清除多选框的值
-      setselectedRowKeys([]);
       const { projectId } = props;
       const data = {
         ...listData,
@@ -148,13 +165,25 @@ const FiledList = props => {
       }
       return <FileExclamationOutlined />;
     },
+    /** 删除警告 */
+    // showDeleteConfirm: () => {
+    //   confirm({
+    //     title: '删除后将不可恢复，确定删除当前项目吗？',
+    //     icon: <ExclamationCircleOutlined />,
+    //     content: '',
+    //     centered: true,
+    //     onOk() {
+    //       console.log('OK')
+    //     },
+    //   })
+    // },
     /**
      * 搜索框查询
      * @param {Object} e 目标对象
      */
     queryList: e => {
       const value = e.target.value.trim();
-      const id = globalSearch === 0 ? 0 : listData.directoryId;
+      const id = globalSearch * 1 === 0 ? 0 : listData.directoryId;
       listData = {
         ...listData,
         searchName: value,
@@ -168,20 +197,16 @@ const FiledList = props => {
      * @param {String} id 层级/面包屑id值
      * @param {Number} type 文件类型
      * @param {String} name 面包屑/目录名称
-     * @param {Array} seachBreadcrumbName 面包屑导航
      */
-    querydirectory: (id, type, name, seachBreadcrumbName) => {
+    querydirectory: (id, type, name) => {
       if (type === 2) {
         listData = {
           ...listData,
           directoryId: id,
         };
         fn.getDateList().then(() => {
-          if (seachBreadcrumbName) {
-            setBreadcrumbName([...seachBreadcrumbName.reverse(), { name, id }]);
-          } else {
-            setBreadcrumbName([...BreadcrumbName, { name, id }]);
-          }
+          rowSelection.onChange(null, []);
+          setBreadcrumbName([...BreadcrumbName, { name, id }]);
         });
       }
     },
@@ -265,9 +290,13 @@ const FiledList = props => {
         .downloadFiles(data)
         .then(() => {
           data.isDown = 1;
-          const url = `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
-            data.spaceType
-          }/${data.spaceCode}/files/download/${data.id}?${Qs.stringify(data)}`;
+          const url = `${
+            env === 'dev'
+              ? 'http://localhost:8001/192.168.20.6:8150'
+              : baseURLMap.env
+          }/disk/v1/${data.spaceType}/${data.spaceCode}/files/download/${
+            data.id
+          }?${Qs.stringify(data)}`;
           window.open(url);
         })
         .catch();
@@ -292,9 +321,13 @@ const FiledList = props => {
           newFiles.push(newItem);
         });
         axios({
-          url: `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
-            data.spaceType
-          }/${data.spaceCode}/files/batchDownload?isDown=${data.isDown}`,
+          url: `${
+            env === 'dev'
+              ? 'http://localhost:8001/192.168.20.14:8150'
+              : baseURLMap.env
+          }/disk/v1/${data.spaceType}/${
+            data.spaceCode
+          }/files/batchDownload?isDown=${data.isDown}`,
           method: 'post',
           data: newFiles,
           headers: {
@@ -365,17 +398,7 @@ const FiledList = props => {
           <span
             style={{ marginLeft: 10, cursor: 'pointer' }}
             onClick={() => {
-              listData = {
-                ...listData,
-                searchName: '',
-              };
-              setSeachName('');
-              fn.querydirectory(
-                record.id,
-                record.fileType,
-                record.name,
-                record.directoryPathResEntitys,
-              );
+              fn.querydirectory(record.id, record.fileType, record.name);
             }}
           >
             <Tooltip placement="top" title={value}>
@@ -422,33 +445,21 @@ const FiledList = props => {
         return `${Math.floor(((text / 1024) * 100) / 100)}kb`;
       },
     },
-    {
-      title: '所在目录',
-      dataIndex: '',
-      align: 'center',
-      width: 150,
-      className: SearchName && SearchName.length > 0 ? '' : 'notshow',
-      render: (value, record) => {
-        let catalog = '/';
-        if (
-          record &&
-          record.directoryPathResEntitys &&
-          record.directoryPathResEntitys.length > 0
-        ) {
-          catalog = record.directoryPathResEntitys[0].name;
-        }
-        return catalog;
-      },
-    },
+    // {
+    //   title: '操作',
+    //   width: 80,
+    //   render: () => (
+    //     <>
+    //       <a onClick={() => fn.showDeleteConfirm()}>删除</a>
+    //     </>
+    //   ),
+    // },
   ];
 
   const searchChange = e => {
     setGlobalSearch(e);
     const id = e === 0 ? 0 : listData.directoryId;
-    listData = {
-      ...listData,
-      directoryId: id,
-    };
+    listData.directoryId = id;
     fn.getDateList();
   };
 
@@ -489,6 +500,8 @@ const FiledList = props => {
               <DownloadOutlined />
               下载
             </Button>
+            <FileUpload source={baseList} baseList={fn.getFileUpload} />
+            {/* <br /> */}
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
               <Breadcrumb style={{ cursor: 'pointer' }}>
                 <Breadcrumb.Item>
@@ -501,6 +514,7 @@ const FiledList = props => {
                       };
                       setSeachName('');
                       fn.getDateList().then(() => {
+                        rowSelection.onChange(null, []);
                         setBreadcrumbName([]);
                       });
                     }}
@@ -522,6 +536,7 @@ const FiledList = props => {
                               };
                               setSeachName('');
                               fn.getDateList().then(() => {
+                                rowSelection.onChange(null, []);
                                 setBreadcrumbName(
                                   BreadcrumbName.slice(0, key + 1),
                                 );
@@ -534,11 +549,6 @@ const FiledList = props => {
                       );
                     })
                   : ''}
-                {SearchName && SearchName.length > 0 ? (
-                  <Breadcrumb.Item> 搜索 “{SearchName}”</Breadcrumb.Item>
-                ) : (
-                  ''
-                )}
               </Breadcrumb>
             </div>
           </Col>
@@ -614,24 +624,14 @@ const FiledList = props => {
                     float: 'right',
                     transform: 'translateX(15px)',
                   }}
-                  onChange={e => {
-                    setSeachName(e.target.value);
+                  onPressEnter={e => {
                     listData = {
                       ...listData,
                       searchName: e.target.value,
                     };
-
-                    const debounce = (fn1, wait) => {
-                      let timer = null;
-                      return () => {
-                        if (timer !== null) {
-                          clearTimeout(timer);
-                        }
-                        timer = setTimeout(fn1, wait);
-                      };
-                    };
-                    debounce(fn.queryList(e), 500);
+                    fn.queryList(e);
                   }}
+                  onChange={e => setSeachName(e.target.value)}
                   value={SearchName}
                 />
               </Col>
@@ -641,7 +641,7 @@ const FiledList = props => {
       </div>
       <Table
         className="classrow1"
-        rowKey="id"
+        rowKey="name"
         rowSelection={rowSelection}
         columns={columns}
         dataSource={tableList.length > 0 ? tableList : []}
@@ -698,5 +698,4 @@ const FiledList = props => {
 export default connect(({ projectManage }) => ({
   filedList: projectManage.filedList,
   projectList: projectManage.projectList,
-  baseURLMap: projectManage.baseURLMap,
 }))(FiledList);
