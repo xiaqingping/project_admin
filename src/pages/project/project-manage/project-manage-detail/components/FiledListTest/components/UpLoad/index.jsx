@@ -89,10 +89,9 @@ const FileUpload = props => {
       />
 
       <Button
-        type="primary"
         onClick={() => { document.getElementById('file').click() }}
       >
-        上传
+        <UploadOutlined />上传
       </Button>
 
       <span
@@ -100,7 +99,7 @@ const FileUpload = props => {
         onClick={() => { setvisible(true) }}
       >
         查看
-				</span>  <br />
+			</span>
       {/* 上传状态显示 */}
       <Drawer
         title="上传"
