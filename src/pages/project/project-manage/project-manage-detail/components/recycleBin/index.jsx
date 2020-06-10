@@ -31,23 +31,24 @@ class recycliBin extends React.Component {
     this.setState({
       loading: true,
     });
-    let data = {
-      spaceType: 'project', // String 必填 空间类型（来源可以为服务名称...）
-      spaceCode: '6e761a1aa7934884b11bf57ebf69db51', // String 必填 空间编号(可以为功能ID/编号...)
-      directoryId: '', // String 可选 目录ID
-      searchName: '', // String 可选 搜索名称（文件或目录名称）
+    const data = {};
+    data.spaceType = 'project'; // String 必填 空间类型（来源可以为服务名称...）
+    data.spaceCode = this.props.projectId; // String 必填 空间编号(可以为功能ID/编号...)
+    let space = {
+      // directoryId: '0', // String 可选 目录ID
+      name: '', // String 可选 搜索名称（文件或目录名称）
       sortType: 1, // Integer 必填 {1, 2, 3}
       sortWay: 1, // Integer 必填 {1, 2}
     };
 
     if (parameters)
-      data = {
-        ...data,
+      space = {
+        ...space,
         ...parameters,
       };
 
     api
-      .getRecycleFiles(data)
+      .getRecycleFiles(data, space)
       .then(res => {
         this.setState({
           loading: false,

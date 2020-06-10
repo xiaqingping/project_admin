@@ -39,7 +39,7 @@ import './index.less';
 
 // 移动 复制 模态框
 import ChooseFileList from './components/chooseFileList';
-import FileUpload from './components/UpLoad'
+import FileUpload from './components/UpLoad';
 
 const { Option } = Select;
 const { confirm } = Modal;
@@ -124,8 +124,8 @@ const FiledList = props => {
      * 批量上传 测试功能
      */
     getFileUpload: () => {
-      const { projectId } = props
-      const id = listData.directoryId
+      const { projectId } = props;
+      const id = listData.directoryId;
       const data = {
         spaceType: 'project',
         spaceCode: projectId,
@@ -135,8 +135,8 @@ const FiledList = props => {
         userCode: '',
         ...businessParma,
         logicDirectoryId: id,
-      }
-      return data
+      };
+      return data;
     },
     /** 通过列名称筛选 */
     handleChange: () => fn.getDateList(),
@@ -352,7 +352,7 @@ const FiledList = props => {
           data.isDown = 1;
           const url = `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
             data.spaceType
-            }/${data.spaceCode}/files/download/${data.id}?${Qs.stringify(data)}`;
+          }/${data.spaceCode}/files/download/${data.id}?${Qs.stringify(data)}`;
           window.open(url);
         })
         .catch();
@@ -379,7 +379,7 @@ const FiledList = props => {
         axios({
           url: `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
             data.spaceType
-            }/${data.spaceCode}/files/batchDownload?isDown=${data.isDown}`,
+          }/${data.spaceCode}/files/batchDownload?isDown=${data.isDown}`,
           method: 'post',
           data: newFiles,
           headers: {
@@ -427,16 +427,16 @@ const FiledList = props => {
     fn.getDateList();
     // 查询项目基础信息及流程列表
     api1.getProjectProcess(props.projectId).then(res => {
-      setBaseList(res)
-    })
+      setBaseList(res);
+    });
     // 查询成员列表
     api1.getProjectMember({ projectId: props.projectId }).then(res => {
-      const { code, name } = res[0]
+      const { code, name } = res[0];
       setBusinessParma({
         businessName: name,
         businessCode: code,
-      })
-    })
+      });
+    });
   }, []);
 
   const editFile = row => {
@@ -462,9 +462,9 @@ const FiledList = props => {
             onClick={() => {
               listData = {
                 ...listData,
-                searchName: ''
-              }
-              setSeachName('')
+                searchName: '',
+              };
+              setSeachName('');
               fn.querydirectory(
                 record.id,
                 record.fileType,
@@ -473,9 +473,7 @@ const FiledList = props => {
               );
             }}
           >
-            <span
-              style={{ marginRight: 10, cursor: 'pointer' }}
-            >
+            <span style={{ marginRight: 10, cursor: 'pointer' }}>
               {fn.setImg(record.fileType, record.extendName)}
             </span>
             <Tooltip placement="top" title={value}>
@@ -542,43 +540,51 @@ const FiledList = props => {
       width: 150,
       className: SearchName && SearchName.length > 0 ? '' : 'notshow',
       render: (value, record) => {
-        let catalog = '/'
-        if (record && record.directoryPathResEntitys && record.directoryPathResEntitys.length > 0) {
-          catalog = record.directoryPathResEntitys[0].name
+        let catalog = '/';
+        if (
+          record &&
+          record.directoryPathResEntitys &&
+          record.directoryPathResEntitys.length > 0
+        ) {
+          catalog = record.directoryPathResEntitys[0].name;
         }
         return (
           <span
             style={{ cursor: 'pointer' }}
             onClick={() => {
-              setSeachName('')
+              setSeachName('');
               if (catalog === '/') {
                 listData = {
                   ...listData,
                   directoryId: '0',
                   searchName: '',
-                }
+                };
                 fn.getDateList().then(() => {
-                  setBreadcrumbName([])
-                })
+                  setBreadcrumbName([]);
+                });
               } else {
                 listData = {
                   ...listData,
-                  searchName: ''
-                }
-                const seachBreadcrumbName =
-                  record.directoryPathResEntitys.slice(1, record.directoryPathResEntitys.length)
-                console.log(record.directoryPathResEntitys, seachBreadcrumbName)
-                const { id, name } = record.directoryPathResEntitys[0]
-                console.log(id, name)
-                fn.querydirectory(
-                  id, 2, name, seachBreadcrumbName,
-                )
+                  searchName: '',
+                };
+                const seachBreadcrumbName = record.directoryPathResEntitys.slice(
+                  1,
+                  record.directoryPathResEntitys.length,
+                );
+                console.log(
+                  record.directoryPathResEntitys,
+                  seachBreadcrumbName,
+                );
+                const { id, name } = record.directoryPathResEntitys[0];
+                console.log(id, name);
+                fn.querydirectory(id, 2, name, seachBreadcrumbName);
               }
             }}
-          >{catalog}
+          >
+            {catalog}
           </span>
-        )
-      }
+        );
+      },
     },
   ];
 
@@ -687,10 +693,16 @@ const FiledList = props => {
             <Button onClick={() => copyOrMovementFilled('movementBatch')}>
               批量移动
             </Button>
-            <FileUpload source={baseList} baseList={fn.getFileUpload} flash={fn.getDateList} />
+            <FileUpload
+              source={baseList}
+              baseList={fn.getFileUpload}
+              flash={fn.getDateList}
+            />
             <br />
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
-              <Breadcrumb style={{ cursor: 'pointer', minWidth: '60px', float: 'left' }}>
+              <Breadcrumb
+                style={{ cursor: 'pointer', minWidth: '60px', float: 'left' }}
+              >
                 <Breadcrumb.Item>
                   <span
                     onClick={() => {
@@ -710,36 +722,38 @@ const FiledList = props => {
                 </Breadcrumb.Item>
                 {BreadcrumbName && BreadcrumbName.length > 0
                   ? BreadcrumbName.map((item, index) => {
-                    const key = index;
-                    return (
-                      <Breadcrumb.Item key={key}>
-                        <span
-                          onClick={() => {
-                            listData = {
-                              ...listData,
-                              directoryId: item.id,
-                              searchName: '',
-                            };
-                            setSeachName('');
-                            fn.getDateList().then(() => {
-                              setBreadcrumbName(
-                                BreadcrumbName.slice(0, key + 1),
-                              );
-                            });
-                          }}
-                        >
-                          {item.name}
-                        </span>
-                      </Breadcrumb.Item>
-                    );
-                  })
+                      const key = index;
+                      return (
+                        <Breadcrumb.Item key={key}>
+                          <span
+                            onClick={() => {
+                              listData = {
+                                ...listData,
+                                directoryId: item.id,
+                                searchName: '',
+                              };
+                              setSeachName('');
+                              fn.getDateList().then(() => {
+                                setBreadcrumbName(
+                                  BreadcrumbName.slice(0, key + 1),
+                                );
+                              });
+                            }}
+                          >
+                            {item.name}
+                          </span>
+                        </Breadcrumb.Item>
+                      );
+                    })
                   : ''}
               </Breadcrumb>
-              {SearchName && SearchName.length > 0 ?
-                (<span style={{ float: 'left', marginLeft: '5px' }}>
+              {SearchName && SearchName.length > 0 ? (
+                <span style={{ float: 'left', marginLeft: '5px' }}>
                   {'>  '} 搜索 “{SearchName}”
-                </span>) : ''
-              }
+                </span>
+              ) : (
+                ''
+              )}
             </div>
           </Col>
           <Col span={10}>
@@ -816,11 +830,11 @@ const FiledList = props => {
                     transform: 'translateX(15px)',
                   }}
                   onChange={e => {
-                    setSeachName(e.target.value)
+                    setSeachName(e.target.value);
                     listData = {
                       ...listData,
                       searchName: e.target.value,
-                    }
+                    };
 
                     const debounce = (fn1, wait) => {
                       let timer = null;
@@ -829,9 +843,9 @@ const FiledList = props => {
                           clearTimeout(timer);
                         }
                         timer = setTimeout(fn1, wait);
-                      }
-                    }
-                    debounce(fn.queryList(e), 500)
+                      };
+                    };
+                    debounce(fn.queryList(e), 500);
                   }}
                   value={SearchName}
                 />
@@ -908,7 +922,11 @@ const FiledList = props => {
       )}
       {/* 回收站的模态框 */}
       {isRecycle && (
-        <RecycleBin onClose={onClose} getData={() => fn.getDateList()} />
+        <RecycleBin
+          projectId={props.projectId}
+          onClose={onClose}
+          getData={() => fn.getDateList()}
+        />
       )}
     </div>
   );
