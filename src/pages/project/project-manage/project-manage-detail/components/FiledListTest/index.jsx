@@ -37,8 +37,10 @@ import pdf from '@/assets/imgs/pdf.png';
 import RecycleBin from '../recycleBin';
 import FileEditModal from './components/fileEditModal';
 import './index.less';
+
 // 移动 复制 模态框
 import ChooseFileList from './components/chooseFileList';
+import FileUpload from './components/UpLoad'
 
 const { Option } = Select;
 const { confirm } = Modal;
@@ -76,8 +78,6 @@ const FiledList = props => {
     businessCode: '',
   });
 
-  const [searchName, setSearchName] = useState('');
-
   /** 状态 */
   // 新建文件夹Model状态
   const [isVisible, setVisible] = useState(false);
@@ -102,18 +102,19 @@ const FiledList = props => {
   const [addLoading, setAddLoading] = useState(false);
   // 是否为全局搜索
   const [globalSearch, setGlobalSearch] = useState(0);
-  // let globalSearch = 0;
+  // SearchName查询名称状态(String)
+  const [SearchName, setSeachName] = useState('');
+  // selectedRowKeys 多选框的值 []
+  const [selectedRowKeys, setselectedRowKeys] = useState([]);
 
   // 批量操作
   const rowSelection = {
-    onChange: (selectedRowKeys, selectRows) => {
+    onChange: (selectedRowKey, selectRows) => {
       const newRows = selectRows.filter(item => !!item === true);
+      setselectedRowKeys(selectedRowKey);
       setSelectedRows(newRows);
     },
-    getCheckboxProps: record => ({
-      disabled: record.name === 'Disabled User',
-      name: record.name,
-    }),
+    selectedRowKeys,
   };
 
   /**
@@ -121,17 +122,32 @@ const FiledList = props => {
    */
   const fn = {
     /**
-     * 通过列名称筛选
-     * @param {String} value
+     * 批量上传 测试功能
      */
-    handleChange: () => {
-      fn.getDateList();
+    getFileUpload: () => {
+      const { projectId } = props
+      const id = listData.directoryId
+      const data = {
+        spaceType: 'project',
+        spaceCode: projectId,
+        sourceType: 'project',
+        sourceId: projectId,
+        userName: '',
+        userCode: '',
+        ...businessParma,
+        logicDirectoryId: id,
+      }
+      return data
     },
+    /** 通过列名称筛选 */
+    handleChange: () => fn.getDateList(),
     /**
      * 获取列表数据
-     * @param {*} props
+     * @param {Object} parameters 列表补充参数
      */
     getDateList: parameters => {
+      // 清除多选框的值
+      setselectedRowKeys([]);
       const { projectId } = props;
       const data = {
         ...listData,
@@ -142,7 +158,7 @@ const FiledList = props => {
       if (!data.directoryId) setBreadcrumbName([]);
 
       setLoading(true);
-      return api2
+      return api
         .getFiles(data)
         .then(res => {
           setTableList(res);
@@ -226,7 +242,10 @@ const FiledList = props => {
       });
       return true;
     },
-    /** 查询 */
+    /**
+     * 搜索框查询
+     * @param {Object} e 目标对象
+     */
     queryList: e => {
       const value = e.target.value.trim();
       if (value) {
@@ -238,15 +257,27 @@ const FiledList = props => {
         fn.getDateList();
       }
     },
-    /** 目录查询 */
-    querydirectory: (id, type, name) => {
+    /**
+     * 目录查询
+     * 点击查询下一级目录
+     * @param {String} id 层级/面包屑id值
+     * @param {Number} type 文件类型
+     * @param {String} name 面包屑/目录名称
+     * @param {Array} seachBreadcrumbName 面包屑导航
+     */
+    querydirectory: (id, type, name, seachBreadcrumbName) => {
       if (type === 2) {
-        setBreadcrumbName([...BreadcrumbName, { name, id }]);
         listData = {
           ...listData,
           directoryId: id,
         };
-        fn.getDateList();
+        fn.getDateList().then(() => {
+          if (seachBreadcrumbName) {
+            setBreadcrumbName([...seachBreadcrumbName.reverse(), { name, id }]);
+          } else {
+            setBreadcrumbName([...BreadcrumbName, { name, id }]);
+          }
+        });
       }
     },
     /** 创建目录 */
@@ -323,7 +354,7 @@ const FiledList = props => {
           data.isDown = 1;
           const url = `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
             data.spaceType
-          }/${data.spaceCode}/files/download/${data.id}?${Qs.stringify(data)}`;
+            }/${data.spaceCode}/files/download/${data.id}?${Qs.stringify(data)}`;
           window.open(url);
         })
         .catch();
@@ -350,7 +381,7 @@ const FiledList = props => {
         axios({
           url: `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
             data.spaceType
-          }/${data.spaceCode}/files/batchDownload?isDown=${data.isDown}`,
+            }/${data.spaceCode}/files/batchDownload?isDown=${data.isDown}`,
           method: 'post',
           data: newFiles,
           headers: {
@@ -397,19 +428,17 @@ const FiledList = props => {
     // 初始化列表数据
     fn.getDateList();
     // 查询项目基础信息及流程列表
-    api1.getProjectProcess(props.projectId).then(res => setBaseList(res));
+    api1.getProjectProcess(props.projectId).then(res => {
+      setBaseList(res)
+    })
     // 查询成员列表
-    api1
-      .getProjectMember({
-        projectId: props.projectId,
+    api1.getProjectMember({ projectId: props.projectId }).then(res => {
+      const { code, name } = res[0]
+      setBusinessParma({
+        businessName: name,
+        businessCode: code,
       })
-      .then(res => {
-        const { code, name } = res[0];
-        setBusinessParma({
-          businessName: name,
-          businessCode: code,
-        });
-      });
+    })
   }, []);
 
   const editFile = row => {
@@ -430,16 +459,27 @@ const FiledList = props => {
       width: 150,
       render: (value, record) => (
         <div className="classProjectName">
-          {fn.setImg(record.fileType, record.extendName)}
           <span
-            style={{
-              marginLeft: 10,
-              cursor: 'pointer',
-            }}
+            style={{ marginLeft: 10, cursor: 'pointer' }}
             onClick={() => {
-              fn.querydirectory(record.id, record.fileType, record.name);
+              listData = {
+                ...listData,
+                searchName: ''
+              }
+              setSeachName('')
+              fn.querydirectory(
+                record.id,
+                record.fileType,
+                record.name,
+                record.directoryPathResEntitys,
+              );
             }}
           >
+            <span
+              style={{ marginRight: 10, cursor: 'pointer' }}
+            >
+              {fn.setImg(record.fileType, record.extendName)}
+            </span>
             <Tooltip placement="top" title={value}>
               {value}
             </Tooltip>
@@ -496,6 +536,51 @@ const FiledList = props => {
           </a>
         </>
       ),
+    },
+    {
+      title: '所在目录',
+      dataIndex: '',
+      align: 'center',
+      width: 150,
+      className: SearchName && SearchName.length > 0 ? '' : 'notshow',
+      render: (value, record) => {
+        let catalog = '/'
+        if (record && record.directoryPathResEntitys && record.directoryPathResEntitys.length > 0) {
+          catalog = record.directoryPathResEntitys[0].name
+        }
+        return (
+          <span
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              setSeachName('')
+              if (catalog === '/') {
+                listData = {
+                  ...listData,
+                  directoryId: '0',
+                  searchName: '',
+                }
+                fn.getDateList().then(() => {
+                  setBreadcrumbName([])
+                })
+              } else {
+                listData = {
+                  ...listData,
+                  searchName: ''
+                }
+                const seachBreadcrumbName =
+                  record.directoryPathResEntitys.slice(1, record.directoryPathResEntitys.length)
+                console.log(record.directoryPathResEntitys, seachBreadcrumbName)
+                const { id, name } = record.directoryPathResEntitys[0]
+                console.log(id, name)
+                fn.querydirectory(
+                  id, 2, name, seachBreadcrumbName,
+                )
+              }
+            }}
+          >{catalog}
+          </span>
+        )
+      }
     },
   ];
 
@@ -604,20 +689,22 @@ const FiledList = props => {
             <Button onClick={() => copyOrMovementFilled('movementBatch')}>
               批量移动
             </Button>
+            <FileUpload source={baseList} baseList={fn.getFileUpload} flash={fn.getDateList} />
             <br />
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
-              <Breadcrumb style={{ cursor: 'pointer' }}>
+              <Breadcrumb style={{ cursor: 'pointer', minWidth: '60px', float: 'left' }}>
                 <Breadcrumb.Item>
                   <span
                     onClick={() => {
-                      fn.getDateList({ directoryId: '0', searchName: '' });
                       listData = {
                         ...listData,
                         directoryId: '0',
                         searchName: '',
                       };
-                      setSearchName('');
-                      setBreadcrumbName([]);
+                      setSeachName('');
+                      fn.getDateList().then(() => {
+                        setBreadcrumbName([]);
+                      });
                     }}
                   >
                     全部文件
@@ -625,109 +712,131 @@ const FiledList = props => {
                 </Breadcrumb.Item>
                 {BreadcrumbName && BreadcrumbName.length > 0
                   ? BreadcrumbName.map((item, index) => {
-                      const key = index;
-                      return (
-                        <Breadcrumb.Item key={key}>
-                          <span
-                            onClick={() => {
-                              fn.getDateList({
-                                directoryId: item.id,
-                                searchName: '',
-                              });
-                              listData = {
-                                ...listData,
-                                directoryId: item.id,
-                                searchName: '',
-                              };
+                    const key = index;
+                    return (
+                      <Breadcrumb.Item key={key}>
+                        <span
+                          onClick={() => {
+                            listData = {
+                              ...listData,
+                              directoryId: item.id,
+                              searchName: '',
+                            };
+                            setSeachName('');
+                            fn.getDateList().then(() => {
                               setBreadcrumbName(
                                 BreadcrumbName.slice(0, key + 1),
                               );
-                            }}
-                          >
-                            {item.name}
-                          </span>
-                        </Breadcrumb.Item>
-                      );
-                    })
+                            });
+                          }}
+                        >
+                          {item.name}
+                        </span>
+                      </Breadcrumb.Item>
+                    );
+                  })
                   : ''}
               </Breadcrumb>
+              {SearchName && SearchName.length > 0 ?
+                <span style={{ float: 'left', marginLeft: '5px' }}>
+                  {'>  '} 搜索 “{SearchName}”
+                </span> : ''
+              }
             </div>
           </Col>
-          <Col span={8} offset={4}>
+          <Col span={12}>
             <Row>
-              <Col span={14}>
-                <Input
-                  addonBefore={selectBefore}
-                  placeholder="搜索"
-                  width={150}
-                  onPressEnter={value => {
-                    fn.queryList(value);
-                  }}
-                  onChange={e => {
-                    setSearchName(e.target.value);
-                  }}
-                  value={searchName}
-                />
-              </Col>
-              <Col span={7} offset={2}>
+              <Col span={24}>
                 <div
-                  onClick={() => {
-                    const { sortType } = listData;
+                  className="classSort"
+                  onClick={e => {
+                    e.stopPropagation();
+                    const { sortWay } = listData;
+                    setIsActive(!isActive);
                     listData = {
                       ...listData,
-                      sortType: sortType === 1 ? 2 : 1,
+                      sortWay: sortWay === 1 ? 2 : 1,
                     };
                     fn.getDateList();
-                    setIsActive(!isActive);
-                  }}
-                  style={{
-                    transform: 'translateX(10px)',
-                    zIndex: '999',
                   }}
                 >
                   {/* 排序 */}
-                  <SwapRightOutlined
+                  <span
                     style={{
-                      transform: 'rotate(90deg) scaleY(-1) translateY(8px)',
-                      fontSize: '20px',
-                      color: isActive ? '#ccc' : '#1890ff',
+                      width: '40px',
+                      float: 'left',
+                      transform: 'translate(20px, 5px)',
+                      cursor: 'pointer',
                     }}
-                  />
-                  <SwapLeftOutlined
-                    style={{
-                      transform: 'rotate(90deg)',
-                      fontSize: '20px',
-                      color: isActive ? '#1890ff' : '#ccc',
-                    }}
-                  />
+                  >
+                    <SwapRightOutlined
+                      style={{
+                        transform: 'rotate(90deg) scaleY(-1) translateY(8px)',
+                        fontSize: '20px',
+                        color: isActive ? '#ccc' : '#1890ff',
+                      }}
+                    />
+                    <SwapLeftOutlined
+                      style={{
+                        transform: 'rotate(90deg)',
+                        fontSize: '20px',
+                        color: isActive ? '#1890ff' : '#ccc',
+                      }}
+                    />
+                  </span>
 
                   {/* 筛选 */}
-                  <Select
-                    className="classSelect"
-                    defaultValue="文件名"
-                    style={{
-                      width: 100,
-                      textAlign: 'center',
-                      fontSize: '14px',
-                      color: 'rgb(24, 144, 255)',
-                    }}
-                    onChange={value => {
-                      listData = { ...listData, sortWay: value };
-                      fn.getDateList();
-                    }}
-                    bordered={false}
-                    dropdownMatchSelectWidth={120}
-                    dropdownStyle={{
-                      textAlign: 'center',
-                    }}
-                    onClick={e => e.stopPropagation()}
-                    showArrow={false}
-                  >
-                    <Option value={1}>文件名</Option>
-                    <Option value={2}>大小</Option>
-                    <Option value={3}>修改日期</Option>
-                  </Select>
+                  <span>
+                    <Select
+                      className="classSelect"
+                      defaultValue="文件名"
+                      onChange={value => {
+                        listData = { ...listData, sortType: value };
+                        fn.getDateList();
+                      }}
+                      bordered={false}
+                      dropdownMatchSelectWidth={100}
+                      dropdownStyle={{
+                        textAlign: 'center',
+                      }}
+                      onClick={e => e.stopPropagation()}
+                      showArrow={false}
+                    >
+                      <Option value={1}>文件名</Option>
+                      <Option value={2}>大小</Option>
+                      <Option value={3}>修改日期</Option>
+                    </Select>
+                  </span>
                 </div>
+                {/* 搜索框 */}
+                <Input
+                  addonBefore={selectBefore}
+                  placeholder="搜索"
+                  style={{
+                    width: '70%',
+                    float: 'right',
+                    transform: 'translateX(15px)',
+                  }}
+                  onChange={e => {
+                    setSeachName(e.target.value)
+                    listData = {
+                      ...listData,
+                      searchName: e.target.value,
+                    }
+
+                    const debounce = (fn1, wait) => {
+                      let timer = null;
+                      return () => {
+                        if (timer !== null) {
+                          clearTimeout(timer);
+                        }
+                        timer = setTimeout(fn1, wait);
+                      }
+                    }
+                    debounce(fn.queryList(e), 500)
+                  }}
+                  value={SearchName}
+                />
               </Col>
             </Row>
           </Col>

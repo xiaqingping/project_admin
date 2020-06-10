@@ -11,7 +11,7 @@ import ProcessTable from './components/ProcessTable';
 import MemberTbale from './components/MemberTbale';
 import FiledList from './components/FiledList';
 import FiledListTest from './components/FiledListTest';
-import FiledListCopy from './components/FiledListCopy';
+// import FiledListCopy from './components/FiledListCopy';
 
 const { TabPane } = Tabs;
 
@@ -149,11 +149,11 @@ class projectDetail extends Component {
                         <FiledListTest projectId={projectId} />
                       </div>
                     </TabPane>
-                    <TabPane tab="上传测试" key="5">
+                    {/* <TabPane tab="上传测试" key="5">
                       <div className="classFile">
                         <FiledListCopy projectId={projectId} />
                       </div>
-                    </TabPane>
+                    </TabPane> */}
                   </Tabs>
                 </ConfigProvider>
               </Card>
