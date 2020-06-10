@@ -203,7 +203,7 @@ const FiledList = props => {
           data.isDown = 1;
           const url = `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
             data.spaceType
-            }/${data.spaceCode}/files/download/${data.id}?${Qs.stringify(data)}`;
+          }/${data.spaceCode}/files/download/${data.id}?${Qs.stringify(data)}`;
           window.open(url);
         })
         .catch();
@@ -230,7 +230,7 @@ const FiledList = props => {
         axios({
           url: `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
             data.spaceType
-            }/${data.spaceCode}/files/batchDownload?isDown=${data.isDown}`,
+          }/${data.spaceCode}/files/batchDownload?isDown=${data.isDown}`,
           method: 'post',
           data: newFiles,
           headers: {
@@ -291,9 +291,9 @@ const FiledList = props => {
             onClick={() => {
               listData = {
                 ...listData,
-                searchName: ''
-              }
-              setSeachName('')
+                searchName: '',
+              };
+              setSeachName('');
               fn.querydirectory(
                 record.id,
                 record.fileType,
@@ -358,9 +358,13 @@ const FiledList = props => {
       width: 150,
       className: SearchName && SearchName.length > 0 ? '' : 'notshow',
       render: (value, record) => {
-        let catalog = '/'
-        if (record && record.directoryPathResEntitys && record.directoryPathResEntitys.length > 0) {
-          catalog = record.directoryPathResEntitys[0].name
+        let catalog = '/';
+        if (
+          record &&
+          record.directoryPathResEntitys &&
+          record.directoryPathResEntitys.length > 0
+        ) {
+          catalog = record.directoryPathResEntitys[0].name;
         }
         return (
           <span
@@ -395,17 +399,17 @@ const FiledList = props => {
         )
       }
     },
-  ]
+  ];
 
   const searchChange = e => {
-    setGlobalSearch(e)
-    const id = e === 0 ? 0 : listData.directoryId
+    setGlobalSearch(e);
+    const id = e === 0 ? 0 : listData.directoryId;
     listData = {
       ...listData,
-      directoryId: id
-    }
-    fn.getDateList()
-  }
+      directoryId: id,
+    };
+    fn.getDateList();
+  };
 
   const selectBefore = (
     <Select
@@ -436,7 +440,9 @@ const FiledList = props => {
               下载
             </Button>
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
-              <Breadcrumb style={{ cursor: 'pointer', minWidth: '60px', float: 'left' }}>
+              <Breadcrumb
+                style={{ cursor: 'pointer', minWidth: '60px', float: 'left' }}
+              >
                 <Breadcrumb.Item>
                   <span
                     onClick={() => {
@@ -456,35 +462,35 @@ const FiledList = props => {
                 </Breadcrumb.Item>
                 {BreadcrumbName && BreadcrumbName.length > 0
                   ? BreadcrumbName.map((item, index) => {
-                    const key = index;
-                    return (
-                      <Breadcrumb.Item key={key}>
-                        <span
-                          onClick={() => {
-                            listData = {
-                              ...listData,
-                              directoryId: item.id,
-                              searchName: '',
-                            };
-                            setSeachName('');
-                            fn.getDateList().then(() => {
-                              setBreadcrumbName(
-                                BreadcrumbName.slice(0, key + 1),
-                              );
-                            });
-                          }}
-                        >
-                          {item.name}
-                        </span>
-                      </Breadcrumb.Item>
-                    );
-                  })
+                      const key = index;
+                      return (
+                        <Breadcrumb.Item key={key}>
+                          <span
+                            onClick={() => {
+                              listData = {
+                                ...listData,
+                                directoryId: item.id,
+                                searchName: '',
+                              };
+                              setSeachName('');
+                              fn.getDateList().then(() => {
+                                setBreadcrumbName(
+                                  BreadcrumbName.slice(0, key + 1),
+                                );
+                              });
+                            }}
+                          >
+                            {item.name}
+                          </span>
+                        </Breadcrumb.Item>
+                      );
+                    })
                   : ''}
               </Breadcrumb>
-              {SearchName && SearchName.length > 0 ?
+              {SearchName && SearchName.length > 0 ? (
                 <span style={{ float: 'left', marginLeft: '5px' }}>
                   {'>  '} 搜索 “{SearchName}”
-                </span> : ''
+                </span>) : ''
               }
             </div>
           </Col>
@@ -562,11 +568,11 @@ const FiledList = props => {
                     transform: 'translateX(15px)',
                   }}
                   onChange={e => {
-                    setSeachName(e.target.value)
+                    setSeachName(e.target.value);
                     listData = {
                       ...listData,
                       searchName: e.target.value,
-                    }
+                    };
 
                     const debounce = (fn1, wait) => {
                       let timer = null;
@@ -575,9 +581,9 @@ const FiledList = props => {
                           clearTimeout(timer);
                         }
                         timer = setTimeout(fn1, wait);
-                      }
-                    }
-                    debounce(fn.queryList(e), 500)
+                      };
+                    };
+                    debounce(fn.queryList(e), 500);
                   }}
                   value={SearchName}
                 />
@@ -588,7 +594,7 @@ const FiledList = props => {
       </div>
       <Table
         className="classrow1"
-        rowKey="name"
+        rowKey="id"
         rowSelection={rowSelection}
         columns={columns}
         dataSource={tableList.length > 0 ? tableList : []}

@@ -3,13 +3,12 @@ import { Button, Empty, Drawer } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import Process from './Process';
 
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-let uploadFile = null
+let uploadFile = null;
 // eslint-disable-next-line prefer-const
-let uploadFiles = []
-let ids = []
-let newArr = []
+let uploadFiles = [];
+let ids = [];
+let newArr = [];
 
 /**
  * 文件批量上传组件
@@ -19,13 +18,13 @@ let newArr = []
  * @since 文件批量上传组件
  */
 const FileUpload = props => {
-  const data = props.baseList()
+  const data = props.baseList();
 
   /** 状态 */
   // model状态
-  const [visible, setvisible] = useState(false)
+  const [visible, setvisible] = useState(false);
   // uploadFiles状态
-  const [typeuploadFiles, setTypeuploadFiles] = useState(true)
+  const [typeuploadFiles, setTypeuploadFiles] = useState(true);
 
   // 参数
   const proList = {
@@ -48,92 +47,106 @@ const FileUpload = props => {
     mediaType: '',
     extendName: '',
     name: '',
-    ...data
-  }
+    ...data,
+  };
 
   /** 上传改变 */
-  const handleChange = (e) => {
-    const [file] = e.target.files
-    uploadFile = file
+  const handleChange = e => {
+    const [file] = e.target.files;
+    uploadFile = file;
     for (let i = 0; i < e.target.files.length; i++) {
-      uploadFiles.push(e.target.files[i])
-      newArr = [...uploadFiles]
+      uploadFiles.push(e.target.files[i]);
+      newArr = [...uploadFiles];
     }
-    setTypeuploadFiles(uploadFiles)
-    setvisible(true)
+    setTypeuploadFiles(uploadFiles);
+    setvisible(true);
     // 处理重复文件无法上传
-    document.getElementById('file').setAttribute('type', 'text')
-    document.getElementById('file').setAttribute('type', 'file')
-  }
+    document.getElementById('file').setAttribute('type', 'text');
+    document.getElementById('file').setAttribute('type', 'file');
+  };
 
   /** 移除文件 */
   const removeuploadFile = id => {
     ids.push(id);
     uploadFiles = newArr.filter((item, index) => {
-      return !ids.includes(index)
-    })
+      return !ids.includes(index);
+    });
 
     if (uploadFiles.length <= 0) {
-      setTypeuploadFiles(false)
-      ids = []
+      setTypeuploadFiles(false);
+      ids = [];
     }
-  }
+  };
 
   return (
     <>
       <input
-        id='file'
+        id="file"
         style={{ display: 'none' }}
         onChange={handleChange}
-        type="file" multiple="multiple"
+        type="file"
+        multiple="multiple"
       />
-
       <Button
         type="primary"
-        onClick={() => { document.getElementById('file').click() }}
+        onClick={() => {
+          document.getElementById('file').click();
+        }}
       >
         上传
       </Button>
-
       <span
         style={{ color: '#1890ff', marginLeft: '10px' }}
-        onClick={() => { setvisible(true) }}
+        onClick={() => {
+          setvisible(true);
+        }}
       >
         查看
-				</span>  <br />
+      </span>{' '}
+      <br />
       {/* 上传状态显示 */}
       <Drawer
         title="上传"
         width={600}
         closable={false}
-        onClose={() => { setvisible(false) }}
+        onClose={() => {
+          setvisible(false);
+        }}
         visible={visible}
       >
         <div>
           <div style={{ height: '30px' }}>
             <UploadOutlined
               style={{ float: 'right', color: '#1890ff', fontSize: '20px' }}
-              onClick={() => { document.getElementById('file').click() }}
+              onClick={() => {
+                document.getElementById('file').click();
+              }}
             />
           </div>
           <div>
-            {
-              typeuploadFiles && uploadFiles && uploadFiles.length > 0 ?
-                uploadFiles.map((item, index) => {
-                  return <Process
+            {typeuploadFiles && uploadFiles && uploadFiles.length > 0 ? (
+              uploadFiles.map((item, index) => {
+                return (
+                  <Process
                     removeuploadFile={removeuploadFile}
                     proList={proList}
                     key={`${index + 0}`}
                     uploadFile={item}
                     id={index}
                   />
-                }) : <Empty description='暂无任务' image={Empty.PRESENTED_IMAGE_SIMPLE} />
-            }
+                );
+              })
+            ) : (
+              <Empty
+                description="暂无任务"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
           </div>
         </div>
       </Drawer>
     </>
   );
-}
+};
 
-export default FileUpload
+export default FileUpload;

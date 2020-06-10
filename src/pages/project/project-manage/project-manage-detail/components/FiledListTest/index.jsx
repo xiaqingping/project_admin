@@ -27,7 +27,6 @@ import {
 
 import Qs from 'qs';
 // 自定义
-import api from '@/pages/project/api/disk';
 import api1 from '@/pages/project/api/projectManageDetail';
 import api2 from '@/pages/project/api/file';
 import file from '@/assets/imgs/file.png';
@@ -158,7 +157,7 @@ const FiledList = props => {
       if (!data.directoryId) setBreadcrumbName([]);
 
       setLoading(true);
-      return api
+      return api2
         .getFiles(data)
         .then(res => {
           setTableList(res);
@@ -302,7 +301,7 @@ const FiledList = props => {
       if (!result) return false;
       // setLoading(true);
       setAddLoading(true);
-      return api
+      return api2
         .createDirctory(data)
         .then(res => {
           setAddLoading(false);
@@ -738,9 +737,9 @@ const FiledList = props => {
                   : ''}
               </Breadcrumb>
               {SearchName && SearchName.length > 0 ?
-                <span style={{ float: 'left', marginLeft: '5px' }}>
+                (<span style={{ float: 'left', marginLeft: '5px' }}>
                   {'>  '} 搜索 “{SearchName}”
-                </span> : ''
+                </span>) : ''
               }
             </div>
           </Col>
