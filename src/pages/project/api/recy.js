@@ -19,10 +19,16 @@ export default {
   },
 
   // 回收站列表查询
-  getRecycleFiles(params) {
+  // getRecycleFiles(params) {
+  //   return request(
+  //     `${http}disk/v1/${params.spaceType}/${params.spaceCode}/recycleBin/files`,
+  //     { params },
+  //   );
+  // },
+  getRecycleFiles(c, data) {
     return request(
-      `${http}disk/v1/${params.spaceType}/${params.spaceCode}/recycleBin/files`,
-      { params },
+      `${http}disk/v1/${c.spaceType}/${c.spaceCode}/recycleBin/files`,
+      { params: data },
     );
   },
 
