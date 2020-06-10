@@ -285,7 +285,7 @@ const FiledList = props => {
       width: 150,
       render: (value, record) => (
         <div className="classProjectName">
-          {fn.setImg(record.fileType, record.extendName)}
+
           <span
             style={{ marginLeft: 10, cursor: 'pointer' }}
             onClick={() => {
@@ -302,6 +302,11 @@ const FiledList = props => {
               );
             }}
           >
+            <span
+              style={{ marginRight: 10, cursor: 'pointer' }}
+            >
+              {fn.setImg(record.fileType, record.extendName)}
+            </span>
             <Tooltip placement="top" title={value}>
               {value}
             </Tooltip>
@@ -361,8 +366,38 @@ const FiledList = props => {
         ) {
           catalog = record.directoryPathResEntitys[0].name;
         }
-        return catalog;
-      },
+        return (
+          <span
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              setSeachName('')
+              if (catalog === '/') {
+                listData = {
+                  ...listData,
+                  directoryId: '0',
+                  searchName: '',
+                }
+                fn.getDateList().then(() => {
+                  setBreadcrumbName([])
+                })
+              } else {
+                listData = {
+                  ...listData,
+                  searchName: ''
+                }
+                const seachBreadcrumbName =
+                  record.directoryPathResEntitys.slice(1, record.directoryPathResEntitys.length)
+                console.log(record.directoryPathResEntitys, seachBreadcrumbName)
+                const { id, name } = record.directoryPathResEntitys[0]
+                fn.querydirectory(
+                  id, 2, name, seachBreadcrumbName,
+                )
+              }
+            }}
+          >{catalog}
+          </span>
+        )
+      }
     },
   ];
 
@@ -455,10 +490,8 @@ const FiledList = props => {
               {SearchName && SearchName.length > 0 ? (
                 <span style={{ float: 'left', marginLeft: '5px' }}>
                   {'>  '} 搜索 “{SearchName}”
-                </span>
-              ) : (
-                ''
-              )}
+                </span>) : ''
+              }
             </div>
           </Col>
           <Col span={12}>
@@ -483,6 +516,7 @@ const FiledList = props => {
                       width: '40px',
                       float: 'left',
                       transform: 'translate(20px, 5px)',
+                      cursor: 'pointer',
                     }}
                   >
                     <SwapRightOutlined

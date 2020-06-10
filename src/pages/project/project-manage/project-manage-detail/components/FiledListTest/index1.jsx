@@ -27,6 +27,7 @@ import {
 
 import Qs from 'qs';
 // 自定义
+import api from '@/pages/project/api/disk';
 import api1 from '@/pages/project/api/projectManageDetail';
 import api2 from '@/pages/project/api/file';
 import file from '@/assets/imgs/file.png';
@@ -103,17 +104,17 @@ const FiledList = props => {
   const [globalSearch, setGlobalSearch] = useState(0);
   // SearchName查询名称状态(String)
   const [SearchName, setSeachName] = useState('');
-  // selectedRowKeys 多选框的值 []
-  const [selectedRowKeys, setselectedRowKeys] = useState([]);
 
   // 批量操作
   const rowSelection = {
-    onChange: (selectedRowKey, selectRows) => {
+    onChange: (selectedRowKeys, selectRows) => {
       const newRows = selectRows.filter(item => !!item === true);
-      setselectedRowKeys(selectedRowKey);
       setSelectedRows(newRows);
     },
-    selectedRowKeys,
+    getCheckboxProps: record => ({
+      disabled: record.name === 'Disabled User',
+      name: record.name,
+    }),
   };
 
   /**
@@ -138,15 +139,18 @@ const FiledList = props => {
       }
       return data
     },
-    /** 通过列名称筛选 */
-    handleChange: () => fn.getDateList(),
+    /**
+     * 通过列名称筛选
+     * @param {String} value
+     */
+    handleChange: () => {
+      fn.getDateList();
+    },
     /**
      * 获取列表数据
-     * @param {Object} parameters 列表补充参数
+     * @param {*} props
      */
     getDateList: parameters => {
-      // 清除多选框的值
-      setselectedRowKeys([]);
       const { projectId } = props;
       const data = {
         ...listData,
@@ -241,10 +245,7 @@ const FiledList = props => {
       });
       return true;
     },
-    /**
-     * 搜索框查询
-     * @param {Object} e 目标对象
-     */
+    /** 查询 */
     queryList: e => {
       const value = e.target.value.trim();
       if (value) {
@@ -256,27 +257,15 @@ const FiledList = props => {
         fn.getDateList();
       }
     },
-    /**
-     * 目录查询
-     * 点击查询下一级目录
-     * @param {String} id 层级/面包屑id值
-     * @param {Number} type 文件类型
-     * @param {String} name 面包屑/目录名称
-     * @param {Array} seachBreadcrumbName 面包屑导航
-     */
-    querydirectory: (id, type, name, seachBreadcrumbName) => {
+    /** 目录查询 */
+    querydirectory: (id, type, name) => {
       if (type === 2) {
+        setBreadcrumbName([...BreadcrumbName, { name, id }]);
         listData = {
           ...listData,
           directoryId: id,
         };
-        fn.getDateList().then(() => {
-          if (seachBreadcrumbName) {
-            setBreadcrumbName([...seachBreadcrumbName.reverse(), { name, id }]);
-          } else {
-            setBreadcrumbName([...BreadcrumbName, { name, id }]);
-          }
-        });
+        fn.getDateList();
       }
     },
     /** 创建目录 */
@@ -301,7 +290,7 @@ const FiledList = props => {
       if (!result) return false;
       // setLoading(true);
       setAddLoading(true);
-      return api2
+      return api
         .createDirctory(data)
         .then(res => {
           setAddLoading(false);
@@ -459,19 +448,12 @@ const FiledList = props => {
       render: (value, record) => (
         <div className="classProjectName">
           <span
-            style={{ marginLeft: 10, cursor: 'pointer' }}
+            style={{
+              marginLeft: 10,
+              cursor: 'pointer',
+            }}
             onClick={() => {
-              listData = {
-                ...listData,
-                searchName: ''
-              }
-              setSeachName('')
-              fn.querydirectory(
-                record.id,
-                record.fileType,
-                record.name,
-                record.directoryPathResEntitys,
-              );
+              fn.querydirectory(record.id, record.fileType, record.name);
             }}
           >
             <span
@@ -691,19 +673,18 @@ const FiledList = props => {
             <FileUpload source={baseList} baseList={fn.getFileUpload} flash={fn.getDateList} />
             <br />
             <div style={{ padding: '10px 0' }} className="classBreadcrumb">
-              <Breadcrumb style={{ cursor: 'pointer', minWidth: '60px', float: 'left' }}>
+              <Breadcrumb style={{ cursor: 'pointer' }}>
                 <Breadcrumb.Item>
                   <span
                     onClick={() => {
+                      fn.getDateList({ directoryId: '0', searchName: '' });
                       listData = {
                         ...listData,
                         directoryId: '0',
                         searchName: '',
                       };
-                      setSeachName('');
-                      fn.getDateList().then(() => {
-                        setBreadcrumbName([]);
-                      });
+                      setSearchName('');
+                      setBreadcrumbName([]);
                     }}
                   >
                     全部文件
@@ -716,17 +697,18 @@ const FiledList = props => {
                       <Breadcrumb.Item key={key}>
                         <span
                           onClick={() => {
+                            fn.getDateList({
+                              directoryId: item.id,
+                              searchName: '',
+                            });
                             listData = {
                               ...listData,
                               directoryId: item.id,
                               searchName: '',
                             };
-                            setSeachName('');
-                            fn.getDateList().then(() => {
-                              setBreadcrumbName(
-                                BreadcrumbName.slice(0, key + 1),
-                              );
-                            });
+                            setBreadcrumbName(
+                              BreadcrumbName.slice(0, key + 1),
+                            );
                           }}
                         >
                           {item.name}
@@ -736,11 +718,6 @@ const FiledList = props => {
                   })
                   : ''}
               </Breadcrumb>
-              {SearchName && SearchName.length > 0 ?
-                (<span style={{ float: 'left', marginLeft: '5px' }}>
-                  {'>  '} 搜索 “{SearchName}”
-                </span>) : ''
-              }
             </div>
           </Col>
           <Col span={12}>
@@ -765,7 +742,6 @@ const FiledList = props => {
                       width: '40px',
                       float: 'left',
                       transform: 'translate(20px, 5px)',
-                      cursor: 'pointer',
                     }}
                   >
                     <SwapRightOutlined
