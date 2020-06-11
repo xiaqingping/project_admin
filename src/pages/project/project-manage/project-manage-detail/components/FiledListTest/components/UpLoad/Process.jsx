@@ -100,7 +100,11 @@ const Process = props => {
           setProgress(100)
         })
       } else if (status === 2) {
-        message.success('已覆盖')
+        if(radioValue === 1) {
+          message.success('已覆盖')
+        } else if(radioValue === 3) {
+          message.success('已重命名')
+        }
         setIsshow('none')
         removeuploadFile(id)
       }
@@ -219,7 +223,12 @@ const Process = props => {
               console.log('第三接口error', thirdERR)
             })
           } else if (status === 2) {
-            message.success('已覆盖')
+            if(radioValue === 1) {
+              message.success('已覆盖')
+            } else if(radioValue === 3) {
+              message.success('已重命名')
+            }
+
             setIsshow('none')
             removeuploadFile(id)
           }
