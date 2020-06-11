@@ -80,6 +80,8 @@ const FiledList = props => {
   /** 状态 */
   // 新建文件夹Model状态
   const [isVisible, setVisible] = useState(false);
+  // 新建文件夹提交状态
+  const [isSpinning, setIsSpinning] = useState(false)
   // 修改弹框显示和隐藏
   const [editModalVis, setEditModalVis] = useState(false);
   // 修改文件数据
@@ -97,8 +99,6 @@ const FiledList = props => {
   const [requestType, setRequestType] = useState('');
   // visible 回收站model状态
   const [isRecycle, setRecycle] = useState(false);
-  // 新建文件夹弹框得loading
-  const [addLoading, setAddLoading] = useState(false);
   // 是否为全局搜索
   const [globalSearch, setGlobalSearch] = useState(0);
   // SearchName查询名称状态(String)
@@ -279,40 +279,42 @@ const FiledList = props => {
       }
     },
     /** 创建目录 */
+    /** 创建目录 */
     createDirctory: () => {
-      const { projectId } = props;
-      const { code } = baseList;
-      const id = listData.directoryId === '0' ? '3' : listData.directoryId;
+      const { projectId } = props
+      const { code } = baseList
+      const id = listData.directoryId
       const data = {
         spaceType: 'project',
-        sourceCode: code,
-        sourceType: 'project',
         spaceCode: projectId,
+        sourceType: 'project',
+        sourceCode: code,
         sourceId: projectId,
         userName: '',
         userCode: '',
         ...businessParma,
         ...projectParma,
         parentId: id,
-      };
+      }
+
       // 校验输入值
-      const result = fn.verifyInput(data);
-      if (!result) return false;
-      // setLoading(true);
-      setAddLoading(true);
+      const result = fn.verifyInput(data)
+      if (!result) return false
+      setLoading(true)
+      setIsSpinning(true)
       return api2
         .createDirctory(data)
         .then(res => {
-          setAddLoading(false);
-          fn.clearParam();
-          setTableList(res);
-          fn.getDateList();
-          // setLoading(false);
+          setTableList(res)
+          fn.getDateList()
+          setLoading(false)
+          setVisible(false)
+          setIsSpinning(false)
         })
         .catch(() => {
-          // setLoading(false);
-          setAddLoading(false);
-        });
+          setLoading(false)
+          setIsSpinning(false)
+        })
     },
     /** 清除创建 */
     clearParam: () => {
@@ -352,7 +354,7 @@ const FiledList = props => {
           data.isDown = 1;
           const url = `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
             data.spaceType
-          }/${data.spaceCode}/files/download/${data.id}?${Qs.stringify(data)}`;
+            }/${data.spaceCode}/files/download/${data.id}?${Qs.stringify(data)}`;
           window.open(url);
         })
         .catch();
@@ -379,7 +381,7 @@ const FiledList = props => {
         axios({
           url: `${env ? baseURLMap[env] : baseURLMap.dev}/disk/v1/${
             data.spaceType
-          }/${data.spaceCode}/files/batchDownload?isDown=${data.isDown}`,
+            }/${data.spaceCode}/files/batchDownload?isDown=${data.isDown}`,
           method: 'post',
           data: newFiles,
           headers: {
@@ -722,29 +724,29 @@ const FiledList = props => {
                 </Breadcrumb.Item>
                 {BreadcrumbName && BreadcrumbName.length > 0
                   ? BreadcrumbName.map((item, index) => {
-                      const key = index;
-                      return (
-                        <Breadcrumb.Item key={key}>
-                          <span
-                            onClick={() => {
-                              listData = {
-                                ...listData,
-                                directoryId: item.id,
-                                searchName: '',
-                              };
-                              setSeachName('');
-                              fn.getDateList().then(() => {
-                                setBreadcrumbName(
-                                  BreadcrumbName.slice(0, key + 1),
-                                );
-                              });
-                            }}
-                          >
-                            {item.name}
-                          </span>
-                        </Breadcrumb.Item>
-                      );
-                    })
+                    const key = index;
+                    return (
+                      <Breadcrumb.Item key={key}>
+                        <span
+                          onClick={() => {
+                            listData = {
+                              ...listData,
+                              directoryId: item.id,
+                              searchName: '',
+                            };
+                            setSeachName('');
+                            fn.getDateList().then(() => {
+                              setBreadcrumbName(
+                                BreadcrumbName.slice(0, key + 1),
+                              );
+                            });
+                          }}
+                        >
+                          {item.name}
+                        </span>
+                      </Breadcrumb.Item>
+                    );
+                  })
                   : ''}
               </Breadcrumb>
               {SearchName && SearchName.length > 0 ? (
@@ -752,8 +754,8 @@ const FiledList = props => {
                   {'>  '} 搜索 “{SearchName}”
                 </span>
               ) : (
-                ''
-              )}
+                  ''
+                )}
             </div>
           </Col>
           <Col span={10}>
@@ -869,11 +871,15 @@ const FiledList = props => {
         visible={isVisible}
         centered
         onOk={() => {
-          fn.createDirctory();
+          fn.createDirctory()
+          fn.clearParam()
         }}
-        onCancel={() => fn.clearParam()}
+        onCancel={() => {
+          fn.clearParam()
+          setVisible(false)
+        }}
       >
-        <Spin spinning={addLoading}>
+        <Spin spinning={isSpinning} tip="Loading...">
           <div>
             文件夹名称：{' '}
             <Input
@@ -883,20 +889,20 @@ const FiledList = props => {
                 setProjectParma({
                   ...projectParma,
                   name: e.target.value.trim(),
-                });
+                })
               }}
             />
           </div>
           <div>
             描述：{' '}
-            <Input.TextArea
+            <Input
               placeholder="输入描述"
               value={projectParma.describe}
               onChange={e => {
                 setProjectParma({
                   ...projectParma,
                   describe: e.target.value.trim(),
-                });
+                })
               }}
             />
           </div>

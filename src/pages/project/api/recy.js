@@ -6,8 +6,8 @@
 import request from '@/utils/request';
 
 // const http = 'http://192.168.20.6:8150/';
-const http = '';
-// const http = 'http://192.168.20.14:8150/';
+let http = '';
+http = 'http://192.168.20.14:8150/';
 
 export default {
   // 项目列表查询
