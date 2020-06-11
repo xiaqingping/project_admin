@@ -148,6 +148,15 @@ class Test extends Component {
       payload: newData,
     });
     sessionStorage.setItem('introduction', JSON.stringify(newData));
+
+    //  获取已存储的参数值,删除数据的时候更新已存储的参数值
+    const paramList = JSON.parse(sessionStorage.getItem('processForParams'));
+    if (paramList) {
+      const newParam = paramList.filter(
+        item => item.processModelId !== value.id,
+      );
+      sessionStorage.setItem('processForParams', JSON.stringify(newParam));
+    }
   };
 
   /**
@@ -356,6 +365,7 @@ class Test extends Component {
       url = `/project/project-manage/detail/${projectId}`;
     }
     sessionStorage.removeItem('introduction');
+    sessionStorage.removeItem('processForParams');
 
     history.push(url);
   };
