@@ -153,7 +153,6 @@ const FiledList = props => {
         spaceCode: projectId,
         ...parameters,
       };
-
       if (!data.directoryId) setBreadcrumbName([]);
 
       setLoading(true);
@@ -657,7 +656,7 @@ const FiledList = props => {
       {/* 搜索模块 */}
       <div className="classQuery">
         <Row>
-          <Col span={12}>
+          <Col span={14}>
             <Button
               type="primary"
               onClick={() => {
@@ -757,7 +756,7 @@ const FiledList = props => {
               )}
             </div>
           </Col>
-          <Col span={12}>
+          <Col span={10}>
             <Row>
               <Col span={24}>
                 <div
@@ -826,7 +825,7 @@ const FiledList = props => {
                   addonBefore={selectBefore}
                   placeholder="搜索"
                   style={{
-                    width: '70%',
+                    width: '55%',
                     float: 'right',
                     transform: 'translateX(15px)',
                   }}

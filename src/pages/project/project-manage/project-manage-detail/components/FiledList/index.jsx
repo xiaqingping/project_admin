@@ -417,8 +417,8 @@ const FiledList = props => {
       defaultValue={globalSearch}
       className="select-before"
       onChange={searchChange}
-      style={{ paddingRight: '10px', paddingLeft: '10px' }}
-      dropdownMatchSelectWidth={150}
+      style={{ paddingRight: '5px', paddingLeft: '5px' }}
+      dropdownMatchSelectWidth={140}
     >
       <Option value={0}>全局搜索</Option>
       <Option value={1}>当前文件搜索</Option>
@@ -563,7 +563,7 @@ const FiledList = props => {
                   addonBefore={selectBefore}
                   placeholder="搜索"
                   style={{
-                    width: '70%',
+                    width: '55%',
                     float: 'right',
                     transform: 'translateX(15px)',
                   }}

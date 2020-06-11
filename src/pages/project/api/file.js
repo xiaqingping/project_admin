@@ -12,13 +12,15 @@ if (process.env.NODE_ENV !== 'development') {
 }
 export default {
   // 查询文件列表
-  getFiles(params) {
+  getFiles(param) {
+    const { spaceType, spaceCode, directoryId, searchName, sortType, sortWay } = param
+    const params = { directoryId, name: searchName, sortType, sortWay }
     return request(
-      `${http}/disk/v2/${params.spaceType}/${params.spaceCode}/files`,
+      `${http}/disk/v2/${spaceType}/${spaceCode}/files`,
       {
-        params,
+        params
       },
-    );
+    )
   },
 
   // 创建目录
@@ -65,12 +67,12 @@ export default {
   },
 
   EditFile(data) {
+    const { spaceType, spaceCode, id, fileType, name, describe } = data
     return request(
-      `${http}/disk/v1/${data.spaceType}/${data.spaceCode}/files/${data.id}
-`,
+      `${http}/disk/v1/${spaceType}/${spaceCode}/files/${data.id}`,
       {
         method: 'PUT',
-        data,
+        data: { id, fileType, name, describe },
       },
     );
   },
